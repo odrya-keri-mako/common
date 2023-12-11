@@ -1,11 +1,13 @@
+/*!
+ * Common angular  v1.0
+ */
 ;(function(window, angular) {
 
   'use strict';
 
   // Add class(es)
   HTMLElement.prototype.addClass = (function(classList) {
-    if (Object.prototype.toString.call(classList) === '[object String]' ||
-                                       classList instanceof String) {
+    if (Object.prototype.toString.call(classList) === '[object String]') {
       classList = [...new Set(classList.split(' ').map(s => s.trim()).filter(s => s.length))];
       classList.forEach(c => this.classList.add(c));
     }
@@ -13,8 +15,7 @@
 
   // Remove class(es)
   HTMLElement.prototype.removeClass = (function(classList) { 
-    if (Object.prototype.toString.call(classList) === '[object String]' ||
-                                       classList instanceof String) {
+    if (Object.prototype.toString.call(classList) === '[object String]') {
       classList = [...new Set(classList.split(' ').map(s => s.trim()).filter(s => s.length))];
       classList.forEach(c => this.classList.remove(c));
     }
@@ -22,12 +23,19 @@
 
   // Toogle class(es)
   HTMLElement.prototype.toggleClass = (function(classList) { 
-    if (Object.prototype.toString.call(classList) === '[object String]' ||
-                                       classList instanceof String) {
+    if (Object.prototype.toString.call(classList) === '[object String]') {
       classList = [...new Set(classList.split(' ').map(s => s.trim()).filter(s => s.length))];
       classList.forEach(c => this.classList.toogle(c));
     }
   });
+
+  // Unique array
+  Array.prototype.unique = function(key=null) {
+    let arr = this;
+    if (Object.prototype.toString.call(key) === '[object String]')
+          return [...new Map(arr.filter(obj => key in obj).map(obj => [obj[key], obj])).values()];
+    else 	return [... new Set(arr)];
+  };
 
   // Application common module
   angular.module('app.common', [])
@@ -99,27 +107,43 @@
       // Set utilities
       let util = {
 
+        variableType: checkedVar => Object.prototype.toString.call(checkedVar).slice(8, -1).toLowerCase(),
 				isUndefined: checkedVar => Object.prototype.toString.call(checkedVar) === '[object Undefined]',
     		isNull: checkedVar => Object.prototype.toString.call(checkedVar) === '[object Null]',
-    		isBoolean: checkedVar => 	Object.prototype.toString.call(checkedVar) === '[object Boolean]' ||
-    		                        	checkedVar instanceof Boolean,
-    		isNumber: checkedVar =>	Object.prototype.toString.call(checkedVar) === '[object Number]' ||
-    		                        checkedVar instanceof Number,
+    		isBoolean: checkedVar => 	Object.prototype.toString.call(checkedVar) === '[object Boolean]',
+    		isNumber: checkedVar =>	Object.prototype.toString.call(checkedVar) === '[object Number]',
     		isInt: checkedVar => util.isNumber(checkedVar) && checkedVar % 1 === 0,
     		isFloat: checkedVar => util.isNumber(checkedVar) && checkedVar % 1 !== 0,
     		isVarNumber: checkedVar => util.isNumber(checkedVar) ||
     		                          (util.isString(checkedVar) && !isNaN(Number(checkedVar))),
-    		isString: checkedVar => 	Object.prototype.toString.call(checkedVar) === '[object String]' ||
-    		                          checkedVar instanceof String,
-    		isDate: checkedVar =>	Object.prototype.toString.call(checkedVar) === '[object Date]' ||
-    		                      checkedVar instanceof Date,
-    		isArray: checkedVar =>	Object.prototype.toString.call(checkedVar) === '[object Array]' ||
-    		                        checkedVar instanceof Array,
-    		isObject: checkedVar =>	Object.prototype.toString.call(checkedVar) === '[object Object]' ||
-    		                        checkedVar instanceof Object,
-        isFile: checkedVar =>	Object.prototype.toString.call(checkedVar) === '[object File]' ||
-    		                      checkedVar instanceof File,
-        isDate: checkedVar => checkedVar instanceof Date && !isNaN(checkedVar),
+    		isString: checkedVar => 	Object.prototype.toString.call(checkedVar) === '[object String]',
+    		isDate: checkedVar =>	Object.prototype.toString.call(checkedVar) === '[object Date]',
+    		isArray: checkedVar =>	Object.prototype.toString.call(checkedVar) === '[object Array]',
+    		isObject: checkedVar =>	Object.prototype.toString.call(checkedVar) === '[object Object]',
+        isFile: checkedVar =>	Object.prototype.toString.call(checkedVar) === '[object File]',
+        isEmpty: checkedVar => {
+          let variableType = util.variableType(checkedVar);
+          switch (variableType) {
+            case 'undefined':
+            case 'null':
+              return true;
+            case 'string':
+              return util.isStringBlank(checkedVar);
+            case 'number':
+              return checkedVar === 0;
+            case 'boolean':
+              return !checkedVar;
+            case 'date':
+              return !Date.parse(checkedVar);
+            case 'array':
+              return checkedVar.length === 0;
+            case 'object':
+              return util.isObjectEmpty(checkedVar);
+            default:
+              return true;
+          }
+        },
+        isStringBlank: checkedVar => !checkedVar || /^\s*$/.test(checkedVar),
 				isObjectEmpty: checkedVar => {
 					if (util.isObject(checkedVar)) {
 							for(var prop in checkedVar) {
@@ -131,18 +155,22 @@
 				},
 				isObjectHasKey: (checkedVar, key) =>  util.isObject(checkedVar) && 
                                               util.isString(key) && key in checkedVar,
-				objFilterByKeys: (obj, filter) => {
+				objFilterByKeys: (obj, filter, isExist=true) => {
 						if (!util.isObject(obj)) return obj;
 						if (util.isString(filter)) {
               filter = filter.replaceAll(';', ',');
               filter = filter.split(",");
             }
-						if (util.isArray(filter) && filter.length) {
-										return  Object.assign({}, 
-														Object.keys(obj)
-														.filter((k) => filter.includes(k))
-														.reduce((o, k) => Object.assign(o, {[k]: obj[k]}), {}));
-						} else  return  Object.assign({}, obj);
+            if (!util.isArray(filter) || !filter.length)
+              return Object.assign({}, obj);
+            if (!util.isBoolean(isExist)) isExist = true;
+						return  Object.assign({}, 
+										Object.keys(obj)
+										.filter((k) => {
+                      if (isExist) 
+                            return filter.includes(k);
+                      else  return !filter.includes(k); 
+                    }).reduce((o, k) => Object.assign(o, {[k]: obj[k]}), {}));
 				},
 				objMerge: (target, source, existKeys) => {
 						if (!util.isObject(target)) target = {};
@@ -152,12 +180,9 @@
 						else    return  Object.assign({}, target, source);
 				},
         indexByKeyValue: (a, k, v) => a.findIndex(o => o[k] === v),
-    		isFunction: checkedVar =>	Object.prototype.toString.call(checkedVar) === '[object Function]' ||
-    		                          checkedVar instanceof Function,
-    		isClass: checkedVar =>	Object.prototype.toString.call(checkedVar) === '[object Class]' ||
-    		                        checkedVar instanceof Class,
-    		isBlob: checkedVar =>	Object.prototype.toString.call(checkedVar) === '[object Blob]' ||
-    		                      checkedVar instanceof Blob,
+    		isFunction: checkedVar =>	Object.prototype.toString.call(checkedVar) === '[object Function]',
+    		isClass: checkedVar =>	Object.prototype.toString.call(checkedVar) === '[object Class]',
+    		isBlob: checkedVar =>	Object.prototype.toString.call(checkedVar) === '[object Blob]',
     		isJson: checkedVar => {
     		    if (util.isString(checkedVar)) {
     		        try       {return !util.isUndefined(JSON.parse(checkedVar));} 
@@ -165,10 +190,7 @@
     		    } else return false;
     		},
         isJQuery: () => typeof jQuery !== 'undefined',
-        isJQueryElement: checkedVar =>  util.isJQuery() && checkedVar instanceof jQuery && 
-                                        util.isObjectHasKey(checkedVar, 'length') &&
-                                        util.isNumber(checkedVar.length) && checkedVar.length > 0 &&
-                                        'nodeType' in checkedVar.get(0),
+        isJQueryElement: checkedVar =>  util.isJQuery() && 'nodeType' in checkedVar.get(0),
 				isNodeElement: checkedVar =>	checkedVar instanceof Element || 
   			                              checkedVar instanceof HTMLElement,
   			isNodeList: checkedVar =>	checkedVar instanceof NodeList ||
@@ -196,16 +218,23 @@
                         /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,5}$/.test(checkedVar),
         upToLowHyphen: (str) => str.replace(/([a-zA-Z])(?=[A-Z])/g, '$1-').toLowerCase(),
         lowToUpHyphen: (str) => str.replace(/(-.)/g, (x) => {return x[1].toUpperCase();}),
-        capitalize: (str) => {
-          if (str.length == 1) return str.toUpperCase();
-          else return str.charAt(0).toUpperCase() + 
-                      str.substr(1).toLowerCase();
+        capitalize: (str, isLowerEnd=true) => {
+          if (!util.isString(str)) return str;
+          str = str.trim();
+          if (str.length === 0) return str;
+          if (str.length === 1) return str.toUpperCase();
+          if (!util.isBoolean(isLowerEnd)) isLowerEnd = true;
+          return  str.charAt(0).toUpperCase() + (isLowerEnd ?
+                  str.substr(1).toLowerCase() : str.substr(1));
         },
         getPageId: () => {
           let pageID = document.location.pathname;
           if (pageID[0] === '/') pageID = pageID.slice(1);
           if (pageID.slice(-1) === '/') pageID = pageID.slice(0, -1);
           return pageID;
+        },
+        getPageUrl: () => {
+          return document.location.origin + '/' + util.getPageId() + '/';
         },
         getCommonRelativePath: () => {
           let page    = (document.location.origin + document.location.pathname).toLowerCase(),
@@ -437,10 +466,50 @@
             } else    reject('Invalid parameter: file!');
           });
         },
+        getComponentVersion: (componentName, tagName) => {
+          return new Promise((resolve, reject) => {
+            if (util.isString(componentName)) {
+              componentName = componentName.trim();
+              if (componentName.length) {
+                if (!util.isString(tagName))
+                  tagName = 'link';
+                tagName = tagName.trim().toLowerCase();
+                if (!['link', 'script'].includes(tagName))
+                  tagName = 'link';
+                let attribute = tagName === 'link' ? 'href' : 'src',
+                    element 	= document.querySelector(`${tagName}[${attribute}*="${componentName}"]`);
+                if (element) {
+                  let url = element.getAttribute(attribute);
+                  if (url && url.length) {
+                    try {
+                      fetch(url)
+                      .then(response => {
+                        if (response.ok)
+                              return response.text();
+                        else	return reject(`Unable to read (${url})!`); 
+                      })
+                      .then(response => {
+                        if (response) {
+                          let matches 	= response.match(/(?!v)([.\d]+[.\d])/);
+                          if (matches && matches.length > 0)
+                                resolve(matches[0]);
+                          else 	reject(`Missing version property (${tagName}/${componentName})!`);
+                        }
+                      });
+                    } catch (e) {
+                      reject(e.message);
+                    }
+                  } else reject(`Missing url attribute (${tagName}/${componentName})!`);
+                } else reject(`Unable to find element (${tagName}/${componentName})!`);
+              } else reject(`Component name is empty!`);
+            } else reject(`Missing component name!`);	
+          });
+        },
         deferredObj: () => {
           let defer = $q.defer();
           return {promise: defer, completed: defer.promise};
-        }
+        },
+        sleep: async (delay) => new Promise((resolve) => setTimeout(resolve, delay))
 			};
 
 			// Return utilities
@@ -694,38 +763,89 @@
     '$timeout',
     'util',
     ($transitions, $window, $state, $rootScope, $timeout, util) => {
-      return {
 
-        // Events
-        events: (baseStates=null, scrollTop=true) => {
-          
+      return {
+        /**
+         * Events
+         * @param {*} options disable state(s) by name, parent, and group property when refresh page
+         * @param {boolean} scrollTop   scroll to top when refresh page
+         */
+        events: (options=null, scrollTop=true) => {
+
           // Set application properties
           $rootScope.app = {
             id        : util.getPageId(),
+            url       : util.getPageUrl(),
             commonPath: util.getCommonRelativePath()
           };
 
+          // Check/Merge/Convert options with default
+          if (!util.isObject(options)) options = {name: options};
+          options = util.objMerge({
+            name: null,
+            parent: null,
+            group: null
+          }, options, true);
+          Object.keys(options).forEach(key => {
+            if (util.isString(options[key])) {
+              options[key] = options[key].replaceAll(';', ',').split(',');
+              options[key] = options[key].map(name => name.trim()).filter(name => name !== '');
+            }
+            if (!util.isArray(options[key])) options[key] = [];
+          });
+          
           // Define state properties
           $rootScope.state = {
-            id        : null,
-            prev      : null,
-            base      : null,     
-            available : $state.get()
-                              .map(state => state.name.trim())
-                              .filter(name => name !== '')
+            id          : null,
+            prev        : null,    
+            prevEnabled : null,
+            parent      : null,
+            group       : null,
+            default     : null
           };
+          
+          // Get available states
+          $rootScope.state.available = 
+            $state.get()
+                  .filter(state => state.name != '' && 
+                  (!util.isObjectHasKey(state, 'abstract') || !state.abstract))
+                  .reduce((a, o) => {
+                    if (o.url === "/") $rootScope.state.default = o.name;
+                    o.class = o.name.replace('.', '-');
+                    a.push(util.objMerge({
+                      name: null,
+                      class: null,
+                      parent: null,
+                      group: null
+                    }, o, true));
+                    return a;
+                  }, []);
 
-          // Check parameter base state(s)
-          if (util.isString(baseStates)) {
-            baseStates = baseStates.replaceAll(';', ',').split(',');
-            baseStates = baseStates.map(name => name.trim()).filter(name => name !== '');
+          // When default state not exist set to first state
+          if (!$rootScope.state.default)
+            $rootScope.state.default = $rootScope.state.available[0].name;
+
+          // Set disabled states
+          $rootScope.state.disabled = [
+            ...new Set([].concat(
+              $rootScope.state.available
+                        .filter(state =>  $rootScope.state.default !== state.name &&
+                                          options.name.includes(state.name) ||
+                                          options.parent.includes(state.parent) ||
+                                          options.group.includes(state.group))
+                        .map(state => state.name)
+          ))];
+          
+          // Set page container visibility, and class
+          let setPageContainer = (stateId, method) => {
+            let element = document.querySelector('.page-container');
+            if (element) {
+              element.classList[method]('show');
+              let index = util.indexByKeyValue($rootScope.state.available, 'name', stateId);
+              if (index !== -1) 
+                element.classList[method]($rootScope.state.available[index].class);
+            }
           }
-          if (util.isArray(baseStates))
-            baseStates = baseStates.filter(state => $rootScope.state.available.includes(state));
-          if (!util.isArray(baseStates))
-            baseStates = [];
-          baseStates.unshift($rootScope.state.available[0]);
-          $rootScope.state.base = [...new Set(baseStates)];
 
           // Check parameter scroll to top
           if (!util.isBoolean(scrollTop)) scrollTop = true;
@@ -735,29 +855,63 @@
             
             // Check is first time
             if (util.isNull($rootScope.state.id)) {
-              if (!$rootScope.state.base.includes(transition.to().name))
-                return transition.router.stateService.target($rootScope.state.base[0]);
+              if ($rootScope.state.disabled.includes(transition.to().name))
+                return transition.router.stateService.target($rootScope.state.default);
             }
 
-            // Set state properties
-            $rootScope.state.prev = $rootScope.state.id;
-            $rootScope.state.id   = transition.to().name;
-            $rootScope.$applyAsync();
+            // Check state is change
+            if(!angular.equals(transition.to().name, transition.from().name)) {
+            
+              // Set page container visibility, and class
+              setPageContainer(transition.from().name, 'remove');
+              
+              // Set state properties
+              if (!$rootScope.state.disabled.includes($rootScope.state.id))
+                $rootScope.state.prevEnabled = $rootScope.state.id;
+              $rootScope.state.prev = $rootScope.state.id;
+              $rootScope.state.id   = transition.to().name;
+
+              // Get/Check transaction state to index
+              let index = util.indexByKeyValue($rootScope.state.available, 'name', transition.to().name);
+              if (index !== -1) {
+                $rootScope.state.parent = $rootScope.state.available[index].parent;
+                $rootScope.state.group = $rootScope.state.available[index].group;
+              }
+
+              // Apply change
+              $rootScope.$applyAsync();
+            }
             return true;
           });
-        
+          
           // On success transaction
           $transitions.onSuccess({}, () => {
+            
             return $timeout(() => {
-              let element = document.querySelector('.page-container');
-              if (util.isNodeElement(element))
-                element.addClass($rootScope.state.id.concat(' ', 'show'));
+
+              // Set page container visibility, and class
+              setPageContainer($rootScope.state.id, 'add');
+
+              // Scroll to top if necessary
               if (scrollTop) $window.scrollTo(0, 0);
               return true;
             });
           });
         }
       }
+    }
+  ])
+
+  // Include replace
+  .directive('ngIncludeReplace', [
+    () => {
+      return {
+        require: 'ngInclude',
+        restrict: 'A',
+        link: function (scope, element) {
+          element.replaceWith(element.children());
+        }
+      };
     }
   ])
 
@@ -873,78 +1027,6 @@
 							scope.winWidth  = parseInt(window.innerWidth);
               scope.isVisible = iElement[0].classList.contains('show');
               scope.throttled = false;
-						},
-
-						// Post-link
-						post: (scope) => {
-							$timeout(() => {
-                scope.methods.init();
-              });
-						}
-					};
-				}
-			};
-		}
-	])
-
-  // Show bootstrap5 modal dialog
-	.directive('ngModalDialog', [
-    '$timeout',
-    ($timeout) => {
-
-			// Controller
-			let controller = [
-				'$scope',
-        '$element', 
-				($scope, $element) => {
-
-          // Set methods
-          $scope.methods = {
-
-            // Initialize
-            init: () => {
-
-              // Set Events
-              $scope.methods.events();
-            },
-
-            // Events
-            events: () => {
-
-              
-            }
-          }
-				}
-			];
-
-      return {
-				restrict: 'EA',
-				replace: true,
-				scope: {},
-				controller: controller,
-				template:`<div  class="modal fade" id="ng-modal" tabindex="-1" 
-                        aria-labelledby="modal-label" aria-hidden="true">
-                    <div class="modal-dialog">
-                      <div class="modal-content">
-                        <div class="modal-header">
-                          <h5 class="modal-title" id="modal-label"></h5>
-                          <button type="button" class="btn-close" 
-                                  data-bs-dismiss="modal" aria-label="Close">
-                          </button>
-                        </div>
-                        <div class="modal-body"></div>
-                        <div class="modal-footer"></div>
-                      </div>
-                    </div>
-                  </div>`,
-
-				// Compile 
-				compile: () => {
-					
-					return {
-						
-						// Pre-link
-						pre: (scope, iElement) => {
 						},
 
 						// Post-link

@@ -13,8 +13,11 @@
         if (!util.isString(key)) return key;
         key = key.trim();
         if (!util.isBoolean(isAllowed)) isAllowed = true;
-        if (!isAllowed || !util.isObjectHasKey(data, key)) return key;
-        return data[key];
+        if (!isAllowed || 
+            !util.isObjectHasKey(data, key) ||
+            !data[key]) 
+              return key;
+        else  return data[key];
       }
     }
   ])
@@ -45,23 +48,63 @@
             data:{}
           };
 
+          // Check application properties
+          if (!util.isObjectHasKey($rootScope, 'app'))
+            $rootScope.app = {};
+          if (!util.isObjectHasKey($rootScope.app, 'id'))
+            $rootScope.app.id = util.getPageId();
+
           // Get available languages
           http.request("./lang/available.json")
           .then(data => {
 
-            // Check/Set available languages
-            $rootScope.lang.available = data;
-            if (!util.isArray($rootScope.lang.available) || 
-                             !$rootScope.lang.available.length) {
-              $rootScope.lang.available = [{
-                id    : "en",
-		            type  : "west",
-                name  : "english",
-                local : "english",
-                img   : "./image/countries/usa.png",
+            // Check response data
+            if (util.isArray(data) && data.length) {
+
+              // Each available languages
+              data = data.map(o => {
+
+                // Merge language properties with default
+                o = util.objMerge({
+                  id		: null,
+                  type	: "west",
+                  name	: null,
+                  local	: null,
+                  img		: null,
+                  valid	: true
+                }, o, true);
+
+                // Check/Set language properties
+                if (util.isString(o.id) && !util.isEmpty(o.id)) {
+                  o.id = o.id.trim().toLowerCase();
+                  if (!util.isString(o.type)) o.type = 'west';
+                  o.type = o.type.trim().toLowerCase();
+                  if (!['west','east'].includes(o.type)) o.type = 'west';
+                  if (!util.isString(o.name) || util.isEmpty(o.name)) o.name = o.id;
+                  o.name = o.name.trim().toLowerCase();
+                  if (!util.isString(o.local) || util.isEmpty(o.local)) o.local = o.name;
+                  o.local = o.local.trim().toLowerCase();
+                  if (!util.isString(o.img) || util.isEmpty(o.img)) o.img = `${o.id}.png`;
+                  if (!util.isBoolean(o.valid)) o.valid = true;
+                } else o.valid = false;
+                return o;
+              }).filter(o => o.valid).unique('id');
+            }
+
+            // When there is no data, set it to default
+            if (!util.isArray(data) || !data.length) {
+              data = [{
+                id    : "hu",
+		            type  : "east",
+                name  : "hungarian",
+				        local : "magyar",
+                img   : "hun.png",
                 valid : true
               }];
             }
+
+            // Set available languages
+            $rootScope.lang.available = data;
 
             // Get/Check last language identifier
             $rootScope.lang.id = localStorage.getItem($rootScope.app.id + "_lang_id");
@@ -70,7 +113,7 @@
             // When language id is not in available languages, then set to first
             $rootScope.lang.index = util.indexByKeyValue($rootScope.lang.available, 'id', $rootScope.lang.id);
             if ($rootScope.lang.index === -1) {
-                $rootScope.lang.id    = $rootScope.lang.available[0];
+                $rootScope.lang.id    = $rootScope.lang.available[0].id;
                 $rootScope.lang.index = 0;
             }
 
@@ -113,6 +156,19 @@
           $rootScope.lang.index = util.indexByKeyValue($rootScope.lang.available, 'id', id);
           $rootScope.lang.type = $rootScope.lang.available[$rootScope.lang.index].type;
           service.get();
+        },
+
+        // Translate
+        translate: (key, isUpper=false) => {
+          if (!util.isString(key)) return key;
+          key = key.trim();
+          if (!key) return key;
+          if (!util.isBoolean(isUpper)) isUpper=false;
+          if (util.isObjectHasKey($rootScope.lang.data, key)) {
+            if (isUpper)
+                  return util.capitalize($rootScope.lang.data[key]);
+            else  return $rootScope.lang.data[key];
+          } return key;
         }
       };
 
@@ -124,6 +180,16 @@
       // Return service
       return service;
     }
-  ]);
+  ])
+
+  // Navbar language
+  .directive('ngNavbarLanguage', [
+    () => {
+      return {
+        replace: true,
+        scope: false,
+        templateUrl:`./html/navbar/navigate_language.html`
+      };
+  }]);
 
 })(window, angular);

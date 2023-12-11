@@ -1,4 +1,8 @@
 <?php
+declare(strict_types=1);
+
+use \Util\Util as Util;
+
 /**
  * Environment
  */
@@ -32,9 +36,13 @@ chdir($___app___["path"][0]);
 
 
 // Set custum error reporting
-error_reporting(false);
+error_reporting(0);
 set_error_handler('customErrorHandler', E_ALL);
 register_shutdown_function('customFatalErrorHandler');
+
+
+// Set include path(s)
+setIncludePath();
 
 
 // Autoload register
@@ -164,11 +172,50 @@ function checkPath($path, $exceptFolder=null) {
 
 
 // Search for file
+function setIncludePath() {
+
+	// Get include path(s)
+	$include = get_include_path();
+	if ($include === false) $include = "";
+	$includePaths = explode(PATH_SEPARATOR, $include);
+	$includePaths = array_values(array_filter($includePaths));
+
+	// Get application global
+	global $___app___;
+
+	// Get/Set application global paths
+	$globalPaths = array_merge(array(), $___app___['path']);
+	foreach($globalPaths as $i => $path) {
+		if (is_dir($path.'php'))
+		 $globalPaths[$i] .= "php/";
+	}
+
+	// Merge/Check include paths with global paths
+	$includePaths = array_merge($includePaths, $globalPaths);
+	foreach($includePaths as $i => $path) {
+		$includePaths[$i] = checkPath($path);
+	}
+	$includePaths = array_unique($includePaths);
+
+	// Set new include paths
+	$include = implode(PATH_SEPARATOR, $includePaths);
+	set_include_path("./" . PATH_SEPARATOR . $include);
+}
+
+
+// Search for file
 function searchForFile($fileName, $folder=null) {
+
+	// Check/Set parameter file name
+	if (!is_string($fileName) || 
+					empty(($fileName = trim($fileName))))
+		return null;
+	$fileName = strtr($fileName, array(DIRECTORY_SEPARATOR => '/'));
 
 	// Check/Set parameter folder
 	if (is_string($folder) && 
-			!empty(($folder = trim($folder)))) {
+				!empty(($folder = trim($folder)))) {
+		$folder = strtr($folder, array(DIRECTORY_SEPARATOR => '/'));
 		if (substr($folder, 0, 1) === '/')
 					$folder = substr($folder, 1);
 		if (substr($folder, -1) !== '/')
@@ -189,6 +236,9 @@ function searchForFile($fileName, $folder=null) {
 		if (is_readable($file)) return $file;
 	}
 
-	// Not found
-	return null;
+	// Check file exists anywhere in the include path
+	$file = stream_resolve_include_path($fileName);
+	if ($file && is_readable($file)) 
+				return $file;
+	else 	return null;
 }

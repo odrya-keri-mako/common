@@ -307,6 +307,14 @@
 }
 
 /* scale and fade */
+.scale-down {
+	-webkit-animation:scale-down .4s ease-out;
+					animation:scale-down .4s ease-out;
+}
+.scale-up {
+	-webkit-animation:scale-up .4s ease-out;
+					animation:scale-up .4s ease-out;
+}
 .scaleDown {
 	-webkit-animation: scaleDown .7s ease both;
 					animation: scaleDown .7s ease both;
@@ -340,6 +348,22 @@
 /********************************* keyframes **************************************/
 
 /* scale and fade */
+@-webkit-keyframes scale-down {
+	0% 	{-webkit-transform: scale(1);}
+100% 	{-webkit-transform: scale(0);}
+}
+@keyframes scale-down {
+	0% 	{transform: scale(1);}
+100% 	{transform: scale(0);}
+}
+@-webkit-keyframes scale-up {
+	0% 	{-webkit-transform: scale(0);}
+100% 	{-webkit-transform: scale(1);}
+}
+@keyframes scale-up {
+	0% 	{transform: scale(0);}
+100% 	{transform: scale(1);}
+}
 @-webkit-keyframes scaleDown {
 	from 	{ }
 	to 		{ opacity: 0; -webkit-transform: scale(.8); }

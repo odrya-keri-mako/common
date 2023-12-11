@@ -1,4 +1,10 @@
 <?php
+declare(strict_types=1);
+
+// Set namespace
+namespace Util;
+
+use Exception;
 
 /**
  * Utilityes
@@ -128,5 +134,18 @@
     return  is_array($arr) &&
             !empty($arr) && 
             array_keys($arr) !== range(0, count($arr) - 1);
+  }
+
+  // Capitalize
+  public static function capitalize($str, $encoding="utf-8", $isLowerEnd=true) {
+    if (!is_string($str)) $str = "";
+    $str = trim($str);
+    if (strlen($str) === 0) return $str;
+    $firstLetter = mb_strtoupper(mb_substr($str, 0, 1, $encoding), $encoding);
+    if (!is_bool($isLowerEnd)) $isLowerEnd = true;
+    if ($isLowerEnd)
+          $strEnd = mb_strtolower(mb_substr($str, 1, mb_strlen($str, $encoding), $encoding), $encoding);
+    else  $strEnd = mb_substr($str, 1, mb_strlen($str, $encoding), $encoding);
+    return $firstLetter . $strEnd;
   }
 }
