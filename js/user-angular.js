@@ -441,7 +441,7 @@
           linkIcon2: "@",
           linkState2: "@"
         },
-        template:`<div class="form-dialog-footer w-100 px-3"
+        template:`<div class="form-dialog-footer w-100 px-3 py-2"
                        ng-init="callback=callback()">
                     <div class="clearfix">
                       <div class="float-none float-sm-end pt-2">
@@ -486,7 +486,7 @@
                       <div class="float-none float-sm-start text-center text-sm-start pt-1"
                            ng-if="linkId||linkId2">
                         <hr class="text-muted d-sm-none">
-                        <a class="fs-md link-offset-2 link-offset-3-hover link-underline
+                        <a class="link-offset-2 link-offset-3-hover link-underline
                                   link-underline-opacity-0 link-underline-opacity-75-hover
                                   mb-3 mb-sm-1 col-12 col-sm-auto btnClickEffect d-block"
                            ui-sref="{{linkState}}"
@@ -498,7 +498,7 @@
                             {{linkId | translate:$root.lang.data | capitalize}}
                           </span>
                         </a>
-                        <a class="fs-md link-offset-2 link-offset-3-hover link-underline
+                        <a class="link-offset-2 link-offset-3-hover link-underline
                                   link-underline-opacity-0 link-underline-opacity-75-hover
                                   mb-3 mb-sm-1 col-12 col-sm-auto btnClickEffect d-block"
                            ui-sref="{{linkState2}}"
