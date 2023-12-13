@@ -172,11 +172,10 @@
                       else  return !filter.includes(k); 
                     }).reduce((o, k) => Object.assign(o, {[k]: obj[k]}), {}));
 				},
-        arrOfObjFilterByKeys: (arr, filter) => {
+        arrayObjFilterByKeys: (arr, filter, isExist=true) => {
+          if (!util.isArray(arr) || !arr.length) return arr;
           return arr.map((obj) => {
-            return  Object.keys(obj)
-                          .filter((key) => filter.includes(key))
-                          .reduce((o, k) => Object.assign(o, {[k]: obj[k]}), {});
+            return util.objFilterByKeys(obj, filter, isExist);
           });
         },
 				objMerge: (target, source, existKeys) => {
