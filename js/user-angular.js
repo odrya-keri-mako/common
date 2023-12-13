@@ -266,6 +266,27 @@
               }
             });
           }
+
+          // Check state identifier is register or profile
+          if (['register','profile'].includes($rootScope.state.id)) {
+            $scope.nameChanged = () => {
+              $scope.methods.showName();
+            };
+            document.addEventListener("languageChanged", () => {
+              $scope.methods.showName();
+            });
+          }
+        },
+
+        // Show user name
+        showName: () => {
+          let name = "";
+          $rootScope.lang.rule[$rootScope.lang.type].forEach(k => {
+            if ($scope.model[k]) {
+              name += ($scope.model[k] + " ");
+            }
+          });
+          $scope.model.name = name.trim();
         },
 
         // Accept button clicked
