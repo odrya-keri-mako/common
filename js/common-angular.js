@@ -172,6 +172,13 @@
                       else  return !filter.includes(k); 
                     }).reduce((o, k) => Object.assign(o, {[k]: obj[k]}), {}));
 				},
+        arrOfObjFilterByKeys: (arr, filter) => {
+          return arr.map((obj) => {
+            return  Object.keys(obj)
+                          .filter((key) => filter.includes(key))
+                          .reduce((o, k) => Object.assign(o, {[k]: obj[k]}), {});
+          });
+        },
 				objMerge: (target, source, existKeys) => {
 						if (!util.isObject(target)) target = {};
 						if (!util.isObject(source)) source = {};
