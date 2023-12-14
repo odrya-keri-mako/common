@@ -29,7 +29,7 @@
     'util', 
     function($rootScope, http, util) {
 
-      // Create event language changed
+      // Create new event language changed
       const languageChanged = new Event("languageChanged");
 
       // Set service
@@ -177,7 +177,11 @@
 
       // On language changed
       $rootScope.changeLanguage = (event) => {
+
+        // Set current language
         service.set(event.currentTarget.dataset.langId);
+
+        // Trigger event language changed
         document.dispatchEvent(languageChanged);
       };
 

@@ -269,9 +269,13 @@
 
           // Check state identifier is register or profile
           if (['register','profile'].includes($rootScope.state.id)) {
+
+            // Name properties (sufix,first,middle,last,postfix) changed
             $scope.nameChanged = () => {
               $scope.methods.showName();
             };
+
+            // Language changed
             document.addEventListener("languageChanged", () => {
               $scope.methods.showName();
             });
