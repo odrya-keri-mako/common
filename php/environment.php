@@ -1,7 +1,8 @@
 <?php
 declare(strict_types=1);
 
-use \Util\Util as Util;
+// Use namescapes aliasing
+use Util\Util as Util;
 
 /**
  * Environment

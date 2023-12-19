@@ -133,6 +133,21 @@ textarea.input-disabled {
   font-size: var(--lg-font-size) !important;
 }
 
+/* Overlay please wait... */
+.please-wait-overlay .please-wait-panel {
+  width: 320px;
+  height: 160px;
+  margin-left: -160px;
+  margin-top: -80px;
+  border-width: 3px !important;
+}
+.please-wait-overlay .please-wait-header {
+  line-height: 30px;
+}
+.please-wait-overlay .please-wait-content {
+  line-height: 130px;
+}
+
 /* Background color transparent */
 .bg-dark-transparent {
   background-color:rgba(0,0,0,.3);
@@ -259,6 +274,18 @@ textarea.input-disabled {
   .float-md-none {
     float: none !important;
   }
+  .please-wait-overlay .please-wait-panel {
+    width: 400px;
+    height: 200px;
+    margin-left: -200px;
+    margin-top: -100px;
+  }
+  .please-wait-overlay .please-wait-header {
+    line-height: 40px;
+  }
+  .please-wait-overlay .please-wait-content {
+    line-height:160px;
+  }
 }
 @media (min-width: 992px) {
 	.w-lg-auto {
@@ -286,6 +313,18 @@ textarea.input-disabled {
   }
   .float-xl-none {
     float: none !important;
+  }
+  .please-wait-overlay .please-wait-panel {
+    width: 500px;
+    height: 200px;
+    margin-left: -250px;
+    margin-top: -100px;
+  }
+  .please-wait-overlay .please-wait-header {
+    line-height: 40px;
+  }
+  .please-wait-overlay .please-wait-content {
+    line-height:160px;
   }
 }
 @media (min-width: 1400px) {

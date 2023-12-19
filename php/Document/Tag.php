@@ -407,7 +407,7 @@ class Tag {
           $result['attr']['class'][] = $property;
 
           // Check element property is attribute property
-        } else if (mb_substr($property, -1, 'UTF-8') === ']') {
+        } else if (mb_substr($property, 0, -1, 'UTF-8') === ']') {
 
           // Enlarge property length
           $length++;

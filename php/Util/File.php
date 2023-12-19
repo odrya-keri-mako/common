@@ -4,7 +4,6 @@ declare(strict_types=1);
 // Set namespace
 namespace Util;
 
-use Exception;
 
 /**
  * File
@@ -25,7 +24,7 @@ class File {
 				}
 				fclose($handle);
 				return $result;
-			} else	throw new Exception("Unable to open file {$file}!");
-		} else		throw new Exception("The file cannot be found or cannot be read {$file}!");
+			} else	throw new \Exception("Unable to open file {$file}!");
+		} else		throw new \Exception("The file cannot be found or cannot be read {$file}!");
 	}
 }

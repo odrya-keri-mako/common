@@ -36,13 +36,22 @@
       let service = {
 
         // Initialize
-        init: () => {
+        init: (imgPath=null) => {
+
+          // Check parameter image path
+          if (!util.isString(imgPath)) 
+            imgPath = $rootScope.app.commonPath + 'media/image/countries/';
+          imgPath = imgPath.trim();
+          if (!imgPath.length) imgPath = './';
+          imgPath = imgPath.replaceAll('\\', '/');
+          if (imgPath.slice(-1) !== '/') imgPath += '/';
 
           // Set language
           $rootScope.lang = {
             id:null, 
             type:null, 
             index:null,
+            imgPath: imgPath,
             rule: {
               west: ['prefix_name','first_name','middle_name','last_name','suffix_name'],
               east: ['prefix_name','last_name','first_name','middle_name','suffix_name']
@@ -110,7 +119,7 @@
             $rootScope.lang.available = data;
 
             // Get/Check last language identifier
-            $rootScope.lang.id = localStorage.getItem($rootScope.app.id + "_lang_id");
+            $rootScope.lang.id = localStorage.getItem(service.getKey());
             if (!$rootScope.lang.id) $rootScope.lang.id = document.documentElement.lang;
 
             // When language id is not in available languages, then set to first
@@ -129,9 +138,14 @@
           .catch(e => console.log(e));
         },
 
+        // Get key
+				getKey: () => {
+					return [$rootScope.app.id, 'lang_id'].join('_');
+				},
+
         // Set html language property
         setHtml: () => {
-          localStorage.setItem($rootScope.app.id + "_lang_id", $rootScope.lang.id);
+          localStorage.setItem(service.getKey(), $rootScope.lang.id);
           document.documentElement.lang = $rootScope.lang.id;
           let title = document.getElementsByTagName("title");
           if (title.length) {
@@ -196,7 +210,42 @@
       return {
         replace: true,
         scope: false,
-        templateUrl:`./html/navbar/navigate_language.html`
+        template:`<li class="nav-item mx-1 dropdown"
+                      ng-if="$root.lang.available && $root.lang.available.length > 1">
+                    <a id="dropdown-menu-language" 
+                       href="#" 
+                       class="nav-link dropdown-toggle"  
+                       role="button" 
+                       data-bs-toggle="dropdown" 
+                       aria-expanded="false">
+                      <img class="me-1" height="22" alt="flag" 
+                           ng-src="{{$root.lang.imgPath+$root.lang.available[$root.lang.index].img}}">
+                      <span class="text-capitalize text-small-caps">
+                        {{$root.lang.available[$root.lang.index].local}}
+                      </span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end mt-2" 
+                        aria-labelledby="dropdown-menu-language">
+                      <li data-lang-id="{{x.id}}"
+                          class="dropdown-item cursor-pointer"
+                          ng-click="changeLanguage($event)"
+                          ng-repeat="x in $root.lang.available" 
+                          ng-if="x.valid && $index != $root.lang.index"
+                          data-bs-toggle="collapse" 
+                          data-bs-target=".navbar-collapse.show">
+                        <div class="language-item-content d-inline-block text-start">
+                          <img class="me-1" height="22" alt="flag"
+                               ng-src="{{$root.lang.imgPath+x.img}}">
+                          <span class="text-capitalize">
+                            {{x.name}}
+                          </span>
+                          <span ng-if="x.name != x.local">
+                            ({{x.local}})
+                          </span>
+                        </div>
+                      </li>
+                    </ul>
+                  </li>`
       };
   }]);
 

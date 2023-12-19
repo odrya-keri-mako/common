@@ -1,0 +1,14 @@
+XDEBUG (phpinfo, php.ini)
+PHP Extension pack
+PHP Intelephense Manage/Extension Settings
+
+intelephense.diagnostics.undefinedTypes 
+intelephense.diagnostics.undefinedFunctions 
+intelephense.diagnostics.undefinedConstants 
+intelephense.diagnostics.undefinedClassConstants 
+intelephense.diagnostics.undefinedMethods 
+intelephense.diagnostics.undefinedProperties 
+intelephense.diagnostics.undefinedVariables
+
+Setting all of these to false except: 
+intelephense.diagnostics.undefinedVariables

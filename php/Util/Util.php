@@ -4,8 +4,6 @@ declare(strict_types=1);
 // Set namespace
 namespace Util;
 
-use Exception;
-
 /**
  * Utilityes
  */
@@ -43,7 +41,7 @@ use Exception;
   public static function jsonDecode($var, $errMsg=null) {
     $result = json_decode($var, true, 512, 0);
     if (json_last_error() !== JSON_ERROR_NONE)
-      throw new Exception("Unable to decode {$errMsg}!");
+      throw new \Exception("Unable to decode {$errMsg}!");
     return $result;
   }
 
@@ -51,7 +49,7 @@ use Exception;
   public static function jsonEncode($var, $errMsg=null) {
     $result = json_encode($var, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     if (json_last_error() !== JSON_ERROR_NONE)
-      throw new Exception("Unable to encode {$errMsg}!");
+      throw new \Exception("Unable to encode {$errMsg}!");
     return $result;
   }
 
@@ -91,7 +89,7 @@ use Exception;
 
     // Check is required
     } elseif($isRequired)
-      throw new Exception("Missing parameters!");
+      throw new \Exception("Missing parameters!");
 
     // Return arguments
     return $args;
@@ -137,10 +135,11 @@ use Exception;
   }
 
   // Capitalize
-  public static function capitalize($str, $encoding="utf-8", $isLowerEnd=true) {
+  public static function capitalize($str, $isLowerEnd=true, $encoding="utf-8") {
     if (!is_string($str)) $str = "";
     $str = trim($str);
-    if (strlen($str) === 0) return $str;
+    if (empty($str)) return $str;
+    if (!is_string($encoding) || empty(($encoding = trim($encoding)))) $encoding = "utf-8";
     $firstLetter = mb_strtoupper(mb_substr($str, 0, 1, $encoding), $encoding);
     if (!is_bool($isLowerEnd)) $isLowerEnd = true;
     if ($isLowerEnd)

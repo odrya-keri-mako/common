@@ -782,7 +782,8 @@
           $rootScope.app = {
             id        : util.getPageId(),
             url       : util.getPageUrl(),
-            commonPath: util.getCommonRelativePath()
+            commonPath: util.getCommonRelativePath(),
+            currentDay: new Date()
           };
 
           // Check/Merge/Convert options with default
@@ -1045,6 +1046,45 @@
 				}
 			};
 		}
-	]);
+	])
+
+  // Please wait
+  .directive('ngWhait', [
+    '$parse',
+    ($parse) => {
+      return {
+        restrict: 'EA',
+        replace: true,
+        scope: {
+          langId: '@',
+          punctuationMark: '@'
+        },
+        template:`<div class="please-wait-overlay position-fixed d-conditional
+                              vh-100 vw-100 top-0 start-0 bg-light-transparent"
+                       style="z-index:2001;">
+                    <div class="please-wait-panel position-absolute start-50 top-50 bg-white 
+                                shadow-bottom-end border rounded-3 text-center
+                                overflow-hidden scale-up fs-6">
+                      <div class="please-wait-header lin-grad-gray text-white">
+                        <i class="fa-solid fa-hourglass-start ms-3 fa-spin"></i>
+                      </div>
+                      <div class="please-wait-content">
+                        <span>{{langId|translate:$root.lang.data|capitalize}}</span>
+                        <span>{{punctuationMark}}</span>
+                      </div>
+                    </div>
+                  </div>`,
+        link: (scope, iElement) => {
+          if (!scope.langId) scope.langId = 'please_wait';
+          if (!scope.punctuationMark) scope.punctuationMark = '...';
+          scope.$on('whait-loading', () => {
+            iElement[0].classList.add('show'); 
+          });
+          scope.$on('whait-finished', () => {
+            iElement[0].classList.remove('show');
+          });
+        }
+      }
+  }]);
 
 })(window, angular);

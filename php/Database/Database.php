@@ -4,9 +4,8 @@ declare(strict_types=1);
 // Set namespace
 namespace Database;
 
-use \Util\Util as Util;
-use PDO;
-use Exception;
+// Use namescapes aliasing
+use Util\Util as Util;
 
 /**
  * Database
@@ -48,13 +47,13 @@ class Database {
   private function set_options($options) {
     $this->options = Util::objMerge(
       array(
-        PDO::MYSQL_ATTR_INIT_COMMAND       => "SET NAMES utf8",
-				PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => false,
-				PDO::ATTR_ERRMODE 						     => PDO::ERRMODE_EXCEPTION,
-				PDO::ATTR_DEFAULT_FETCH_MODE       => PDO::FETCH_ASSOC,
-				PDO::ATTR_ORACLE_NULLS				     => PDO::NULL_EMPTY_STRING,
-				PDO::ATTR_EMULATE_PREPARES		     => false,
-				PDO::ATTR_STRINGIFY_FETCHES        => false
+        \PDO::MYSQL_ATTR_INIT_COMMAND       => "SET NAMES utf8",
+				\PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => false,
+				\PDO::ATTR_ERRMODE 						      => \PDO::ERRMODE_EXCEPTION,
+				\PDO::ATTR_DEFAULT_FETCH_MODE       => \PDO::FETCH_ASSOC,
+				\PDO::ATTR_ORACLE_NULLS				      => \PDO::NULL_EMPTY_STRING,
+				\PDO::ATTR_EMULATE_PREPARES		      => false,
+				\PDO::ATTR_STRINGIFY_FETCHES        => false
       ), $options
     );
   }
@@ -66,9 +65,9 @@ class Database {
 
   // Get fetch mode
   public function get_fetch_mode($isAssoc) {
-    $fetchMode = $this->options[PDO::ATTR_DEFAULT_FETCH_MODE];
+    $fetchMode = $this->options[\PDO::ATTR_DEFAULT_FETCH_MODE];
     if (is_bool($isAssoc))
-      $fetchMode = $isAssoc ? PDO::FETCH_ASSOC : PDO::FETCH_NUM;
+      $fetchMode = $isAssoc ? \PDO::FETCH_ASSOC : \PDO::FETCH_NUM;
     return $fetchMode;
   }
 
@@ -98,20 +97,20 @@ class Database {
 	// Connect to MySQL server
   private function connect() {
 		try {
-			$this->dbHandle = new PDO("mysql:host={$this->conn['host']};
+			$this->dbHandle = new \PDO("mysql:host={$this->conn['host']};
 															    dbname={$this->db};
 																  charset=utf8", 
 																  $this->conn['user'], 
 																  $this->conn['password'], 
 																  $this->get_options());
-		} catch (Exception $e) {
-			throw new Exception($e->getMessage());
+		} catch (\Exception $e) {
+			throw new \Exception($e->getMessage());
 		}
 	}
 
   // Check is connected
   public function is_connected() {
-    return $this->dbHandle instanceof PDO;
+    return $this->dbHandle instanceof \PDO;
   }
 
 	// Get query type
@@ -146,7 +145,7 @@ class Database {
 
       // Check is valid
       if (count(($keys = array_keys($params))) !== $fieldCount)
-        throw new Exception("Invalid number of parameters compared to fields!");
+        throw new \Exception("Invalid number of parameters compared to fields!");
       
       // Add colon to each keys, and prepare query
       $keys   = array_map(function($key) {return ':'.$key;}, $keys); 
@@ -174,7 +173,7 @@ class Database {
     
     // Check is valid
     if(count($params) % $fieldCount !== 0)
-      throw new Exception("Invalid number of parameters compared to fields!");
+      throw new \Exception("Invalid number of parameters compared to fields!");
 
     // Prepare query
     $qMark	= "(" . str_repeat("?,", $fieldCount);
@@ -235,7 +234,7 @@ class Database {
 			return $result;
 
 		// Exception (close database, and throw error)
-		} catch (Exception $e) {
+		} catch (\Exception $e) {
 
       // Close connection
 			$this->close();
@@ -244,7 +243,7 @@ class Database {
       $message = explode(":", trim($e->getMessage()));
       
       // Set error
-			throw new Exception($message[count($message)-1]);
+			throw new \Exception($message[count($message)-1]);
 		}
 	}
 

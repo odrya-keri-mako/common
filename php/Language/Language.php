@@ -4,7 +4,8 @@ declare(strict_types=1);
 // Set namespace
 namespace Language;
 
-use \Util\Util as Util;
+// Use namescapes aliasing
+use Util\Util as Util;
 
 /**
  * Language
@@ -96,7 +97,35 @@ class Language {
 	}
 
 	// Translate
-	public function translate($data=null, $isCapitalize=false) {
+	public function translate($data=null, $notCapitalize=null) {
+		if (is_string($data)) {
+			$data = trim(strtr($data, array(';' => ',')));
+			$data = array_values(array_filter(explode(",", $data)));
+		}
+		if (is_array($data) && !Util::isAssocArray($data)) {
+			$data = array_unique($data);
+			$data = array_combine($data, $data);
+		}
+		if (!Util::isAssocArray($data)) return null;
+		if (is_string($notCapitalize)) {
+			$notCapitalize = trim(strtr($notCapitalize, array(';' => ',')));
+			$notCapitalize = array_values(array_filter(explode(",", $notCapitalize)));
+		}
+		if (!is_array($notCapitalize)) $notCapitalize = array();
+		foreach($data as $key => $langKey) {
+			if (is_string($langKey)) {
+				if (array_key_exists($langKey, $this->data)) {
+					$data[$key] = $this->data[$langKey];
+					if (!in_array($langKey, $notCapitalize))
+						$data[$key] = Util::capitalize($data[$key], false);
+				} else $data[$key] = $langKey;
+			}
+		}
+		return $data;
+	}
+
+	// Translate
+	public function translateOld($data=null, $isCapitalize=false) {
 		if (is_string($data)) {
 			$data = trim(strtr($data, array(';' => ',')));
 			$data = array_values(array_filter(explode(",", $data)));

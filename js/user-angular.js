@@ -143,6 +143,8 @@
     'http',
     function($rootScope, $scope, $state, $timeout, util, user, lang, http) {
 
+      console.log('User controller...');
+
       // Set methods
       $scope.methods = {
         
@@ -271,24 +273,26 @@
           if (['register','profile'].includes($rootScope.state.id)) {
 
             // Name properties (sufix,first,middle,last,postfix) changed
-            $scope.nameChanged = () => {
-              $scope.methods.showName();
-            };
+            $scope.nameChanged = () => $scope.methods.showName();
 
-            // Language changed
-            document.addEventListener("languageChanged", () => {
-              $scope.methods.showName();
-            });
+            // When language is changed show name
+            document.addEventListener("languageChanged", () => $scope.methods.showName());
           }
+        },
+
+        // Toogle name details
+        toogleName: (event) => {
+          let element = event.currentTarget,
+              nameDetailContainer = element.closest('form')
+                                           .querySelector('#name_detail_container');
+          nameDetailContainer.classList.toggle('show');
         },
 
         // Show user name
         showName: () => {
           let name = "";
           $rootScope.lang.rule[$rootScope.lang.type].forEach(k => {
-            if ($scope.model[k]) {
-              name += ($scope.model[k] + " ");
-            }
+            if ($scope.model[k]) name += ($scope.model[k] + " ");
           });
           $scope.model.name = name.trim();
         },
@@ -296,12 +300,14 @@
         // Accept button clicked
         clicked: (event) => {
 
-          // Get accept button identifier
-          let acceptBtnId = event.currentTarget.id;
+          // Get accept button identifier, 
+          // and set variable is show please whait.
+          let acceptBtnId = event.currentTarget.id,
+              isShowWait  = false;
 
           // Check type
           if (acceptBtnId === 'modify') {
-            if (acceptBtnId !== 'profile')
+            if ($rootScope.state.id !== 'profile')
               $state.go($rootScope.state.prevEnabled);
             return;
           }
@@ -317,37 +323,47 @@
                           'email_current_user',
                           'password_confirm'
                         ], false)
-              }
+              };
 
+          // Update arguments
           switch(acceptBtnId) {
             case 'password_change':
-              args.data.userId  = 1;
-              //args.data.userId  = $rootScope.user.id;
+              args.data.userId = $rootScope.user.id;
               break;
             case 'password_frogot':
             case 'email_change':
+              isShowWait = true;
               args.data.langId    = $rootScope.lang.id;
               args.data.langType  = $rootScope.lang.type;
               if (acceptBtnId === 'email_change') {
-                args.data.userId  = 1;
-                //args.data.userId = $rootScope.user.id;
+                args.data.userId  = $rootScope.user.id;
                 args.data.appUrl  = $rootScope.app.url;
+                args.data.event   = acceptBtnId;
               }
               break;
             case 'register':
             case 'profile':
+              if (acceptBtnId === 'register') {
+                isShowWait = true;
+              }
               break;
             default:   
           }
 
+          // Show please wait
+          if (isShowWait) $rootScope.$broadcast("whait-loading");
+
           // Http request
           http.request(args).then(response => {
+            if (isShowWait) $rootScope.$broadcast("whait-finished");
             switch(acceptBtnId) {
               case 'login':
                 response.email = $scope.model.email;
                 user.set(response);
                 break;
+              case 'email_change':
               case 'password_change':
+              case 'password_frogot':
                 $timeout(() => alert(lang.translate(response, true)+'!'), 50);
                 break;
               case 'register':
@@ -360,6 +376,7 @@
             }
           })
           .catch(e => {
+            if (isShowWait) $rootScope.$broadcast("whait-finished");
             $scope.helper.editable = !$scope.helper.editable;
             $scope.$applyAsync();
             $timeout(() => alert(lang.translate(e, true)+'!'), 50);
@@ -412,7 +429,89 @@
       return {
         replace: true,
         scope: false,
-        templateUrl:`./html/navbar/navigate_user.html`
+        template:`<li class="nav-item mx-1">
+                    <ul class="navbar-nav">
+                      <li class="nav-item"
+                          ng-if="!$root.user.id && $root.state.id !== 'login' && 
+                                  $root.state.id !== 'password_frogot'">
+                        <a class="nav-link" 
+                           ui-sref="login" 
+                           ui-sref-active="active">
+                          <i class="fa-solid fa-right-to-bracket me-1"></i>
+                          <span class="text-capitalize text-small-caps">
+                            {{'login' | translate:$root.lang.data}}
+                          </span>
+                        </a>
+                      </li>
+                      <li class="nav-item" 
+                          ng-if="!$root.user.id && ($root.state.id === 'login' || 
+                                  $root.state.id === 'password_frogot')">
+                        <a class="nav-link" 
+                           ui-sref="register" 
+                           ui-sref-active="active">
+                          <i class="fa-solid fa-id-card me-1"></i>
+                          <span class="text-capitalize text-small-caps">
+                            {{'register' | translate:$root.lang.data}}
+                          </span>
+                        </a>
+                      </li>
+                      <li class="nav-item dropdown" 
+                          ng-if="$root.user.id">
+                        <a id="dropdown-menu-user"
+                           href="#" 
+                           class="nav-link dropdown-toggle"
+                           role="button" 
+                           data-bs-toggle="dropdown" 
+                           aria-expanded="false">
+                          <div class="bg-img bg-img-cover overflow-hidden rounded-circle d-inline-block float-start me-2" 
+                               style="width:32px;height:32px;"
+                               ng-style="{'background-image':$root.user.img_type?'url(data:'+$root.user.img_type+';base64,'+$root.user.img+')	            ':'url	('	+app.commonPath+'media/image/blank/'+($root.user.gender==='F'?'fe':'')+'male-blank.webp)'}"
+                               ng-show="$root.user.img || $root.user.gender">
+                          </div>
+                          <div class="text-capitalize text-small-caps d-inline-block float-start">
+                            {{'account' | translate:$root.lang.data}}
+                          </div>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end mt-2" 
+                            aria-labelledby="dropdown-menu-user">
+                          <li>
+                            <a class="dropdown-item disabled" href="#">
+                              <span class="text-capitalize text-small-caps" 
+                                    ng-if="$root.user.nick_name">
+                                {{$root.user.nick_name}}
+                              </span>
+                              <span class="text-capitalize text-small-caps" 
+                                    ng-repeat="k in $root.lang.rule[$root.lang.type]"
+                                    ng-if="!$root.user.nick_name">
+                                {{user[k]}}
+                              </span>
+                            </a>
+                          </li>
+                          <li>
+                            <a class="dropdown-item"
+                               ng-class="{'disabled': $root.state.id === 'user' && userEvent === 'profile'}"
+                               ui-sref="profile">
+                              <i class="fa-solid fa-user fa-lg"></i>
+                              <span class="text-capitalize text-small-caps">
+                                {{'profile' | translate:$root.lang.data}}
+                              </span>
+                            </a>
+                          </li>
+                          <li><hr class="dropdown-divider"></li>
+                          <li>
+                            <a class="dropdown-item" 
+                               href="javascript:void(0)" 
+                               ng-click="logout()">
+                              <i class="fa-solid fa-right-from-bracket fa-lg"></i>
+                              <span class="text-capitalize text-small-caps">
+                                {{'logout' | translate:$root.lang.data}}
+                              </span>
+                            </a>
+                          </li>
+                        </ul>
+                      </li>
+                    </ul>
+                  </li>`
       };
   }])
 
@@ -453,6 +552,7 @@
         restrict: 'EA',
         scope: {
           formName: '<',
+          isModify: '@',
           identifier: "@",
           acceptId: "@",
           acceptIcon: "@",
@@ -468,6 +568,7 @@
         },
         template:`<div class="form-dialog-footer w-100 px-3 py-2"
                        ng-init="callback=callback()">
+                       {{$root.state.id}} - {{editable}} - {{isModify}}
                     <div class="clearfix">
                       <div class="float-none float-sm-end pt-2">
                         <button id="{{identifier}}"
@@ -478,7 +579,7 @@
                                 style="min-width:100px;"
                                 ng-click="editable=!editable;callback($event)"
                                 ng-disabled="formName.$invalid"
-                                ng-show="editable">
+                                ng-show="editable||!isModify">
                           <i ng-class="acceptIcon"></i>
                           <span class="ms-1 btn-content">
                             {{acceptId | translate:$root.lang.data | capitalize}}
@@ -490,10 +591,24 @@
                                        shadow-sm-bottom-end btnClickEffect"
                                 style="min-width:100px;"
                                 ng-click="editable=!editable;callback($event)"
-                                ng-show="!editable">
+                                ng-show="!editable"
+                                ng-if="isModify">
                           <i class="fa-solid fa-pen-to-square"></i>
                           <span class="ms-1 btn-content">
                             {{'modify' | translate:$root.lang.data | capitalize}}
+                          </span>
+                        </button>
+                        <button id="save"
+                                type="button" 
+                                class="btn btn-primary mb-2 mx-1 col-12 col-sm-auto 
+                                       shadow-sm-bottom-end btnClickEffect"
+                                style="min-width:100px;"
+                                ng-click="callback($event)"
+                                ng-show="editable"
+                                ng-if="$root.state.id==='profile'">
+                          <i class="fa-solid fa-floppy-disk"></i>
+                          <span class="ms-1 btn-content">
+                            {{'save' | translate:$root.lang.data | capitalize}}
                           </span>
                         </button>
                         <a id="cancel"
@@ -539,6 +654,10 @@
                   </div>`,
         link: (scope) => {
           if (!util.isString(scope.identifier)) scope.identifier = scope.acceptId;
+          if (!util.isString(scope.isModify)) scope.isModify = "false";
+          scope.isModify = scope.isModify.trim().toLowerCase();
+          if (!['true','false'].includes(scope.isModify)) scope.isModify = "false";
+          scope.isModify = scope.isModify === 'true';
           if (!util.isBoolean(scope.editable)) scope.editable = true;
         }
       };
@@ -561,7 +680,7 @@
                     </div>
                   </div>`,
         link: (scope) => {
-          if (!scope.ruleId)  scope.ruleId  = 'password_rule';
+          if (!scope.ruleId) scope.ruleId  = 'password_rule';
           if (!scope.ruleClass) scope.ruleClass = 'text-muted';
           if (!scope.punctuationMark) scope.punctuationMark = '.';
         }
