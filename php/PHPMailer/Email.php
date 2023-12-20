@@ -14,7 +14,7 @@ use Util\Util as Util;
 class Email extends PHPMailer {
 
 	// Constructor
-  function __construct($exceptions=null, $options=null) {
+  function __construct($options=null, $exceptions=null) {
 		parent::__construct($exceptions);
 		$this->setEmail($options);
   }
