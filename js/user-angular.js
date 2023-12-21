@@ -282,14 +282,17 @@
 
         // Toogle name details
         toogleName: (event) => {
-          let element = event.currentTarget,
-              nameDetailContainer = element.closest('form')
-                                           .querySelector('.name-detail-container');
-          if (nameDetailContainer.clientHeight) {
-            nameDetailContainer.style.height = 0;
-          } else {
-            let nameDetailWrapper = nameDetailContainer.querySelector('.name-detail-wrapper');
-            nameDetailContainer.style.height = nameDetailWrapper.clientHeight + "px";
+          let element = event.currentTarget;
+          if (element) {
+            let btnIcon     = element.querySelector('i.fa-circle-up'),
+                parentForm  = element.closest('form');
+            if (btnIcon)
+              btnIcon.classList.toggle('fa-rotate-180');
+            if (parentForm) {
+              let nameDetailContainer = parentForm.querySelector('.name-detail-container');
+              if (nameDetailContainer)
+                nameDetailContainer.classList.toggle('show');
+            }
           }
         },
 
