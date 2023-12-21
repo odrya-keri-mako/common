@@ -60,7 +60,8 @@
           let icon  = angular.element(
              `<div class="clear-icon position-absolute text-primary cursor-pointer
                           fw-semibold text-center px-2 text-bold fs-5"
-                    ng-show="${ngModel.$$parentForm.$name}.${ngModel.$name}.$viewValue">
+                   style="max-width:10px;"
+                   ng-show="${ngModel.$$parentForm.$name}.${ngModel.$name}.$viewValue">
                 &#215;
               </div>`),
               style = {top:'0', right:'12px', zIndex:101};
@@ -286,9 +287,9 @@
                     <hr class="text-muted">
                     <div class="row mb-2">
                       <div class="col-form-label col-form-label-sm col-md-4 text-md-end fw-semibold">
-                        <span class="fw-bold text-danger">*</span>
-                        <i class="fa-regular fa-hand-point-right fa-xl"></i>
-                        <span class="ms-1 text-capitalize">
+                        <i class="fa-solid fa-star fa-2xs text-danger"></i>
+                        <i class="fa-regular fa-hand-point-right fa-xl me-1"></i>
+                        <span class="text-capitalize">
                           {{'code' | translate:$root.lang.data}}:
                         </span>
                       </div>

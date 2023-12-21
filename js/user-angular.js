@@ -192,6 +192,7 @@
                 $scope.helper.minBorn       = moment().subtract(120, 'years').format('YYYY-MM-DD');
                 $scope.helper.image         = null;
                 $scope.helper.countryCodes  = null;
+                $scope.helper.fileInput     = document.querySelector('input#image[type="file"]'); 
                 set.promise.resolve();
                 break;
 
@@ -534,9 +535,9 @@
           titleTextId: '@',
           titleTextClass: '@'
         },
-        template:`<div class="form-dialog-header w-100 d-flex flex-row align-items-center py-3"
+        template:`<div class="form-dialog-header w-100 d-flex flex-row align-items-center p-3"
                        ng-class="titleClass">
-                    <i class="fa-xl px-3" ng-class="titleIcon"></i>
+                    <i class="fa-2xl" ng-class="titleIcon"></i>
                     <h4 class="w-100 mb-0 text-center"
                         ng-class="titleTextClass">
                       {{titleTextId | translate:$root.lang.data | capitalize}}
