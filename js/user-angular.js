@@ -284,8 +284,13 @@
         toogleName: (event) => {
           let element = event.currentTarget,
               nameDetailContainer = element.closest('form')
-                                           .querySelector('#name_detail_container');
-          nameDetailContainer.classList.toggle('show');
+                                           .querySelector('.name-detail-container');
+          if (nameDetailContainer.clientHeight) {
+            nameDetailContainer.style.height = 0;
+          } else {
+            let nameDetailWrapper = nameDetailContainer.querySelector('.name-detail-wrapper');
+            nameDetailContainer.style.height = nameDetailWrapper.clientHeight + "px";
+          }
         },
 
         // Show user name
