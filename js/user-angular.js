@@ -576,7 +576,6 @@
         },
         template:`<div class="form-dialog-footer w-100 px-3 py-2"
                        ng-init="callback=callback()">
-                       {{$root.state.id}} - {{editable}} - {{isModify}}
                     <div class="clearfix">
                       <div class="float-none float-sm-end pt-2">
                         <button id="{{identifier}}"

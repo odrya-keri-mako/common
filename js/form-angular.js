@@ -282,10 +282,10 @@
         restrict: 'EA',
 				replace: true,
 				scope: false,
-        template:`<div class="row">
+        template:`<div class="m-0 p-0">
                     <hr class="text-muted">
                     <div class="row mb-2">
-                      <div class="col-form-label col-md-4 text-md-end fw-semibold">
+                      <div class="col-form-label col-form-label-sm col-md-4 text-md-end fw-semibold">
                         <span class="fw-bold text-danger">*</span>
                         <i class="fa-regular fa-hand-point-right fa-xl"></i>
                         <span class="ms-1 text-capitalize">
@@ -301,7 +301,10 @@
                       <div class="col-1"></div>
                     </div>
                     <div class="row input-row">
-                      <div class="col-form-label d-none d-sm-block col-sm-4"></div>
+                      <label for="testcode" 
+                             class="col-form-label col-form-label-sm col-md-4 
+                                    text-md-end fw-semibold invisible">
+                      </label>
                       <div class="col-11 col-md-7 position-relative">
                         <div class="input-group input-group-sm">
                           <div class="input-group-prepend">
