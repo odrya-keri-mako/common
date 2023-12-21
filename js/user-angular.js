@@ -284,7 +284,7 @@
         toogleName: (event) => {
           let element = event.currentTarget;
           if (element) {
-            let btnIcon     = element.querySelector('i.fa-circle-up'),
+            let btnIcon     = element.querySelector('.name-detail-toggle-icon'),
                 parentForm  = element.closest('form');
             if (btnIcon)
               btnIcon.classList.toggle('fa-rotate-180');
