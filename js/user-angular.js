@@ -137,13 +137,12 @@
     '$scope',
     '$state',
     '$timeout',
+    '$q',
     'util',
     'user',
     'lang',
     'http',
-    function($rootScope, $scope, $state, $timeout, util, user, lang, http) {
-
-      console.log('User controller...');
+    function($rootScope, $scope, $state, $timeout, $q, util, user, lang, http) {
 
       // Set methods
       $scope.methods = {
@@ -192,8 +191,46 @@
                 $scope.helper.minBorn       = moment().subtract(120, 'years').format('YYYY-MM-DD');
                 $scope.helper.image         = null;
                 $scope.helper.countryCodes  = null;
-                $scope.helper.fileInput     = document.querySelector('input#image[type="file"]'); 
-                set.promise.resolve();
+                $scope.model.img            = null;
+                $scope.model.img_type       = null;
+
+                // Create new deffered objects, 
+                // and create list watch
+                let countries = util.deferredObj(),
+                    completed = [countries.completed];
+
+                // Check state id is profile
+                if ($rootScope.state.id === 'profile') {
+
+                  // Create new deffered objects
+                  let image = util.deferredObj(),
+                      user  = util.deferredObj();
+                
+                  // Add to list watch
+                  completed.push(image.completed, user.completed);
+                  
+
+
+
+                  image.promise.resolve();
+                  user.promise.resolve();
+                }
+
+                // Get countries
+                http.request(`${$rootScope.app.commonPath}data/countries.json`)
+                .then(response => {
+                  $scope.helper.countries = response;
+                  countries.promise.resolve();
+                })
+                .catch(e => {
+                  countries.promise.resolve();
+                  $timeout(() => alert(e), 50);
+                });
+
+                // Whait for all completed
+                $q.all(completed).then(() => {
+                  set.promise.resolve();
+                });
                 break;
 
               default:
@@ -216,58 +253,63 @@
           // Check helper has image property
           if (util.isObjectHasKey($scope.helper, 'image')) {
 
-            // Watch user image changed
-            $scope.$watch('helper.image', (newValue, oldValue) => {
+            // Get input element image type file, and check exist
+            let inputElement = document.querySelector('input#image[type="file"]');
+            if (inputElement) {
 
-              // Check is changed
-              if(!angular.equals(newValue, oldValue)) {
+              // Watch user image changed
+              $scope.$watch('helper.image', (newValue, oldValue) => {
 
-                // Restore value, apply change, and show error when exist
-                let restore = (error=null) => {
-                  $scope.helper.image = oldValue;
-                  $scope.$applyAsync();
-                  if (error) 
-                    $timeout(() => alert(lang.translate(error, true)+'!'), 50);
-                };
+                // Check is changed
+                if(!angular.equals(newValue, oldValue)) {
 
-                // Check has property
-                if (newValue) {
+                  // Restore value, apply change, and show error when exist
+                  let restore = (error=null) => {
+                    $scope.helper.image = oldValue;
+                    $scope.$applyAsync();
+                    if (error) 
+                      $timeout(() => alert(lang.translate(error, true)+'!'), 50);
+                  };
 
-                  // Check accept file types property
-                  util.fileAllowedTypes(newValue, $scope.helper.fileInput.accept).then(() => {
+                  // Check has property
+                  if (newValue) {
 
-                    // File reader
-                    util.fileReader(newValue, {
-                      method  : 'readAsDataURL',
-                      limit   : 64
-                    }).then((data) => {
+                    // Check accept file types property
+                    util.fileAllowedTypes(newValue, inputElement.accept).then(() => {
 
-                      // Set image
-                      $scope.model.img      = util.getBase64UrlData(data);
-                      $scope.model.img_type = newValue.type;
+                      // File reader
+                      util.fileReader(newValue, {
+                        method  : 'readAsDataURL',
+                        limit   : 64
+                      }).then((data) => {
+
+                        // Set image
+                        $scope.model.img      = util.getBase64UrlData(data);
+                        $scope.model.img_type = newValue.type;
+                        $scope.$applyAsync();
+
+                      // Restore
+                      }).catch(error => restore(error));
+                    }).catch(error => restore(error));
+
+                  } else {
+
+                    // Get/Check input file data attribute file-choice-cancel property
+                    let isCanceled = inputElement.getAttribute('data-file-choice-cancel');
+                    inputElement.removeAttribute('data-file-choice-cancel');
+                    if (!isCanceled) {
+
+                      // Reset image
+                      $scope.model.img      = null;
+                      $scope.model.img_type = null;
                       $scope.$applyAsync();
 
                     // Restore
-                    }).catch(error => restore(error));
-                  }).catch(error => restore(error));
-
-                } else {
-
-                  // Get/Check input file data attribute file-choice-cancel property
-                  let isCanceled = $scope.helper.fileInput.getAttribute('data-file-choice-cancel');
-                  $scope.helper.fileInput.removeAttribute('data-file-choice-cancel');
-                  if (!isCanceled) {
-
-                    // Reset image
-                    $scope.model.img      = null;
-                    $scope.model.img_type = null;
-                    $scope.$applyAsync();
-
-                  // Restore
-                  } else restore();
+                    } else restore();
+                  }
                 }
-              }
-            });
+              });
+            }
           }
 
           // Check state identifier is register or profile
@@ -283,17 +325,13 @@
 
         // Toogle name details
         toogleName: (event) => {
-          let element = event.currentTarget;
-          if (element) {
-            let btnIcon     = element.querySelector('.name-detail-toggle-icon'),
-                parentForm  = element.closest('form');
-            if (btnIcon)
-              btnIcon.classList.toggle('fa-rotate-180');
-            if (parentForm) {
-              let nameDetailContainer = parentForm.querySelector('.name-detail-container');
-              if (nameDetailContainer)
-                nameDetailContainer.classList.toggle('show');
-            }
+          let element     = event.currentTarget,
+              btnIcon     = element.querySelector('.name-detail-toggle-icon'),
+              parentForm  = element.closest('form');
+          if (btnIcon) btnIcon.classList.toggle('fa-rotate-180');
+          if (parentForm) {
+            let nameDetailContainer = parentForm.querySelector('.name-detail-container');
+            if (nameDetailContainer) nameDetailContainer.classList.toggle('show');
           }
         },
 
@@ -304,6 +342,18 @@
             if ($scope.model[k]) name += ($scope.model[k] + " ");
           });
           $scope.model.name = name.trim();
+        },
+
+        // Country changed
+        countryChanged: () => {
+          if ($scope.model.country) {
+            $scope.helper.countryCodes  = $scope.model.country.code;
+            $scope.model.country_code   = $scope.helper.countryCodes[0];
+          } else {
+            $scope.helper.countryCodes  = null;
+            $scope.model.country_code   = null;
+          }
+          $scope.$applyAsync();
         },
 
         // Accept button clicked
@@ -326,6 +376,7 @@
                 url   : `./php/${acceptBtnId}.php`,
                 method: acceptBtnId === 'login' ? 'GET' : 'POST',
                 data  : util.objFilterByKeys($scope.model, [
+                          'name',
                           'testcode',
                           'testCodeContent',
                           'email_confirm',
@@ -352,7 +403,15 @@
               break;
             case 'register':
             case 'profile':
+              if (args.data.born)
+                args.data.born = moment(args.data.born).format('YYYY-MM-DD');
+              if (args.data.country)
+                args.data.country = args.data.country.country;
               if (acceptBtnId === 'register') {
+                args.data.langId    = $rootScope.lang.id;
+                args.data.langType  = $rootScope.lang.type;
+                args.data.appUrl  = $rootScope.app.url;
+                args.data.event   = acceptBtnId;
                 isShowWait = true;
               }
               break;

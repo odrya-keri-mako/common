@@ -124,28 +124,6 @@ class Language {
 		return $data;
 	}
 
-	// Translate
-	public function translateOld($data=null, $isCapitalize=false) {
-		if (is_string($data)) {
-			$data = trim(strtr($data, array(';' => ',')));
-			$data = array_values(array_filter(explode(",", $data)));
-		}
-		if (is_array($data) && !Util::isAssocArray($data)) {
-			$data = array_unique($data);
-			$data = array_combine($data, $data);
-		}
-		if (!Util::isAssocArray($data)) return null;
-		if (!is_bool($isCapitalize)) $isCapitalize = false;
-		foreach(array_keys($data) as $key) {
-			if (array_key_exists($key, $this->data))
-						$data[$key] = $isCapitalize ? 
-													Util::capitalize($this->data[$key]) : 
-													$this->data[$key];
-			else	$data[$key] = $key;
-		}
-		return $data;
-	}
-
 	// Get person name of language rule
 	public function getUserName($data) {
 		$result = "";
@@ -157,5 +135,29 @@ class Language {
 			}
 		}
 		return trim($result);
+	}
+
+	// Check that the language keys are not included in the document
+	public static function checkLanguageKeysExist($fileName, $language, $path=null) {
+		if (!is_string($path) || 
+			empty(($path = trim($path)))) {
+			$path = 'html';
+		}
+		$file 		= searchForFile($fileName, $path);
+		$document = file_get_contents($file);
+		$languageFiltered = array_filter(
+												array_filter($language, 'ucfirst'), 
+													function ($key) {
+														return (substr($key, 0, 1) === "%" && 
+																		substr($key, 	 -1) === "%");
+													}, ARRAY_FILTER_USE_KEY
+												);
+		$result = array();
+		foreach(array_keys($languageFiltered) as $key) {
+			if (strrpos($document, $key) === false) {
+				array_push($result, $key);
+			}
+		}
+		return $result;
 	}
 }

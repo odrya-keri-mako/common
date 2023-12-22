@@ -64,10 +64,11 @@
                    ng-show="${ngModel.$$parentForm.$name}.${ngModel.$name}.$viewValue">
                 &#215;
               </div>`),
-              style = {top:'0', right:'12px', zIndex:101};
+              style = {top:'0', right:'25px', zIndex:101};
 
           // When necessary modify clear icon style 
-          if (iElement.hasClass('form-control-sm'))
+          if (iElement.hasClass('form-control-sm') ||
+              iElement.hasClass('form-select-sm'))
             style.top = '-2px';
           if (util.isJson(iAttrs.ngClearIcon))
             style = util.objMerge(style, JSON.parse(iAttrs.ngClearIcon));
