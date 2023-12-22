@@ -284,7 +284,7 @@
         restrict: 'EA',
 				replace: true,
 				scope: false,
-        template:`<div class="m-0 p-0">
+        template:`<div class="m-0 p-0 mb-2">
                     <hr class="text-muted">
                     <div class="row mb-2">
                       <div class="col-form-label col-form-label-sm col-md-4 text-md-end fw-semibold">

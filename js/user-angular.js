@@ -371,18 +371,27 @@
             return;
           }
 
-          // Set url, and set arguments for requiest
+          // Get user neccesary property
+          let user_property = util.objFilterByKeys($scope.model, [
+                                'name',
+                                'testcode',
+                                'testCodeContent',
+                                'email_confirm',
+                                'email_current_user',
+                                'password_confirm'
+                              ], false);
+          
+          // Convert data
+          if (util.isObjectHasKey(user_property, 'born'))
+            user_property.born = moment(user_property.born).format('YYYY-MM-DD');
+          if (util.isObjectHasKey(user_property, 'country'))
+            user_property.country = user_property.country.country;
+
+          // Set arguments for requiest
           let args  = {
                 url   : `./php/${acceptBtnId}.php`,
                 method: acceptBtnId === 'login' ? 'GET' : 'POST',
-                data  : util.objFilterByKeys($scope.model, [
-                          'name',
-                          'testcode',
-                          'testCodeContent',
-                          'email_confirm',
-                          'email_current_user',
-                          'password_confirm'
-                        ], false)
+                data  : util.cloneVariable(user_property)
               };
 
           // Update arguments
@@ -403,10 +412,6 @@
               break;
             case 'register':
             case 'profile':
-              if (args.data.born)
-                args.data.born = moment(args.data.born).format('YYYY-MM-DD');
-              if (args.data.country)
-                args.data.country = args.data.country.country;
               if (acceptBtnId === 'register') {
                 args.data.langId    = $rootScope.lang.id;
                 args.data.langType  = $rootScope.lang.type;
@@ -423,7 +428,11 @@
 
           // Http request
           http.request(args).then(response => {
+
+            // Loading
             if (isShowWait) $rootScope.$broadcast("whait-finished");
+
+            // 
             switch(acceptBtnId) {
               case 'login':
                 response.email = $scope.model.email;
@@ -435,6 +444,11 @@
                 $timeout(() => alert(lang.translate(response, true)+'!'), 50);
                 break;
               case 'register':
+                user_property.id   = response.id;
+                user_property.type = response.type;
+                user.set(user_property);
+                $timeout(() => alert(lang.translate('registration_successful', true)+'!'), 50);
+                break;
               case 'profile':
                 break;
               default:   

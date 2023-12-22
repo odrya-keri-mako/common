@@ -538,7 +538,7 @@
 					return new Promise((resolve, reject) => {
 
             // Set is blob property
-            let isBlob = false;
+            let isBlob  = false;
 
             // Set methods
             let methods = {
