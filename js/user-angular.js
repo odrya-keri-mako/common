@@ -698,7 +698,7 @@
 					params: {
 						id : $rootScope.app.id,
 						key: `email_confirm_${$scope.data.event}_${$scope.data.userId}`,
-						//isDestroy: true
+						isDestroy: true
 					}
 				}
 			})
