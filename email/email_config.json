@@ -1,0 +1,12 @@
+{
+	"fromNameLang": "KERI {{informatics}}",
+	"img": {
+		"files": [
+			{
+				"name": "logo.png",
+				"alias": "logoimg"
+			}
+		],
+		"subFolder": "media/image/logo"
+	}
+}

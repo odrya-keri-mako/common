@@ -6,7 +6,7 @@
   min-height: 50px;
 }
 .form-dialog .form-dialog-body {
-  max-height: 60vh !important;
+  max-height: 66vh !important;
 	border-width: 2px 0 1px 0;
 }
 .form-dialog,
@@ -26,14 +26,35 @@
             transform: rotate(0deg);
   }
 }
-input:disabled,
-textarea:disabled,
-input[disabled],
-textarea[disabled],
-input[disabled="disabled"],
-textarea[disabled="disabled"],
 input.input-disabled,
-textarea.input-disabled {
+textarea.input-disabled,
+select.input-disabled {
+  -webkit-touch-callout:none !important;
+	  -webkit-user-select:none !important;
+						user-select:none !important;
+					outline-style:none !important;
+}
+input.input-disabled,
+textarea.input-disabled,
+select.input-disabled {
+  pointer-events: none;
+}
+input.input-disabled[type="radio"],
+input.input-disabled[type="checkbox"] {
+  background-color: rgb(255, 255, 255) !important;
+  border-color: rgb(222, 226, 230) !important;
+}
+input.input-disabled[type="radio"]:checked,
+input.input-disabled[type="checkbox"]:checked {
+  background-color: rgb(13, 110, 253) !important;
+  border-color: rgb(13, 110, 253) !important;
+}
+input.input-disabled,
+textarea.input-disabled,
+select.input-disabled {
   background-color: white !important;
   border-color: transparent !important;
+}
+select.input-disabled {
+  background-image: none !important;
 }

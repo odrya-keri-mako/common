@@ -36,8 +36,69 @@
       return {
         scope: false,
         link: (scope, iElement) => {
+
+          // Set event key down
           iElement.bind("keydown", function(event) {
-            if (event.keyCode == 32) event.preventDefault();
+            if (event.keyCode === 32) {
+              event.preventDefault();
+              return false;
+            }
+          });
+        }
+      };
+    }
+  ])
+
+  // Allow numbers only
+  .directive('ngAllowNumbers', [
+    'util',
+    (util) => {
+
+      return {
+        restrict: 'EA',
+        require : "ngModel",
+        scope: false,
+        link: (scope, iElement, iAttrs, ngModel) => {
+
+          // Set default options
+          let options = {isAllowNegative:false, disableZeroStart:true, isFloat:false};
+
+          // When attribute is json, then merge with default optons
+          if (util.isJson(iAttrs.ngAllowNumbers))
+            options = util.objMerge(options, JSON.parse(iAttrs.ngAllowNumbers), true);
+
+          // Check options
+          if (options.isFloat) options.disableZeroStart = false;
+
+          // Set event key down
+          iElement.bind("keydown", function(event) {
+            
+            // Numbers 0 to 9 also numpad
+            if ((event.which >= 48 && event.which <=  57) ||
+                (event.which >= 96 && event.which <= 105)) {
+              
+              // Check disable zero start
+              if (options.disableZeroStart && 
+                 (event.which === 48 || event.which === 96)) {
+                if (!iElement[0].value) {
+                        event.preventDefault(); 
+                        return false;
+                } else  return true;
+              } else return true;
+
+            // Backspace, enter, delete, escape, arrows, end, home, ins, numlock
+            // When is allow float then allow dot or numpad dot
+            // When is allow negative then allow minus sign or numpad minus sign
+            } else if (([8,13,46,27,37,38,39,40,35,36,45,144].includes(event.which)) ||
+                (event.which >= 48 && event.which <=  57) ||
+                (event.which >= 96 && event.which <= 105) ||
+                (options.isFloat && [110, 190].includes(event.which)) ||
+                (options.isAllowNegative && [173, 109].includes(event.which))) {
+              return true;
+            } else {
+              event.preventDefault(); 
+              return false;
+            }
           });
         }
       };
@@ -61,7 +122,7 @@
              `<div class="clear-icon position-absolute text-primary cursor-pointer
                           fw-semibold text-center px-2 text-bold fs-5"
                    style="max-width:10px;"
-                   ng-show="${ngModel.$$parentForm.$name}.${ngModel.$name}.$viewValue">
+                   ng-show="helper.isInEditMode && ${ngModel.$$parentForm.$name}.${ngModel.$name}.$viewValue">
                 &#215;
               </div>`),
               style = {top:'0', right:'25px', zIndex:101};
@@ -107,8 +168,7 @@
   // Check mark
   .directive('ngCheckMark', [
     '$compile',
-    '$timeout',
-    ($compile, $timeout) => {
+    ($compile) => {
 
       return {
         restrict: 'EA',
@@ -127,7 +187,9 @@
             let checkMark = angular.element(
                 `<div class="col-1 pt-1">
                     <span class="check-mark ms-1 fw-bold text-success"
-                          ng-show="${ngModel.$$parentForm.$name}.${ngModel.$name}.$valid">
+                          ng-show="helper.isInEditMode && 
+                                    ${ngModel.$$parentForm.$name}.${ngModel.$name}.$valid && 
+                                    ${ngModel.$$parentForm.$name}.${ngModel.$name}.$viewValue">
                       &check;
                     </span>
                   </div>`);
@@ -235,8 +297,8 @@
         restrict: 'EA',
         replace: true,
         scope: {
-          skeleton: "@skeleton",
-          editable: "<editable"
+          skeleton: "@",
+          isInEditMode: "<"
         },
         controller: controller,
         template:`<div class="row mb-2">
@@ -245,9 +307,9 @@
                       <div class="form-check form-check-inline small">
                         <input id="show_password" 
                                class="form-check-input"
-                               ng-class="{'input-disabled': !editable}" 
+                               ng-class="{'input-disabled': !isInEditMode}" 
                                type="checkbox"
-                               ng-disabled="!editable">
+                               ng-disabled="!isInEditMode">
                         <label class="form-check-label" 
                                for="show_password">
                           <i class="fa-solid fa-eye mx-1"></i>
@@ -264,7 +326,7 @@
           return {
             pre: (scope) => {
               if (!util.isString(scope.skeleton)) scope.skeleton = 'form';
-              if (!util.isBoolean(scope.editable)) scope.editable = true;
+              if (!util.isBoolean(scope.isInEditMode)) scope.isInEditMode = true;
             },
             post: (scope) => {
               $timeout(() => scope.methods.init());
@@ -284,12 +346,12 @@
         restrict: 'EA',
 				replace: true,
 				scope: false,
-        template:`<div class="m-0 p-0 mb-2">
+        template:`<div class="testcode-container">
                     <hr class="text-muted">
                     <div class="row mb-2">
                       <div class="col-form-label col-form-label-sm col-md-4 text-md-end fw-semibold">
                         <i class="fa-solid fa-star fa-2xs text-danger"></i>
-                        <i class="fa-regular fa-hand-point-right fa-xl me-1"></i>
+                        <i class="fa-regular fa-hand-point-right fa-xl mx-1"></i>
                         <span class="text-capitalize">
                           {{'code' | translate:$root.lang.data}}:
                         </span>
@@ -302,7 +364,7 @@
                       </div>
                       <div class="col-1"></div>
                     </div>
-                    <div class="row input-row">
+                    <div class="row mb-2 input-row">
                       <label for="testcode" 
                              class="col-form-label col-form-label-sm col-md-4 
                                     text-md-end fw-semibold invisible">
@@ -318,7 +380,7 @@
                                  name="testcode"
                                  type="text" 
                                  class="form-control form-control-sm"
-                                 ng-class="{'input-disabled': !helper.editable}"
+                                 ng-class="{'input-disabled': !helper.isInEditMode}"
                                  spellcheck="false" 
                                  autocomplete="off"
                                  ng-attr-placeholder="{{('code'|translate:$root.lang.data)}}"
@@ -328,7 +390,7 @@
                                  ng-keyup="keyUp($event)"
                                  ng-model="model.testcode"
                                  ng-init="model.testcode=null"
-                                 ng-disabled="!helper.editable"
+                                 ng-disabled="!helper.isInEditMode"
                                  ng-compare-model="model.testCodeContent"
                                  ng-trim="false"
                                  ng-disable-space
@@ -339,7 +401,7 @@
                                     class="btn btn-sm btn-light text-capitalize 
                                            text-small-caps btnClickEffect"
                                     ng-click="refresh($event)"
-                                    ng-disabled="!helper.editable">
+                                    ng-disabled="!helper.isInEditMode">
                               <i class="fas fa-sync-alt"></i>
                               <span class="ms-1">
                                 {{'refresh' | translate:$root.lang.data}}
@@ -357,23 +419,30 @@
             scope.model.testCodeContent = util.getTestCode();
             if (event) {
               scope.model.testcode = null;
-              let element = event.currentTarget;
-              if (element) {
-                let inputGroup = element.closest('.input-group');
-                if (inputGroup) {
-                  let inputElement = inputGroup.querySelector('input#testcode');
-                  if (inputElement) $timeout(() => inputElement.focus(), 50);
+              if (util.hasKey(event, 'currentTarget')) {
+                let element = event.currentTarget;
+                if (element) {
+                  let inputGroup = element.closest('.input-group');
+                  if (inputGroup) {
+                    let inputElement = inputGroup.querySelector('input#testcode');
+                    if (inputElement) $timeout(() => {inputElement.focus();}, 50);
+                  }
                 }
               }
             }
-          },
+          }
+
+          // Set custom event to refresh testcode
+          scope.$on('refreshTestcodeEvent', (event) => {
+            scope.refresh(event);
+          });
 
           // Set testcode
           scope.keyUp = (event) => {
             if (event.ctrlKey && event.altKey && event.key.toUpperCase() === 'T') {
               scope.model.testcode = scope.model.testCodeContent;
               let inputElement = event.currentTarget;
-              if (inputElement) $timeout(() => inputElement.focus(), 50);
+              if (inputElement) $timeout(() => {inputElement.focus()}, 50);
             }
           }
 

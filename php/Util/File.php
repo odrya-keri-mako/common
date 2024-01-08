@@ -24,7 +24,7 @@ class File {
 				}
 				fclose($handle);
 				return $result;
-			} else	throw new \Exception("Unable to open file {$file}!");
-		} else		throw new \Exception("The file cannot be found or cannot be read {$file}!");
+			} else	Util::setError("Unable to open file {$file}!");
+		} else		Util::setError("The file cannot be found or cannot be read {$file}!");
 	}
 }

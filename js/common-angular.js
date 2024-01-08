@@ -34,8 +34,13 @@
     let arr = this;
     if (Object.prototype.toString.call(key) === '[object String]')
           return [...new Map(arr.filter(obj => key in obj).map(obj => [obj[key], obj])).values()];
-    else 	return [... new Set(arr)];
+    else 	return [...new Set(arr)];
   };
+
+  // Convert day to string format (YYYY-mm-dd)
+  Date.prototype.toISOFormat = function() {
+    return this.toISOString().split('T')[0];
+  }
 
   // Application common module
   angular.module('app.common', [])
@@ -49,6 +54,7 @@
         // Check parameters
         if (!util.isString(str)) return str;
         str = str.trim();
+        if (util.isString(isAllowed)) isAllowed = !(isAllowed.toLowerCase().trim() === 'false');
         if (!util.isBoolean(isAllowed)) isAllowed = true;
         if (!isAllowed || !str.length) return str;
         return util.capitalize(str);
@@ -153,8 +159,8 @@
 							}
 					} else  return true;
 				},
-				isObjectHasKey: (checkedVar, key) =>  util.isObject(checkedVar) && 
-                                              util.isString(key) && key in checkedVar,
+        hasKey: (checkedVar, key) => util.isString(key) && key in checkedVar,
+				isObjectHasKey: (checkedVar, key) =>  util.isObject(checkedVar) && util.hasKey(checkedVar, key),
 				objFilterByKeys: (obj, filter, isExist=true) => {
 						if (!util.isObject(obj)) return obj;
 						if (util.isString(filter)) {
@@ -177,6 +183,12 @@
           return arr.map((obj) => {
             return util.objFilterByKeys(obj, filter, isExist);
           });
+        },
+        arrayObjShortByKey: (arr, key, isAscending=true) => {
+          if (!util.isBoolean(isAscending)) isAscending = true;
+          if (isAscending)
+                return arr.sort((a, b) => a[key] < b[key] ? -1 : (a[key] > b[key] ?  1 : 0));
+          else  return arr.sort((a, b) => a[key] < b[key] ?  1 : (a[key] > b[key] ? -1 : 0));
         },
 				objMerge: (target, source, existKeys) => {
 						if (!util.isObject(target)) target = {};
@@ -233,14 +245,20 @@
           return  str.charAt(0).toUpperCase() + (isLowerEnd ?
                   str.substr(1).toLowerCase() : str.substr(1));
         },
+        getLocation: (key=null) => {
+          if (!util.isString(key)) key = 'origin';
+          key = key.toLowerCase().trim();
+          if (!util.hasKey(window.location, key)) key = 'origin';
+          return window.location[key];
+        },
         getPageId: () => {
-          let pageID = document.location.pathname;
-          if (pageID[0] === '/') pageID = pageID.slice(1);
-          if (pageID.slice(-1) === '/') pageID = pageID.slice(0, -1);
-          return pageID;
+          let pageId = util.getLocation('pathname').toLowerCase();
+          if (pageId[0] === '/') pageId = pageId.slice(1);
+          if (pageId.slice(-1) === '/') pageId = pageId.slice(0, -1);
+          return pageId;
         },
         getPageUrl: () => {
-          return document.location.origin + '/' + util.getPageId() + '/';
+          return util.getLocation() + '/' + util.getPageId() + '/';
         },
         getCommonRelativePath: () => {
           let page    = (document.location.origin + document.location.pathname).toLowerCase(),
@@ -537,7 +555,10 @@
 					// Create promise
 					return new Promise((resolve, reject) => {
 
-            // Set is blob property
+            // Get common path
+            const COMMON_PATH = util.getCommonRelativePath();
+
+            // Set is blob property (fetch)
             let isBlob  = false;
 
             // Set methods
@@ -545,14 +566,12 @@
 
               // Initialize
               init: () => {
-
+                
                 // Check options property
-                if (util.isString(options)) options = {url: options};
-                if (!util.isObjectHasKey(options, 'url') || 
-                    !util.isString(options.url)) {
-                  reject('Missing url property in httpRequest!');
-                  return;
-                }
+                if (util.isString(options))  options = {url: options};
+                if (!util.isObject(options)) options = {};
+                if (!util.isObjectHasKey(options, 'url'))
+                  options.url = `${COMMON_PATH}php/common.php`;
 
                 // Check method property
                 if (!util.isString(method)) method = 'ajax';
@@ -584,9 +603,29 @@
                     options.method = 'GET';
                 }
 
+                // Check options url is common.php (common path)
+                if (options.url === `${COMMON_PATH}php/common.php`) {
+
+                  // Check options parameter property
+                  if (!util.isObjectHasKey(options, 'data'))
+                    options.data = {};
+                  if (util.isString(options.data)) 
+                    options.data = {require: options.data};
+                  if (!util.isObject(options.data))
+                    options.data = {};
+
+                  // Check/Set page identifier
+                  if (!util.isObjectHasKey(options.data, 'app') ||
+                      !util.isObject(options.data.app))
+                    options.data.app = {};
+                  options.data.app.id = util.getPageId();
+                }
+
                 // Check/Set params
                 if (util.isObjectHasKey(options, 'data') && 
                    !util.isUndefined(options.data)) {
+
+                  // Check method
                   if (method !== 'ajax') {
                           options.method  = 'POST';
                           options.data    = JSON.stringify(options.data);                         
@@ -658,7 +697,7 @@
                       contentType : undefined,
                       responseType: "text"
                     }, options, true);
-                } 
+                }
               },
 
               // AJAX jQuery Http request
@@ -745,10 +784,12 @@
                   if (util.isObjectHasKey(result, "error") && 
                      !util.isNull(result.error))
                         reject(result.error);
-                  else if (util.isObjectHasKey(result, "data"))
-                        resolve(result.data);
-                  else	resolve(result);
-                } else	resolve(result);
+                  else if (util.isObjectHasKey(result, "data")) {
+                    if (util.isJson(result.data))
+                          resolve(JSON.parse(result.data));
+                    else  resolve(result.data);
+                  } else	resolve(result);
+                } else	  resolve(result);
               }
             };
 
@@ -757,6 +798,69 @@
         	});
 				}
 			};
+    }
+  ])
+
+  // File factory
+  .factory('file', [
+    'util',
+    'http',
+    (util, http) => {
+
+      // Define method name
+      let methodName;
+
+      // Set service
+      let service = {
+
+        // Get
+        get: (fileName=null, args=null) => {
+
+          // Check File name
+          if (!util.isString(fileName)) return null;
+
+          // Check arguments
+          args = service.checkArguments(args);
+
+          // Serch for file, and get url, or content
+          return  http.request({
+                    data: {
+                      methodName: methodName,
+                      params    : [fileName, args]
+                    }
+                  })
+                  .then(response => response)
+                  .catch(e => {console.log(e); return null;});
+        }, 
+        
+        // Check arguments
+        checkArguments: (args) => {
+
+          // Check/Conver arguments
+          if (util.isString(args))  args = {subFolder: args.trim()};
+          if (util.isBoolean(args)) args = {isContent: args};
+
+          // Merge arguments with default
+          args = util.objMerge({
+            subFolder: null,
+		        isRecursive: true,
+            isContent: false,
+		        isMinimize: false
+          }, args, true);
+
+          // Set method
+          methodName = args.isContent ? "getContents" : "searchForFile";
+          delete args.isContent;
+          if (methodName === "searchForFile")
+            delete args.isMinimize;
+
+          // Returnarguments
+          return args;
+        }
+      }
+
+      // Return service
+      return service;
     }
   ])
 
@@ -780,10 +884,10 @@
 
           // Set application properties
           $rootScope.app = {
-            id        : util.getPageId(),
-            url       : util.getPageUrl(),
-            commonPath: util.getCommonRelativePath(),
-            currentDay: new Date()
+            id            : util.getPageId(),
+            url           : util.getPageUrl(),
+            commonPath    : util.getCommonRelativePath(),
+            currentDay    : new Date()
           };
 
           // Check/Merge/Convert options with default

@@ -78,5 +78,6 @@
 			}
 	  }
   ]);
+	
 
 })(window, angular);

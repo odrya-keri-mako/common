@@ -4,58 +4,117 @@ declare(strict_types=1);
 // Use namescapes aliasing
 use Util\Util as Util;
 
+// Include 
+require_once('Util\Util.php');
+
+
 /**
  * Environment
  */
 
-// Set character emcoding
-mb_http_output('UTF-8');
-mb_regex_encoding('UTF-8');
-mb_internal_encoding('UTF-8');
+// Set environment
+setEnvironment();
 
 
-// Set memory limit
-ini_set('memory_limit', '-1');
-set_time_limit(0);
+// Set environment
+function setEnvironment() {
+	
+	// Set character emcoding
+	mb_http_output('UTF-8');
+	mb_regex_encoding('UTF-8');
+	mb_internal_encoding('UTF-8');
 
 
-// Set application global paths
-$GLOBALS['___app___'] = array(
-	"path" => array(checkPath(realpath('./'), 'php'))
-);
-$backfiles = array_reverse(debug_backtrace());
-foreach($backfiles as $item) {
-	array_push($___app___["path"], checkPath(dirname($item['file']), 'php'));
+	// Set memory limit
+	ini_set('memory_limit', '-1');
+	set_time_limit(0);
+
+
+	// Get application path(s)
+	$appPaths = getApplicationPath();
+
+	// Set application path(s)
+	setApplicationPath($appPaths);
+
+	// Set application global relative path(s)
+	$GLOBALS['___app___'] = array(
+		"path" => array_merge(array(), $appPaths)
+	);
+	unset($appPaths);
+
+
+	// Set custum error reporting
+	error_reporting(0);
+	set_error_handler('customErrorHandler', E_ALL);
+	register_shutdown_function('customFatalErrorHandler');
+
+
+	// Set include path(s)
+	setIncludePath();
 }
-unset($backfiles, $item);
-array_push($___app___["path"], checkPath(dirname(__FILE__), 'php'));
-$___app___["path"] = array_unique($___app___["path"]);
-
-
-// Change working directory to first path
-chdir($___app___["path"][0]);
-
-
-// Set custum error reporting
-error_reporting(0);
-set_error_handler('customErrorHandler', E_ALL);
-register_shutdown_function('customFatalErrorHandler');
-
-
-// Set include path(s)
-setIncludePath();
 
 
 // Autoload register
 spl_autoload_register(function ($className) {
 
 	// Search for class file
-	$file = searchForFile($className.'.php', 'php');
+	$file = searchForFile($className.'.php', array(
+		'subFolder' 	=> 'php',
+		'isRecursive' => false
+	));
 
 	// When is found, then include it
 	if (!is_null($file)) require_once($file);
 });
 
+
+// Get application path(s)
+function getApplicationPath() {
+	$appPaths 	= array(checkPath(realpath('./'), 'php'));
+	$backfiles	= array_reverse(debug_backtrace());
+	foreach($backfiles as $item) {
+		$appPaths[] = checkPath(dirname($item['file']), 'php');
+	}
+	$appPaths[] = checkPath(dirname(__FILE__), 'php');
+	$appPaths 	= array_values(array_unique($appPaths));
+	
+	// Change working directory to first path
+	if (count($appPaths) < 1 || !chdir($appPaths[0])) {
+		throw new Exception('Unable to change directory');
+	}
+	return $appPaths;
+}
+
+
+// Set application path(s)
+function setApplicationPath(&$appPaths) {
+	$currPath = checkPath(realpath('./'), 'php');
+	for($i=0; $i<count($appPaths); $i++) {
+		$appPaths[$i] = getRelativePath($currPath, $appPaths[$i]);
+	}
+}
+
+
+// Get relative path from working directory
+function getRelativePath($currPath, $pathTo) {
+	$currPath = array_values(array_filter(explode( '/', $currPath)));
+	$toPpath 	= array_values(array_filter(explode( '/', $pathTo)));
+	$root 		= '';
+	$index 		= 0;
+	$minLen 	= min(count($currPath), count($toPpath));
+	while($index++ < $minLen && 
+				$currPath[0] === 
+				$toPpath[0]) {
+		$root 	 .= $currPath[0] . "/";
+		array_shift($currPath);
+		array_shift($toPpath);
+	}
+	$pathTo = substr($pathTo, strlen($root));
+	if (($count = count($currPath)) === 0)
+				$relativePath = "./" . $pathTo;
+	else	$relativePath = str_repeat("../", $count)  . $pathTo;
+	return $relativePath; 
+}
 
 // Custom error handler
 function customErrorHandler($errNum, $errMsg, $errFile, $errLine) {
@@ -172,7 +231,21 @@ function checkPath($path, $exceptFolder=null) {
 }
 
 
-// Search for file
+// Check folder
+function checkFolder($folder=null) {
+	if (is_string($folder) && 
+				!empty(($folder = trim($folder)))) {
+					$folder = strtr($folder, array(DIRECTORY_SEPARATOR => '/'));
+					if (substr($folder, 0, 1) === '/')
+						$folder = substr($folder, 1);
+					if (substr($folder, -1) !== '/')
+						$folder .= '/';
+					return mb_strtolower($folder, 'UTF-8');
+	} else  return '';
+}
+
+
+// Set/Reset include path
 function setIncludePath() {
 
 	// Get include path(s)
@@ -189,6 +262,10 @@ function setIncludePath() {
 	foreach($globalPaths as $i => $path) {
 		if (is_dir($path.'php'))
 		 $globalPaths[$i] .= "php/";
+
+		// Reset order
+		if (($ind = array_search($globalPaths[$i], $includePaths)) !== false) 
+			array_splice($includePaths, $ind, 1);
 	}
 
 	// Merge/Check include paths with global paths
@@ -200,12 +277,28 @@ function setIncludePath() {
 
 	// Set new include paths
 	$include = implode(PATH_SEPARATOR, $includePaths);
-	set_include_path("./" . PATH_SEPARATOR . $include);
+	set_include_path(PATH_SEPARATOR . $include);
 }
 
+// Get url
+function getUrl($fileName, $app, $args=null) {
+	$file = searchForFile($fileName, $args);
+	if (!is_null($file)) {
+		$file 		= mb_strtolower(trim(strtr(realpath($file), array(DIRECTORY_SEPARATOR => '/'))), 'UTF-8');
+		$appPath 	= getWorkingDirectory();
+		$rootPath = strtr($appPath, array($app['id'] => ''));
+		$file 		= strtr($file, array($rootPath => $app['domain'] . '/'));
+	}
+	return $file;
+}
+
+// Get working directory
+function getWorkingDirectory() {
+	return mb_strtolower(trim(strtr(getcwd(), array(DIRECTORY_SEPARATOR => '/'))), 'UTF-8');
+}
 
 // Search for file
-function searchForFile($fileName, $folder=null) {
+function searchForFile($fileName, $args=null) {
 
 	// Check/Set parameter file name
 	if (!is_string($fileName) || 
@@ -213,16 +306,20 @@ function searchForFile($fileName, $folder=null) {
 		return null;
 	$fileName = strtr($fileName, array(DIRECTORY_SEPARATOR => '/'));
 
+	// Check arguments
+	if (is_string($args))
+		$args = array('subFolder' => trim($args));
+	if (is_bool($args))
+		$args = array('isRecursive' => $args);
+
+	// Merge arguments with default
+	$args = Util::objMerge(array(
+		'subFolder' 	=> null,
+		'isRecursive' => true
+	), $args, true);
+
 	// Check/Set parameter folder
-	if (is_string($folder) && 
-				!empty(($folder = trim($folder)))) {
-		$folder = strtr($folder, array(DIRECTORY_SEPARATOR => '/'));
-		if (substr($folder, 0, 1) === '/')
-					$folder = substr($folder, 1);
-		if (substr($folder, -1) !== '/')
-					$folder .= '/';
-	} else  $folder  = '';
-	$folder = mb_strtolower($folder, 'UTF-8');
+	$args['subFolder'] = checkFolder($args['subFolder']);
 
 	// Get application global
 	global $___app___;
@@ -231,15 +328,89 @@ function searchForFile($fileName, $folder=null) {
 	foreach($___app___["path"] as $path) {
 
 		// Set file
-		$file = $path . $folder . $fileName;
+		$file = $path . $args['subFolder'] . $fileName;
 
 		// When is exist, and readeble, then return file
 		if (is_readable($file)) return $file;
+
+		// When is recursive
+		if ($args['isRecursive']) {
+
+			// Get sub directory(es)
+			$directories = glob($path . $args['subFolder'] . '*', GLOB_ONLYDIR);
+
+			// Each sub directory(es)
+			foreach($directories as $dir) {
+
+				// Get sub directory
+				$dir = mb_strtolower(basename($dir), 'UTF-8');
+
+				// Search for file recursive
+				$file = searchForFile($fileName, array(
+					'subFolder' 	=> $args['subFolder'] . $dir,
+					'isRecursive' => $args['isRecursive']
+				));
+
+				// When found, then return file
+				if (!is_null($file)) return $file;
+			}
+		}
 	}
 
-	// Check file exists anywhere in the include path
-	$file = stream_resolve_include_path($fileName);
-	if ($file && is_readable($file)) 
-				return $file;
-	else 	return null;
+	// When not is recursive
+	if (!$args['isRecursive']) {
+
+		// Check file exists anywhere in the include path
+		$file = stream_resolve_include_path($fileName);
+
+		// When is exist, and readeble, then return file
+		if ($file !== false && is_readable($file)) 
+					return $file;
+		else 	return null;
+	} else 	return null;
+}
+
+
+// Search for file, and fet file contents
+function getContents($fileName, $args=null) {
+
+	// Check/Set parameter file name
+	if (!is_string($fileName) || 
+					empty(($fileName = trim($fileName))))
+		return null;
+
+	// Check arguments
+	if (is_string($args))
+		$args = array('subFolder' => trim($args));
+	if (is_bool($args))
+		$args = array('isRecursive' => $args);
+
+	// Merge arguments with default
+	$args = Util::objMerge(array(
+		'subFolder' 	=> null,
+		'isRecursive' => true,
+		'isMinimize' 	=> false
+	), $args, true);
+
+	// Search for file
+	$file = searchForFile($fileName, array(
+		'subFolder' 	=> $args['subFolder'],
+		'isRecursive' => $args['isRecursive']
+	));
+
+	// Check found
+	if (!is_null($file)) {
+
+		// Read file
+		$content = file_get_contents($file);
+
+		// Check sucess
+		if ($content !== false) {
+
+			// Minimize content when is necesary
+			if ($args['isMinimize'])
+						return Util::minimizeHtml($content);
+			else 	return $content;
+		} else	return null;
+	} else		return null;
 }

@@ -14,32 +14,11 @@
 }
 
 /* User select */
-*:not(input):not(textarea),
-input:disabled,
-textarea:disabled,
-input[disabled],
-textarea[disabled],
-input[disabled="disabled"],
-textarea[disabled="disabled"],
-input.input-disabled,
-textarea.input-disabled {
+*:not(input):not(textarea) {
   -webkit-touch-callout:none !important;
 	  -webkit-user-select:none !important;
-	   -khtml-user-select:none !important;
-			 -moz-user-select:none !important;
-				-ms-user-select:none !important;
 						user-select:none !important;
 					outline-style:none !important;
-}
-input:disabled,
-textarea:disabled,
-input[disabled],
-textarea[disabled],
-input[disabled="disabled"],
-textarea[disabled="disabled"],
-input.input-disabled,
-textarea.input-disabled {
-  pointer-events: none;
 }
 
 /* Clear fix */

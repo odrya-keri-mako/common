@@ -20,30 +20,33 @@ class Language {
 					$data;
 
 	// Constructor
-  function __construct($id=null, $type=null) {
-		$this->change($id, $type);
-  }
+  function __construct($args=null) {
 
-	// Destructor
-	function __destruct() {
-		$this->id 	= null;
-		$this->type = null;
-		$this->rule = null;
-		$this->data	= null;
-  }
-
-	// Change language
-	public function change($id=null, $type=null) {
-		$this->set_id($id);
-		$this->set_type($type);
+		// Check arguments
+		$this->checkArguments($args);
+		
+		// Set properties
+		$this->set_id($args["id"]);
+		$this->set_type($args["type"]);
 		$this->set_rule();
 		$this->set_data();
+  }
+
+	// Check arguments
+	private function checkArguments(&$args) {
+
+		// Check arguments
+		if (is_string($args)) $args = array("id" => $args);
+		$args = Util::objMerge(array(
+			"id"		=> null,
+			"type"	=> null
+		), $args, true);
 	}
 
 	// Set language identifier
   private function set_id($id) {
-    if (!is_string($id)) $id = "en";
-    $this->id = trim($id);
+    if (!is_string($id) || empty(($id = trim($id)))) $id = "en";
+    $this->id = strtolower(trim($id));
   }
   
   // Get language identifier
@@ -80,13 +83,30 @@ class Language {
 
 	// Set language data
 	private function set_data() {
+
+		// Get application global
+		global $___app___;
+
+		// Set empty data
 		$data = array();
-		$file = searchForFile("{$this->id}.json", "lang");
-		if (!is_null($file)) {
-			$content 	= file_get_contents($file);
-			$result 	= json_decode($content, true, 512, 0);
-    	if (json_last_error() === JSON_ERROR_NONE)
-				$data = $result;
+
+		// Each application path(s)
+		foreach($___app___["path"] as $path) {
+
+			// Set language file
+			$file = $path . "lang/" . $this->id . ".json";
+
+			// Check exist, and readeble
+			if (is_readable($file)) {
+
+				// Get content
+				$content = file_get_contents($file);
+
+				// Decode, when is not error merge result with data
+				$result = json_decode($content, true, 512, 0);
+    		if (json_last_error() === JSON_ERROR_NONE)
+					$data = Util::objMerge($result, $data);
+			}
 		}
 		$this->data = $data;
 	}
@@ -135,29 +155,5 @@ class Language {
 			}
 		}
 		return trim($result);
-	}
-
-	// Check that the language keys are not included in the document
-	public static function checkLanguageKeysExist($fileName, $language, $path=null) {
-		if (!is_string($path) || 
-			empty(($path = trim($path)))) {
-			$path = 'html';
-		}
-		$file 		= searchForFile($fileName, $path);
-		$document = file_get_contents($file);
-		$languageFiltered = array_filter(
-												array_filter($language, 'ucfirst'), 
-													function ($key) {
-														return (substr($key, 0, 1) === "%" && 
-																		substr($key, 	 -1) === "%");
-													}, ARRAY_FILTER_USE_KEY
-												);
-		$result = array();
-		foreach(array_keys($languageFiltered) as $key) {
-			if (strrpos($document, $key) === false) {
-				array_push($result, $key);
-			}
-		}
-		return $result;
 	}
 }

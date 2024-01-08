@@ -75,7 +75,7 @@ class Database {
   private function set_connection() {
 
     // When configuration file exist, then get connection details
-		$file = searchForFile('db_config.ini', 'db');
+		$file = searchForFile('db_config.ini', array('subFolder' => 'db'));
     if (!is_null($file))
           $conn = parse_ini_file($file, true);
     else  $conn = null;

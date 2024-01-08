@@ -12,6 +12,7 @@
       return (key, data=null, isAllowed=true) => {
         if (!util.isString(key)) return key;
         key = key.trim();
+        if (util.isString(isAllowed))   isAllowed = !(isAllowed.toLowerCase().trim() === 'false');
         if (!util.isBoolean(isAllowed)) isAllowed = true;
         if (!isAllowed || 
             !util.isObjectHasKey(data, key) ||
@@ -67,9 +68,14 @@
             $rootScope.app.id = util.getPageId();
 
           // Get available languages
-          http.request("./lang/available.json")
+          http.request({
+            data: {
+              methodName: "getContents",
+              params    : ['available.json', {subFolder: 'lang', isMinimize: true}]
+            }
+          })
           .then(data => {
-
+            
             // Check response data
             if (util.isArray(data) && data.length) {
 
@@ -115,8 +121,8 @@
               }];
             }
 
-            // Set available languages
-            $rootScope.lang.available = data;
+            // Set available languages shorted by name
+            $rootScope.lang.available = util.arrayObjShortByKey(data, 'name');
 
             // Get/Check last language identifier
             $rootScope.lang.id = localStorage.getItem(service.getKey());
@@ -157,8 +163,14 @@
 
         // Get language data
         get: () => {
-
-          http.request("./lang/" + $rootScope.lang.id + ".json")
+          http.request({
+            data: {
+              className     : "Language/Language",
+              methodName    : "get_data",
+              params        : $rootScope.lang.id,
+              paramsToClass : true
+            }
+          })
           .then(data => {
             $rootScope.lang.data = data;
             service.setHtml();
@@ -192,8 +204,11 @@
       // On language changed
       $rootScope.changeLanguage = (event) => {
 
+        // Get language identifier
+        let langId = util.isString(event) ? event : event.currentTarget.dataset.langId;
+
         // Set current language
-        service.set(event.currentTarget.dataset.langId);
+        service.set(langId);
 
         // Trigger event language changed
         document.dispatchEvent(languageChanged);
@@ -204,48 +219,52 @@
     }
   ])
 
-  // Navbar language
-  .directive('ngNavbarLanguage', [
+  // Show person name order by language type
+  .directive('ngPersonName', [
     () => {
       return {
+        restrict: 'EA',
         replace: true,
+        scope: {
+          person: "<",
+          personClass: "@",
+        },
+        template:`<span ng-class="personClass">
+                    <span ng-repeat="k in $root.lang.rule[$root.lang.type] track by $index"
+                          ng-if="person[k]">
+                      {{person[k]}}
+                    </span>
+                  </span>`
+      };
+  }])
+
+  // Navbar language
+  .directive('ngNavbarLanguage', [
+    '$compile',
+    'file',
+    ($compile, file) => {
+      return {
+        restrict: 'EA',
         scope: false,
-        template:`<li class="nav-item mx-1 dropdown"
-                      ng-if="$root.lang.available && $root.lang.available.length > 1">
-                    <a id="dropdown-menu-language" 
-                       href="#" 
-                       class="nav-link dropdown-toggle"  
-                       role="button" 
-                       data-bs-toggle="dropdown" 
-                       aria-expanded="false">
-                      <img class="me-1" height="22" alt="flag" 
-                           ng-src="{{$root.lang.imgPath+$root.lang.available[$root.lang.index].img}}">
-                      <span class="text-capitalize text-small-caps">
-                        {{$root.lang.available[$root.lang.index].local}}
-                      </span>
-                    </a>
-                    <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end mt-2" 
-                        aria-labelledby="dropdown-menu-language">
-                      <li data-lang-id="{{x.id}}"
-                          class="dropdown-item cursor-pointer"
-                          ng-click="changeLanguage($event)"
-                          ng-repeat="x in $root.lang.available" 
-                          ng-if="x.valid && $index != $root.lang.index"
-                          data-bs-toggle="collapse" 
-                          data-bs-target=".navbar-collapse.show">
-                        <div class="language-item-content d-inline-block text-start">
-                          <img class="me-1" height="22" alt="flag"
-                               ng-src="{{$root.lang.imgPath+x.img}}">
-                          <span class="text-capitalize">
-                            {{x.name}}
-                          </span>
-                          <span ng-if="x.name != x.local">
-                            ({{x.local}})
-                          </span>
-                        </div>
-                      </li>
-                    </ul>
-                  </li>`
+        
+        // Compile 
+				compile: () => {
+					
+					return {
+						
+						// Pre-link
+						pre: (scope, iElement) => {
+              file.get('lang_navbar.html', {
+                subFolder: 'html',
+				        isContent: true,
+				        isMinimize: true
+              }).then(template => {
+                let e = $compile(template)(scope);
+                iElement.replaceWith(e);
+              });
+						}
+          };
+        }
       };
   }]);
 

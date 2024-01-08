@@ -240,7 +240,7 @@
 										 data-bs-toggle="collapse" 
 										 data-bs-target=".navbar-collapse.show">
 										<i class="fa-solid fa-cart-shopping fa-2xl me-1"></i>
-										<div class="shopping-item position-absolute text-center text-white bg-primary">
+										<div class="shopping-item position-absolute top-0 rounded-circle fw-bold text-center text-white bg-primary">
 											{{$root.order.cart.length}}
 										</div>
 										<span class="text-small-caps d-md-none">
