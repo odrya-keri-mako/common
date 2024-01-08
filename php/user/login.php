@@ -5,18 +5,6 @@ declare(strict_types=1);
 use \Util\Util as Util;
 use \Database\Database as Database;
 
-// Check global application property exist
-if (!isset($GLOBALS['___app___'])) {
-
-	// Search for file
-	$path = "";
-	while(!is_readable($path."common/php/environment.php")){$path.="../";}
-
-	// Set environment, and release memory
-	require_once($path.'common/php/environment.php');
-	unset($path);
-}
-
 // Get arguments
 $args = Util::getArgs();
 

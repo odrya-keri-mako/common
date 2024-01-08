@@ -42,5 +42,7 @@ if (!is_null($userFunction->getMethodName())) {
 			// Include file
 			require_once($file);
 		}
-	}
+
+	// Set error
+	} else Util::setError('missing_required_files');
 }

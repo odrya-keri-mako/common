@@ -51,7 +51,7 @@
 							<button class="btn btn-sm name-detail-toggle-btn btn-primary
 														 rounded-start-1 shadow-sm-bottom-end btnClickEffect" 
 											type="button"
-											ng-click="methods.toogleNameDetail($event)">
+											ng-click="methods.toogleNameDetail()">
 								<span class="name-detail-toggle-icon d-inline-block">
 									<i class="fa-regular fa-circle-up fa-lg"></i>
 								</span>
@@ -392,7 +392,7 @@
 										ng-model="model.country"
 										ng-init="model.country=null"
 										ng-change="methods.countryChanged()"
-										ng-options="x.country for x in helper.countries"
+										ng-options="x.country for x in helper.countries track by x.country"
 										ng-clear-icon='{"right":"-8px"}'>
 							<option hidden disabled selected value>
 								-- {{'country' | translate:lang.data}} --
@@ -428,7 +428,7 @@
 											style="max-width:100px;"
 											ng-model="model.country_code"
 											ng-init="model.country_code=null"
-											ng-options="x for x in helper.countryCodes"
+											ng-options="x for x in helper.countryCodes track by x"
 											ng-disabled="!helper.countryCodes || 
 																	 helper.countryCodes.length &lt; 2">
 							</select>

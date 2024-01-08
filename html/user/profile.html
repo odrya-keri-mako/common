@@ -103,7 +103,6 @@
 									 maxlength="50"
 									 ng-model="model.email"
 									 ng-init="model.email=user.email"
-									 ng-trim="false"
 									 disabled>
 					</div>
 				</div>
@@ -136,14 +135,13 @@
 										 spellcheck="false" 
 									 	 autocomplete="off"
 									   ng-model="model.name"
-									   ng-trim="false"
 										 disabled>
 
 							<!-- Button toggle -->
 							<button class="btn btn-sm name-detail-toggle-btn btn-primary
 														 rounded-start-1 shadow-sm-bottom-end btnClickEffect" 
 											type="button"
-											ng-click="methods.toogleNameDetail($event)"
+											ng-click="methods.toogleNameDetail()"
 											ng-show="helper.isInEditMode">
 								<span class="name-detail-toggle-icon d-inline-block">
 									<i class="fa-regular fa-circle-up fa-lg"></i>
@@ -162,7 +160,7 @@
 				</div>
 
 				<!-- Name detail container -->
-				<div class="name-detail-container mb-2 ps-1 overflow-hidden show"
+				<div class="name-detail-container mb-2 ps-1 overflow-hidden"
 						 ng-show="helper.isInEditMode">
 
 					<!-- Dividing line -->
@@ -191,7 +189,6 @@
 									 	 ng-model="model.prefix_name"
 										 ng-change="nameChanged()"
 									 	 ng-disabled="!helper.isInEditMode"
-									 	 ng-trim="false"
 									 	 ng-disable-space
 									 	 ng-clear-icon>
 						</div>
@@ -222,7 +219,6 @@
 									 	 ng-model="model.first_name"
 										 ng-change="nameChanged()"
 									 	 ng-disabled="!helper.isInEditMode"
-									 	 ng-trim="false"
 									 	 ng-disable-space
 									 	 ng-clear-icon
 									 	 ng-check-mark>
@@ -252,7 +248,6 @@
 									 	 ng-model="model.middle_name"
 										 ng-change="nameChanged()"
 									 	 ng-disabled="!helper.isInEditMode"
-									 	 ng-trim="false"
 									 	 ng-disable-space
 									 	 ng-clear-icon>
 						</div>
@@ -283,7 +278,6 @@
 									 	 ng-model="model.last_name"
 										 ng-change="nameChanged()"
 									 	 ng-disabled="!helper.isInEditMode"
-									 	 ng-trim="false"
 									 	 ng-disable-space
 									 	 ng-clear-icon
 									 	 ng-check-mark>
@@ -313,7 +307,6 @@
 									 	 ng-model="model.suffix_name"
 										 ng-change="nameChanged()"
 									 	 ng-disabled="!helper.isInEditMode"
-									 	 ng-trim="false"
 									 	 ng-disable-space
 									 	 ng-clear-icon>
 						</div>
@@ -341,7 +334,6 @@
 									 	 maxlength="50"
 									 	 ng-model="model.nick_name"
 									 	 ng-disabled="!helper.isInEditMode"
-									 	 ng-trim="false"
 									 	 ng-disable-space
 									 	 ng-clear-icon>
 						</div>
@@ -380,7 +372,6 @@
 									 required
 									 ng-model="model.born" 
 									 ng-disabled="!helper.isInEditMode"
-									 ng-trim="false"
 									 ng-disable-space
 									 ng-clear-icon='{"left":"154px","right":""}'
 									 ng-check-mark>
@@ -506,9 +497,8 @@
 										autocomplete="off"
 										ng-model="model.country"
 										ng-disabled="!helper.isInEditMode"
-										ng-disabled="!helper.isInEditMode"
 										ng-change="methods.countryChanged()"
-										ng-options="x.country for x in helper.countries"
+										ng-options="x.country for x in helper.countries track by x.country"
 										ng-clear-icon='{"right":"-8px"}'>
 							<option hidden disabled selected value>
 								-- {{'country' | translate:lang.data}} --
@@ -544,7 +534,7 @@
 											autocomplete="off"
 											style="max-width:100px;"
 											ng-model="model.country_code"
-											ng-options="x for x in helper.countryCodes"
+											ng-options="x for x in helper.countryCodes track by x"
 											ng-disabled="!helper.isInEditMode ||
 																	 !helper.countryCodes || 
 																	  helper.countryCodes.length &lt; 2">
@@ -559,7 +549,6 @@
 										 ng-class="{'input-disabled': !helper.isInEditMode}"
 										 spellcheck="false" 
 										 autocomplete="off"
-										 ng-trim="false"
 										 ng-model="model.phone"
 										 ng-disabled="!helper.isInEditMode"
 									 	 ng-disable-space>
@@ -589,7 +578,6 @@
 									 ng-class="{'input-disabled': !helper.isInEditMode}"
 									 spellcheck="false" 
 									 autocomplete="off"
-									 ng-trim="false"
 									 maxlength="100"
 									 ng-model="model.city"
 									 ng-disabled="!helper.isInEditMode">
@@ -684,7 +672,6 @@
 										maxlength="20"
 										ng-model="model.password"
 										ng-init="model.password=null"
-										ng-trim="false"
 										ng-disable-space
 										ng-pattern="/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,20}$/"
 										ng-clear-icon

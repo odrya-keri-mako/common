@@ -122,5 +122,8 @@
   "error_unknown": "unknown error",
   "next": "next",
   "moves_on": "moves on",
-  "products": "products"
+  "products": "products",
+  "missing_required_files": "missing required files",
+  "data_modification_successful": "the data modification successful",
+  "data_modification_failed": "the data modification failed"
 }

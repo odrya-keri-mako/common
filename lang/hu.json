@@ -123,5 +123,8 @@
   "error_unknown": "ismeretlen hiba",
   "next": "következő",
   "moves_on": "továbblép",
-  "products": "termékek"
+  "products": "termékek",
+  "missing_required_files": "hiányoznak a szükséges fájlok",
+  "data_modification_successful": "az adatmódosítás sikeres volt",
+  "data_modification_failed": "az adatmódosítás nem sikerült"
 }

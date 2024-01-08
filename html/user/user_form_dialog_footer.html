@@ -45,23 +45,28 @@
     <div class="float-none float-sm-start text-center text-sm-start pt-1"
          ng-if="linkId||linkId2">
       <hr class="text-muted d-sm-none">
-      <a class="link-offset-2 link-offset-3-hover link-underline
+      <a class="btn btn-sm border-0 text-primary text-start
+                link-offset-2 link-offset-3-hover link-underline
                 link-underline-opacity-0 link-underline-opacity-75-hover
                 mb-3 mb-sm-1 col-12 col-sm-auto btnClickEffect d-block"
          ui-sref="{{linkState}}"
          ng-if="linkId"
-         ng-class="{'mt-sm-3':!linkId2}">
+         ng-class="{'mt-sm-3':!linkId2,'disabled':$root.state.id==='profile' && isInEditMode}"
+         ng-disabled="$root.state.id==='profile' && isInEditMode">
         <i class="text-decoration-none mx-1"
            ng-class="linkIcon"></i>
         <span class="btn-content">
           {{linkId | translate:$root.lang.data | capitalize}}
         </span>
       </a>
-      <a class="link-offset-2 link-offset-3-hover link-underline
+      <a class="btn btn-sm border-0 text-primary text-start
+                link-offset-2 link-offset-3-hover link-underline
                 link-underline-opacity-0 link-underline-opacity-75-hover
                 mb-3 mb-sm-1 col-12 col-sm-auto btnClickEffect d-block"
          ui-sref="{{linkState2}}"
-         ng-if="linkId2">
+         ng-if="linkId2"
+         ng-class="{'disabled':$root.state.id==='profile' && isInEditMode}"
+         ng-disabled="$root.state.id==='profile' && isInEditMode">
         <i class="text-decoration-none mx-1"
            ng-class="linkIcon2"></i>
         <span class="btn-content">

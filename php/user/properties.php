@@ -5,9 +5,6 @@ declare(strict_types=1);
 use \Util\Util as Util;
 use \Database\Database as Database;
 
-// When global application property not exist, then set environment
-if (!isset($GLOBALS['___app___'])) require_once('../environment.php');
-
 // Get arguments
 $args = Util::getArgs();
 

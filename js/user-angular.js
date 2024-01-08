@@ -191,7 +191,7 @@
                 $scope.helper.minBorn       = moment().subtract(120, 'years').format('YYYY-MM-DD');
                 $scope.helper.image         = null;
                 $scope.helper.countryCodes  = null;
-                $scope.helper.rescue        = {image: null, countryCodes: null};
+                $scope.helper.rescue        = {image:null, countryCodes:null};
 
                 if ($rootScope.state.id === 'profile') 
                       $scope.model = util.objMerge($scope.model, user.get());
@@ -277,7 +277,7 @@
                         'country', 
                         $scope.model.country
                       );
-
+                      
                       // Check exist
                       if (index !== -1) {
                         $scope.model.country        = $scope.helper.countries[index];
@@ -385,15 +385,37 @@
         },
 
         // Toogle name detail
-        toogleNameDetail: (event) => {
-          let element     = event.currentTarget,
-              btnIcon     = element.querySelector('.name-detail-toggle-icon'),
-              parentForm  = element.closest('form');
-          if (btnIcon) btnIcon.classList.toggle('fa-rotate-180');
-          if (parentForm) {
-            let nameDetailContainer = parentForm.querySelector('.name-detail-container');
-            if (nameDetailContainer) nameDetailContainer.classList.toggle('show');
-          }
+        toogleNameDetail: () => {
+          $timeout(() => {
+            $element[0].querySelector('.name-detail-toggle-icon')
+                       .classList.toggle('fa-rotate-180');
+            $element[0].querySelector('.name-detail-container')
+                       .classList.toggle('show');
+          });
+        },
+
+        // Show name detail
+        showNameDetail: () => {
+          $scope.helper.isInEditMode = true;
+          $timeout(() => {
+            $element[0].querySelector('.name-detail-toggle-icon')
+                       .classList.remove('fa-rotate-180');
+            $element[0].querySelector('.name-detail-container')
+                       .classList.add('show');
+            // Set focus
+            $timeout(() => {$scope.methods.setFocus();}, 300);
+          });
+        },
+
+        // Hide name detail
+        hideNameDetail: () => {
+          $element[0].querySelector('.name-detail-toggle-icon')
+                     .classList.add('fa-rotate-180');
+          $element[0].querySelector('.name-detail-container')
+                     .classList.remove('show');
+          $timeout(() => {
+            $scope.helper.isInEditMode = false;
+          }, 300);
         },
 
         // Set user name
@@ -452,7 +474,7 @@
             Object.keys($scope.helper.rescue).forEach(key => {
               $scope.helper.rescue[key] = $scope.helper[key];
             });
-            $scope.helper.isInEditMode  = !$scope.helper.isInEditMode;
+            $scope.methods.showNameDetail();
             return;
           }
 
@@ -542,11 +564,17 @@
                 $timeout(() => {alert(lang.translate('registration_successful', true)+'!');}, 50);
                 break;
               case 'profile':
+                $scope.methods.hideNameDetail();
+                user.set(user_property);
+                $scope.model.password = null;
+                $rootScope.$broadcast('refreshTestcodeEvent');
+                $timeout(() => {alert(lang.translate(response, true)+'!');}, 500);
                 break;
               default:   
             }
             if (acceptBtnId !== 'profile') {
               $state.go($rootScope.state.prevEnabled);
+              return;
             }
           })
           .catch(e => {
@@ -562,8 +590,15 @@
 
               // When is state profile, then disable edit mode.
               if (acceptBtnId === 'profile') {
-                      $scope.helper.isInEditMode = !$scope.helper.isInEditMode;
-                      $scope.$applyAsync();
+
+                // Reset password
+                $scope.model.password = null;
+
+                // Refresh testcode
+                $rootScope.$broadcast('refreshTestcodeEvent');
+
+                // Hide name details
+                $scope.methods.hideNameDetail();
 
               // When is state is not login or register, then go to prevent enabled state.
               } else if(acceptBtnId !== 'login' && 
@@ -595,12 +630,12 @@
           }
 
           // Reset model, change is in edit mode, and apply change
-          $scope.model  = angular.copy($scope.rescue);
+          $scope.model = angular.copy($scope.rescue);
           Object.keys($scope.helper.rescue).forEach(key => {
             $scope.helper[key] = $scope.helper.rescue[key];
           });
-          $scope.helper.isInEditMode = !$scope.helper.isInEditMode;
           $scope.$applyAsync();
+          $scope.methods.hideNameDetail();
         },
 
         // Set focus
