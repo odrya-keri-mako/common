@@ -71,6 +71,44 @@
 											rule-class="text-danger"
 											punctuation-mark="!"></ng-show-rule>
 
+				<!-- Password -->
+				<div class="row input-row mb-0">
+					
+					<!-- Label -->
+					<label for="password" 
+								 class="col-form-label col-form-label-sm col-md-4 text-md-end fw-semibold">
+						<i class="fa-solid fa-star fa-2xs text-danger"></i>
+						<i class="fa-solid fa-key me-1"></i>
+						<span class="text-capitalize">{{'password' | translate:lang.data }}:</span>
+					</label>
+					
+					<!-- Input password -->
+					<div class="col-11 col-md-7 position-relative">
+						<input id="password"
+									 name="password"
+									 type="password"
+									 ng-attr-placeholder="{{('password' | translate:lang.data)}}"
+									 class="form-control form-control-sm input-password"
+									 spellcheck="false" 
+									 autocomplete="off" 
+									 required
+									 maxlength="20"
+									 ng-model="model.password"
+									 ng-init="model.password=null"
+									 ng-trim="false"
+									 ng-disable-space
+									 ng-pattern="/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,20}$/"
+									 ng-clear-icon
+									 ng-check-mark>
+					</div>
+				</div>
+
+				<!-- Password rule -->
+				<ng-show-rule></ng-show-rule>
+				
+				<!-- Show/Hide password -->
+				<ng-show-password></ng-show-password>
+
 				<!-- Email new -->
 				<div class="row input-row mb-2 mt-3">
 					
@@ -146,44 +184,6 @@
 									 ng-check-mark>
 					</div>
 				</div>
-				
-				<!-- Password -->
-				<div class="row input-row mb-0">
-					
-					<!-- Label -->
-					<label for="password" 
-								 class="col-form-label col-form-label-sm col-md-4 text-md-end fw-semibold">
-						<i class="fa-solid fa-star fa-2xs text-danger"></i>
-						<i class="fa-solid fa-key me-1"></i>
-						<span class="text-capitalize">{{'password' | translate:lang.data }}:</span>
-					</label>
-					
-					<!-- Input password -->
-					<div class="col-11 col-md-7 position-relative">
-						<input id="password"
-									 name="password"
-									 type="password"
-									 ng-attr-placeholder="{{('password' | translate:lang.data)}}"
-									 class="form-control form-control-sm input-password"
-									 spellcheck="false" 
-									 autocomplete="off" 
-									 required
-									 maxlength="20"
-									 ng-model="model.password"
-									 ng-init="model.password=null"
-									 ng-trim="false"
-									 ng-disable-space
-									 ng-pattern="/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,20}$/"
-									 ng-clear-icon
-									 ng-check-mark>
-					</div>
-				</div>
-
-				<!-- Password rule -->
-				<ng-show-rule></ng-show-rule>
-				
-				<!-- Show/Hide password -->
-				<ng-show-password></ng-show-password>
 				
 				<!-- Test code -->
 				<ng-test-code></ng-test-code>
