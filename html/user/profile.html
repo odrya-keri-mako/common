@@ -24,13 +24,13 @@
 
 					<!-- Label -->
 					<label for="identifier" 
-								 class="col-form-label col-form-label-sm col-sm-4 text-sm-end fw-semibold">
+								 class="col-form-label col-form-label-sm col-md-4 text-md-end fw-semibold">
 						<i class="fa-solid fa-id-badge"></i>
 						<span class="ms-1 text-capitalize">azonosító:</span>
 					</label>
 
 					<!-- Input identifier -->
-					<div class="col-11 col-sm-7 position-relative">
+					<div class="col-11 col-md-7 position-relative">
 						<input id="identifier"
 									 name="identifier" 
 									 type="text"
@@ -51,13 +51,13 @@
 
 					<!-- Label -->
 					<label for="type" 
-								 class="col-form-label col-form-label-sm col-sm-4 text-sm-end fw-semibold">
+								 class="col-form-label col-form-label-sm col-md-4 text-md-end fw-semibold">
 						<i class="fa-solid fa-user-gear"></i>
 						<span class="ms-1 text-capitalize">típus:</span>
 					</label>
 
 					<!-- Input user type -->
-					<div class="col-11 col-sm-7 position-relative">
+					<div class="col-11 col-md-7 position-relative">
 
 						<!-- Input user type -->
 						<input id="type"
@@ -189,7 +189,7 @@
 									 	 ng-model="model.prefix_name"
 										 ng-change="nameChanged()"
 									 	 ng-disabled="!helper.isInEditMode"
-									 	 ng-disable-space
+									 	 ng-blur="methods.removeWhitespaces($event)"
 									 	 ng-clear-icon>
 						</div>
 					</div>
@@ -219,7 +219,7 @@
 									 	 ng-model="model.first_name"
 										 ng-change="nameChanged()"
 									 	 ng-disabled="!helper.isInEditMode"
-									 	 ng-disable-space
+									 	 ng-blur="methods.removeWhitespaces($event)"
 									 	 ng-clear-icon
 									 	 ng-check-mark>
 						</div>
@@ -248,7 +248,7 @@
 									 	 ng-model="model.middle_name"
 										 ng-change="nameChanged()"
 									 	 ng-disabled="!helper.isInEditMode"
-									 	 ng-disable-space
+									 	 ng-blur="methods.removeWhitespaces($event)"
 									 	 ng-clear-icon>
 						</div>
 					</div>
@@ -278,7 +278,7 @@
 									 	 ng-model="model.last_name"
 										 ng-change="nameChanged()"
 									 	 ng-disabled="!helper.isInEditMode"
-									 	 ng-disable-space
+									 	 ng-blur="methods.removeWhitespaces($event)"
 									 	 ng-clear-icon
 									 	 ng-check-mark>
 						</div>
@@ -307,7 +307,7 @@
 									 	 ng-model="model.suffix_name"
 										 ng-change="nameChanged()"
 									 	 ng-disabled="!helper.isInEditMode"
-									 	 ng-disable-space
+									 	 ng-blur="methods.removeWhitespaces($event)"
 									 	 ng-clear-icon>
 						</div>
 					</div>
@@ -334,7 +334,7 @@
 									 	 maxlength="50"
 									 	 ng-model="model.nick_name"
 									 	 ng-disabled="!helper.isInEditMode"
-									 	 ng-disable-space
+									 	 ng-blur="methods.removeWhitespaces($event)"
 									 	 ng-clear-icon>
 						</div>
 					</div>
@@ -381,7 +381,8 @@
 				<!-- Born rule -->
 				<ng-show-rule rule-id="born_rule"
 											ng-show="helper.isInEditMode"
-											punctuation-mark="!"></ng-show-rule>
+											punctuation-mark="!"
+											ng-show="helper.isInEditMode"></ng-show-rule>
 
 				<!-- Gender -->
 				<fieldset class="row input-row mt-1 mb-3">
@@ -445,7 +446,7 @@
 					</div>
 
 					<!-- Image -->
-					<div class="col-11 col-sm-7 position-relative" 
+					<div class="col-11 col-md-7 position-relative" 
 							 style="height:100px;">
 
 						<!-- Input image -->
@@ -520,10 +521,10 @@
 					</label>
 
 					<!-- Input group -->
-					<div class="col-11 col-md-7">
+					<div class="col-11 col-md-7 position-relative">
 
 						<!-- Input group -->
-						<div class="input-group position-relative">
+						<div class="input-group">
 
 							<!-- Select country code -->
 							<span>+</span>
@@ -549,12 +550,23 @@
 										 ng-class="{'input-disabled': !helper.isInEditMode}"
 										 spellcheck="false" 
 										 autocomplete="off"
+										 maxlength="10"
 										 ng-model="model.phone"
-										 ng-disabled="!helper.isInEditMode"
-									 	 ng-disable-space>
+										 ng-pattern="/^$|^(?!(0))[0-9]{7,10}$/"
+										 ng-disabled="!helper.isInEditMode||!model.country_code"
+										 ng-allow-numbers
+										 ng-clear-icon='{"right":"14px"}'
+										 ng-check-mark>
 						</div>
 					</div>
 				</div>
+
+				<!-- Phone rule -->
+				<ng-show-rule rule-id="phone_rule"
+											pre-width="120"
+											is-capitalize="false"
+											punctuation-mark="."
+											ng-show="helper.isInEditMode"></ng-show-rule>
 
 				<!-- City -->
 				<div class="row input-row mb-2">
@@ -580,7 +592,10 @@
 									 autocomplete="off"
 									 maxlength="100"
 									 ng-model="model.city"
-									 ng-disabled="!helper.isInEditMode">
+									 ng-disabled="!helper.isInEditMode"
+									 ng-change="methods.cityChanged()"
+									 ng-blur="methods.removeWhitespaces($event)"
+									 ng-clear-icon>
 					</div>
 				</div>
 
@@ -609,9 +624,20 @@
 									 autocomplete="off"
 									 maxlength="10"
 									 ng-model="model.postcode"
-									 ng-disabled="!helper.isInEditMode">
+									 ng-disabled="!helper.isInEditMode"
+									 ng-pattern="/^$|^(?!(0))[0-9]{4,10}$/"
+									 ng-disabled="!model.city"
+									 ng-allow-numbers
+									 ng-clear-icon='{"left":"152px"}'
+									 ng-check-mark>
 					</div>
 				</div>
+
+				<!-- Postcode rule -->
+				<ng-show-rule rule-id="postcode_rule"
+											is-capitalize="false"
+											punctuation-mark="."
+											ng-show="helper.isInEditMode"></ng-show-rule>
 
 				<!-- Address -->
 				<div class="row input-row mb-2">
@@ -637,12 +663,13 @@
 											rows="1"
 											ng-model="model.address"
 											ng-disabled="!helper.isInEditMode"
+											ng-blur="methods.removeWhitespaces($event)"
 											ng-clear-icon>
 						</textarea>
 					</div>
 				</div>
 
-
+				<!-- Only in edit mode -->
 				<div class="m-0 p-0" ng-show="helper.isInEditMode">
 
 					<!-- Dividing line -->
@@ -662,20 +689,20 @@
 						<!-- Input password -->
 						<div class="col-11 col-md-7 position-relative">
 							<input id="password"
-										name="password"
-										type="password"
-										ng-attr-placeholder="{{helper.isInEditMode ? ('password' | translate:lang.data) : ''}}"
-										class="form-control form-control-sm input-password"
-										spellcheck="false" 
-										autocomplete="off" 
-										required
-										maxlength="20"
-										ng-model="model.password"
-										ng-init="model.password=null"
-										ng-disable-space
-										ng-pattern="/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,20}$/"
-										ng-clear-icon
-										ng-check-mark>
+										 name="password"
+										 type="password"
+										 ng-attr-placeholder="{{helper.isInEditMode ? ('password' | translate:lang.data) : ''}}"
+										 class="form-control form-control-sm input-password"
+										 spellcheck="false" 
+										 autocomplete="off" 
+										 required
+										 maxlength="20"
+										 ng-model="model.password"
+										 ng-init="model.password=null"
+										 ng-disable-space
+										 ng-pattern="/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,20}$/"
+										 ng-clear-icon
+										 ng-check-mark>
 						</div>
 					</div>
 

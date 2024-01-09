@@ -208,9 +208,9 @@
 									 	 autocomplete="off" 
 									 	 maxlength="20"
 									 	 ng-model="model.suffix_name"
+										 ng-init="model.suffix_name=null"
 										 ng-change="nameChanged()"
 										 ng-blur="methods.removeWhitespaces($event)"
-									 	 ng-init="model.suffix_name=null"
 									 	 ng-clear-icon>
 						</div>
 					</div>
