@@ -20,10 +20,26 @@
   -webkit-transform: rotate(90deg);
           transform: rotate(90deg);
 }
+.name-detail-toggle-icon {
+  -webkit-transition: all .3s ease-in-out;
+          transition: all .3s ease-in-out;
+    transform-origin: center;
+}
+.name-detail-container {
+  height: 0;
+  -webkit-transition: height .3s ease-in-out;
+          transition: height .3s ease-in-out;
+}
+.name-detail-container.show {
+  height: 453px;
+}
 @media (min-width: 768px) {
   .form-dialog .form-dialog-body .fa-hand-point-right {
     -webkit-transform: rotate(0deg);
             transform: rotate(0deg);
+  }
+  .name-detail-container.show {
+    height: 267px;
   }
 }
 input.input-disabled,
