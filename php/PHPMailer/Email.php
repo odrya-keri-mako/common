@@ -323,4 +323,18 @@ class Email extends PHPMailer {
 			$this->setError('email_crete_failed');
 		}
 	}
+
+	// Get configuration file exist, and has necessary properties 
+	public static function isEmailConfigExist() {
+		$file = searchForFile('email.ini', array('subFolder' => 'email'));
+    if (is_null($file) || ($config = parse_ini_file($file, true)) === false) 
+			return false;
+		foreach(array('host','port','email','pass','from') as $key) {
+			if (!array_key_exists($key, $config) ||
+					!is_string($config[$key]) || 
+							empty(($config[$key] = trim($config[$key]))))
+			return false;
+		}
+		return true;
+	}
 }

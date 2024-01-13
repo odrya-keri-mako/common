@@ -12,13 +12,31 @@
     '$timeout',
     'lang',
     'util',
-    ($rootScope, $state, $timeout, lang, util) => {
+    'http',
+    ($rootScope, $state, $timeout, lang, util, http) => {
+
+      // Set options
+      let options = {
+        minAgeLimit         : 18,
+        maxAgeLimit         : 120,
+        isBornShowRule     	: true,
+        isPhoneShowRule     : true,
+        isPostcodeShowRule  : true,
+        isTestCode          : true,
+        isEmailConfirm      : true,
+        isEmailShowRule     : true,
+        isPasswordConfirm   : true,
+        isPasswordShowRule  : true,
+        isNameDetail        : true,
+        isSendEmail         : true
+      };
 
       // Set user default properties
       let user = {
         base: {
           id          : null,
           type        : null,
+          name        : null,
           prefix_name : null,
           first_name  : null,
           middle_name : null,
@@ -45,12 +63,116 @@
       let service = {
 
         // Initialize 
-        init: () => {
-          service.set(util.objMerge(user.base, {
-            email: window.localStorage.getItem(service.getKey())
-          }, true), false);
+        init: (args=null) => {
+          service.setOptions(args).then(() => {
+            service.getFields().then(() => {
+              service.checkOptions();
+              service.set(util.objMerge(user.base, {
+                email: window.localStorage.getItem(service.getKey())
+              }, true), false);
+            }).catch(e => console.log(e));
+          });
         },
         
+        // Set optons
+        setOptions: (args) => {
+
+          // Create promise
+					return new Promise((resolve) => {
+
+            // Check/Convert arguments
+            if (util.isNumber(args)) {
+              args = {minAgeLimit: parseInt(args)};
+            } else if (util.isBoolean(args)) {
+              args = {isTestCode: args};
+            }
+
+            // Merge options with arguments, and resolve
+            options = util.objMerge(options, args, true);
+
+            // Check options
+            if (options.minAgeLimit < 0 ||
+                options.minAgeLimit > 120)
+                options.minAgeLimit = null;
+            if (options.maxAgeLimit < 0 ||
+                options.maxAgeLimit > 120 ||
+               (!util.isNull(options.minAgeLimit) &&
+                             options.maxAgeLimit < options.minAgeLimit))
+                options.maxAgeLimit = null;
+            resolve();
+          });
+        },
+
+        // Check options
+        checkOptions: () => {
+          if (util.isObjectHasKey(user.fields, 'name'))
+            options.isNameDetail = false;
+          if (!util.isObjectHasKey(user.fields, 'born')) {
+            options.minAgeLimit     = null;
+            options.maxAgeLimit     = null;
+            options.isBornShowRule  = false;
+          }
+          if (!util.isObjectHasKey(user.fields, 'phone'))
+            options.isPhoneShowRule = false;
+          if (!util.isObjectHasKey(user.fields, 'postcode'))
+            options.isPostcodeShowRule = false;
+          if (!util.isObjectHasKey(user.fields, 'postcode'))
+            options.isPostcodeShowRule = false;
+          if (!util.isObjectHasKey(user.fields, 'email_verification_code') ||
+              !util.isObjectHasKey(user.fields, 'email_confirmed'))
+            options.isSendEmail = false;
+          if (!options.isSendEmail)
+            options.isEmailShowRule = false;
+          if (!util.isObjectHasKey(user.fields, 'born') &&
+              !util.isObjectHasKey(user.fields, 'gender') &&
+              !util.isObjectHasKey(user.fields, 'img') &&
+              !util.isObjectHasKey(user.fields, 'country') &&
+              !util.isObjectHasKey(user.fields, 'phone') &&
+              !util.isObjectHasKey(user.fields, 'city') &&
+              !util.isObjectHasKey(user.fields, 'postcode') &&
+              !util.isObjectHasKey(user.fields, 'address'))
+                options.isDividingPlusLine = false;
+          else  options.isDividingPlusLine = true;
+        },
+
+        // Get optons
+        getOptions: (key=null) => {
+          if (util.isString(key)) {
+            if (util.isObjectHasKey(options, key))
+                  return options[key];
+            else  return null;
+          } else  return options;
+        },
+
+        // Get user fields
+        getFields: () => {
+
+          // Create promise
+					return new Promise((resolve, reject) => {
+            http.request({
+              data: {
+                className : "Database/Database",
+                methodName: "getFieldsName",
+                params    : 'user'
+              }
+            })
+            .then(response => {
+              user.base   = util.objFilterByKeys(user.base, Object.keys(response));
+              user.rest   = util.objFilterByKeys(user.rest, Object.keys(response));
+              user.fields = response;
+              resolve();
+            })
+            .catch(e => reject(e));
+          });
+        },
+
+        // Check field exist
+        isFieldExist: (fieldName, key=null) => {
+          if (!util.isString(key)) key = 'fields';
+          if (!util.isObjectHasKey(user, key)) key = 'fields'
+          return util.isObjectHasKey(user[key], fieldName);
+        },
+
         // Get key
 				getKey: () => {
 					return [$rootScope.app.id, 'user_email'].join('_');
@@ -141,7 +263,8 @@
     'user',
     'lang',
     'http',
-    function($rootScope, $scope, $element, $state, $timeout, $q, util, user, lang, http) {
+    function($rootScope, $scope, $element, $state, 
+             $timeout, $q, util, user, lang, http) {
 
       // Set methods
       $scope.methods = {
@@ -180,22 +303,40 @@
             $scope.rescue = {};
 
             // Set helper
-            $scope.helper = {isInEditMode: $rootScope.state.id !== 'profile'};
+            $scope.helper = {
+              isInEditMode: $rootScope.state.id !== 'profile',
+              rescue: {}
+            };
             
             // Switch state id, renews model/helper
             switch($rootScope.state.id) {
 
               case 'register':
               case 'profile':
-                $scope.helper.maxBorn       = moment().subtract( 18, 'years').format('YYYY-MM-DD');
-                $scope.helper.minBorn       = moment().subtract(120, 'years').format('YYYY-MM-DD');
-                $scope.helper.image         = null;
-                $scope.helper.countryCodes  = null;
-                $scope.helper.rescue        = {image:null, countryCodes:null};
-
+                if (user.isFieldExist('born')) {
+                  let limit = user.getOptions('minAgeLimit');
+                  if (!util.isNull(limit))
+                        $scope.helper.maxBorn = 
+                            moment().subtract(limit, 'years')
+                                    .format('YYYY-MM-DD');
+                  else  $scope.helper.maxBorn = null;
+                  limit = user.getOptions('maxAgeLimit');
+                  if (!util.isNull(limit))
+                        $scope.helper.minBorn = 
+                            moment().subtract(limit, 'years')
+                                    .format('YYYY-MM-DD');
+                  else  $scope.helper.minBorn = null;
+                }
+                if (user.isFieldExist('img')) {
+                  $scope.helper.image = null;
+                  $scope.helper.rescue.image = null;
+                }
+                if (user.isFieldExist('country')) {
+                  $scope.helper.countryCodes = null;
+                  $scope.helper.rescue.countryCodes = null;
+                }
                 if ($rootScope.state.id === 'profile') 
-                      $scope.model = util.objMerge($scope.model, user.get());
-                else  $scope.model.img_type = null; 
+                  $scope.model = util.objMerge($scope.model, user.get());
 
                 // Create new deffered objects, 
                 // and create list watch
@@ -206,58 +347,70 @@
                 if ($rootScope.state.id === 'profile') {
 
                   // Create new deffered objects
-                  let image = util.deferredObj(),
-                      user  = util.deferredObj();
+                  let image   = util.deferredObj(),
+                      getUser = util.deferredObj();
                 
                   // Add to list watch
-                  completed.push(image.completed, user.completed);
+                  completed.push(image.completed, getUser.completed);
                   
-                  // When user has image properties, then crete image
-                  if ($scope.model.img_type && $scope.model.img) {
-                    util.base64Tofile(
-                      $scope.model.img_type,
-                      $scope.model.img
-                    ).then(file => {
-                      $scope.helper.image = file;
-                      image.promise.resolve();
-                    });
+                  // Check img field exist
+                  if (user.isFieldExist('img')) {
+
+                    // When user has image properties, then crete image
+                    if ($scope.model.img_type && $scope.model.img) {
+                      util.base64Tofile(
+                        $scope.model.img_type,
+                        $scope.model.img
+                      ).then(file => {
+                        $scope.helper.image = file;
+                        image.promise.resolve();
+                      });
+                    } else image.promise.resolve();
                   } else image.promise.resolve();
 
                   // Get user rest properties
                   http.request({
                     data: {
                       require : `properties.php`,
-                      params  : {id: $rootScope.user.id},
+                      params  : {id: $rootScope.user.id}
                     }
                   })
                   .then(response => {
                     if (response) {
-                      response.born = moment(response.born).toDate();
-                      $scope.model  = util.objMerge($scope.model, response);
-                      user.promise.resolve();
+                      if (util.isObjectHasKey(response, 'born'))
+                        response.born = moment(response.born).toDate();
+                      $scope.model = util.objMerge($scope.model, response);
+                      getUser.promise.resolve();
                     }
                   })
                   .catch(e => {
-                    user.promise.resolve();
+                    getUser.promise.resolve();
                     $timeout(() => {alert(lang.translate(e, true)+'!');}, 50);
                   });
                 }
 
-                // Get countries
-                http.request({
-                  data: {
-                    methodName: "getContents",
-                    params    : ['countries.json', {subFolder: 'data', isMinimize: true}]
-                  }
-                })
-                .then(response => {
-                  $scope.helper.countries = response;
-                  countries.promise.resolve();
-                })
-                .catch(e => {
-                  countries.promise.resolve();
-                  $timeout(() => {alert(e);}, 50);
-                });
+                // Check country field exist
+                if (user.isFieldExist('country')) {
+
+                  // Get countries
+                  http.request({
+                    data: {
+                      methodName: "getContents",
+                      params    : [
+                        'countries.json', 
+                        {subFolder:'data', isMinimize:true}
+                      ]
+                    }
+                  })
+                  .then(response => {
+                    $scope.helper.countries = response;
+                    countries.promise.resolve();
+                  })
+                  .catch(e => {
+                    countries.promise.resolve();
+                    $timeout(() => {alert(e);}, 50);
+                  });
+                } else countries.promise.resolve();
 
                 // Whait for all completed
                 $q.all(completed).then(() => {
@@ -265,11 +418,12 @@
                   // Check state id is profile, and has country property
                   if ($rootScope.state.id === 'profile') {
                     
-                    // Set user name
+                    // Set name from name details
                     $scope.methods.setUserName();
 
-                    // Check country exist
-                    if ($scope.model.country) {
+                    // Check country exist and has property
+                    if (user.isFieldExist('country') && 
+                        $scope.model.country) {
 
                       // Get user country index from contries
                       let index = util.indexByKeyValue(
@@ -374,79 +528,100 @@
           }
 
           // Check state identifier is register or profile
-          if (['register','profile'].includes($rootScope.state.id)) {
+          if (util.isObjectHasKey($scope.model, 'user_name') &&
+              ['register','profile'].includes($rootScope.state.id)) {
 
             // Name properties (sufix,first,middle,last,postfix) changed
-            $scope.nameChanged = () => $scope.methods.setUserName();
+            $scope.nameChanged = () => 
+                $scope.methods.setUserName();
 
             // When language is changed show name
-            document.addEventListener("languageChanged", () => $scope.methods.setUserName());
+            document.addEventListener("languageChanged", () => 
+                $scope.methods.setUserName());
           }
         },
 
         // Toogle name detail
         toogleNameDetail: () => {
-          $timeout(() => {
-            $element[0].querySelector('.name-detail-toggle-icon')
-                       .classList.toggle('fa-rotate-180');
-            $element[0].querySelector('.name-detail-container')
-                       .classList.toggle('show');
-          });
+          let detailContainer = $element[0].querySelector('.name-detail-container');
+          if (detailContainer) {
+            $timeout(() => {
+              detailContainer.classList.toggle('show');
+              let toggleIcon = $element[0].querySelector('.name-detail-toggle-icon');
+              if (toggleIcon) 
+                toggleIcon.classList.toggle('fa-rotate-180');
+            });
+          }
         },
 
         // Show name detail
         showNameDetail: () => {
           $scope.helper.isInEditMode = true;
-          $timeout(() => {
-            $element[0].querySelector('.name-detail-toggle-icon')
-                       .classList.remove('fa-rotate-180');
-            $element[0].querySelector('.name-detail-container')
-                       .classList.add('show');
-            // Set focus
-            $timeout(() => {$scope.methods.setFocus();}, 300);
-          });
+          let detailContainer = $element[0].querySelector('.name-detail-container');
+          if (detailContainer) {
+            $timeout(() => {
+              detailContainer.classList.add('show');
+              let toggleIcon = $element[0].querySelector('.name-detail-toggle-icon');
+              if (toggleIcon) 
+                toggleIcon.classList.remove('fa-rotate-180');
+              $timeout(() => {$scope.methods.setFocus();}, 300);
+            });  
+          }
         },
 
         // Hide name detail
         hideNameDetail: () => {
-          $element[0].querySelector('.name-detail-toggle-icon')
-                     .classList.add('fa-rotate-180');
-          $element[0].querySelector('.name-detail-container')
-                     .classList.remove('show');
-          $timeout(() => {
-            $scope.helper.isInEditMode = false;
-          }, 300);
+          let detailContainer = $element[0].querySelector('.name-detail-container');
+          if (detailContainer) {
+            detailContainer.classList.remove('show');
+            let toggleIcon = $element[0].querySelector('.name-detail-toggle-icon');
+            if (toggleIcon) 
+              toggleIcon.classList.add('fa-rotate-180');
+            $timeout(() => {
+              $scope.helper.isInEditMode = false;
+            }, 300);
+          } else $scope.helper.isInEditMode = false;
         },
 
         // Set user name
         setUserName: () => {
-          let name = "";
-          $rootScope.lang.rule[$rootScope.lang.type].forEach(k => {
-            if ($scope.model[k]) {
-              $scope.model[k] = $scope.model[k].replace(/\s+/g, ' ');
-              name += ($scope.model[k].trim() + " ");
-            }
-          });
-          $scope.model.name = name.trim();
+
+          // When user name exist, then set name from name details
+          if (util.isObjectHasKey($scope.model, 'user_name')) {
+
+            // Set name from name details
+            let userName = "";
+            $rootScope.lang.rule[$rootScope.lang.type].forEach(k => {
+              if (util.isObjectHasKey($scope.model, k) && $scope.model[k]) {
+                $scope.model[k] = $scope.model[k].replace(/\s+/g, ' ');
+                userName += ($scope.model[k].trim() + " ");
+              }
+            });
+            $scope.model.user_name = userName.trim();
+          }
         },
 
         // Country changed
         countryChanged: () => {
-          if ($scope.model.country) {
-            $scope.helper.countryCodes  = $scope.model.country.code;
-            $scope.model.country_code   = $scope.helper.countryCodes[0];
-          } else {
-            $scope.helper.countryCodes  = null;
-            $scope.model.country_code   = null;
-            $scope.model.phone          = null;
+          if (user.isFieldExist('country')) {
+            if ($scope.model.country) {
+              $scope.helper.countryCodes  = $scope.model.country.code;
+              $scope.model.country_code   = $scope.helper.countryCodes[0];
+            } else {
+              $scope.helper.countryCodes  = null;
+              $scope.model.country_code   = null;
+              $scope.model.phone          = null;
+            }
+            $scope.$applyAsync();
           }
-          $scope.$applyAsync();
         },
 
         // City changed
         cityChanged: () => {
-          if (!$scope.model.city)
-            $scope.model.postcode = null;
+          if (user.isFieldExist('city') && 
+              user.isFieldExist('postcode')) {
+            if (!$scope.model.city) $scope.model.postcode = null;
+          }
         },
 
         // Removing whitespaces from the beginning and end
@@ -454,8 +629,10 @@
           let element = event.currentTarget;
           if (element.value)
             element.value = element.value.replace(/\s+/g, ' ').trim();
-          if (util.isObjectHasKey($scope.model, element.name) && $scope.model[element.name])
-            $scope.model[element.name] = $scope.model[element.name].replace(/\s+/g, ' ').trim();
+          if (util.isObjectHasKey($scope.model, element.name) && 
+              $scope.model[element.name])
+            $scope.model[element.name] = 
+            $scope.model[element.name].replace(/\s+/g, ' ').trim();
         },
 
         // Accept button clicked
@@ -480,13 +657,13 @@
 
           // Get user neccesary property filtered
           let user_property = util.objFilterByKeys($scope.model, [
-                                'name',
-                                'testcode',
-                                'testCodeContent',
-                                'email_confirm',
-                                'email_current_user',
-                                'password_confirm'
-                              ], false);
+            'user_name',
+            'testcode',
+            'testCodeContent',
+            'email_confirm',
+            'email_current_user',
+            'password_confirm'
+          ], false);
           
           // Convert data
           if (util.isObjectHasKey(user_property, 'born') &&
@@ -508,11 +685,11 @@
             case 'email_change':
             case 'register':
 
-              // Set please wait message to true
-              isShowWait  = true;
+              // Set please wait message to true when send email
+              isShowWait = user.getOptions('isSendEmail');
 
               // Get language properties
-              args.lang   = util.objFilterByKeys($rootScope.lang, ['id','type'], true);
+              args.lang = util.objFilterByKeys($rootScope.lang, ['id','type'], true);
 
               // Set necessary data for email address confirmation
               if (acceptBtnId === 'email_change' ||
@@ -567,7 +744,8 @@
                 $scope.methods.hideNameDetail();
                 user.set(user_property);
                 $scope.model.password = null;
-                $rootScope.$broadcast('refreshTestcodeEvent');
+                if (util.isObjectHasKey($scope.model, 'testcode'))
+                  $rootScope.$broadcast('refreshTestcodeEvent');
                 $timeout(() => {alert(lang.translate(response, true)+'!');}, 500);
                 break;
               default:   
@@ -595,7 +773,8 @@
                 $scope.model.password = null;
 
                 // Refresh testcode
-                $rootScope.$broadcast('refreshTestcodeEvent');
+                if (util.isObjectHasKey($scope.model, 'testcode'))
+                  $rootScope.$broadcast('refreshTestcodeEvent');
 
                 // Hide name details
                 $scope.methods.hideNameDetail();
@@ -608,7 +787,8 @@
               } else {
 
                 // Refresh testcode
-                $rootScope.$broadcast('refreshTestcodeEvent');
+                if (util.isObjectHasKey($scope.model, 'testcode'))
+                  $rootScope.$broadcast('refreshTestcodeEvent');
 
                 // Get email input element
                 let email = $element[0].querySelector('form input#email');
@@ -670,6 +850,19 @@
             if (!isFound && inputs.length) 
               $timeout(() => {inputs[0].focus();}, 50);
           }, 50);
+        },
+
+        // Check user field exist
+        isFieldExist: (fieldName) => {
+          if (fieldName === 'name') {
+            let atika = user.isFieldExist(fieldName);
+          }
+          return user.isFieldExist(fieldName);
+        },
+
+        // Get options key
+        getOptionsKey: (key) => {
+          return user.getOptions(key);
         }
       };
 

@@ -154,6 +154,13 @@ class Language {
 				$result .= ($data[$field] . " ");
 			}
 		}
-		return trim($result);
+		$result = trim($result);
+		if (empty($result) &&
+				array_key_exists('name', $data) && 
+					is_string($data['name']) &&
+					!empty(($data['name'] = trim($data['name'])))) {
+			$result = $data['name'];
+		}
+		return $result;
 	}
 }

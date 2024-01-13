@@ -83,13 +83,13 @@
 				</div>
 
 				<!-- Password rule -->
-				<ng-show-rule></ng-show-rule>
+				<ng-show-rule ng-if="methods.getOptionsKey('isPasswordShowRule')"></ng-show-rule>
 				
 				<!-- Show/Hide password -->
 				<ng-show-password></ng-show-password>
 				
 				<!-- Test code -->
-				<ng-test-code></ng-test-code>
+				<ng-test-code ng-if="methods.getOptionsKey('isTestCode')"></ng-test-code>
 			</form>
 
 			<!-- Footer -->

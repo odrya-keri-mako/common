@@ -18,22 +18,38 @@ $args = Util::getArgs();
 // Connect to database
 $db = new Database();
 
+// Get user table fields
+$userFields = $db->getFieldsName('user');
+
+// Check user table fields exist
+if (is_null($userFields)) {
+
+	// Set error
+	Util::setError('table_not_exist', $db);
+}
+
+// Filter default fields by keys if present in table fields
+$fields = array_filter(array(
+	"id" => null,
+	"name" => null, 
+	"prefix_name" => null, 
+	"first_name" => null,
+	"middle_name" => null,
+	"last_name" => null,
+	"suffix_name" => null,
+ 	"nick_name" => null,
+	"valid" => null,
+	"wrong_attempts" => null
+), function($key) use($userFields) {
+	return array_key_exists($key, $userFields);
+}, ARRAY_FILTER_USE_KEY);
+
 // Set query
-$query =  "SELECT `id`,
-									`prefix_name`,
-									`first_name`,
-									`middle_name`,
-									`last_name`,
-									`suffix_name`,
-									`valid`,
-									`wrong_attempts` 
-						 FROM `user` 
-						WHERE `email` = ?
-						LIMIT 1;";
+$query = "SELECT `" . implode("`,`", array_keys($fields)) . 
+				 "` FROM `user` WHERE `email` = ? LIMIT 1;";
 
 // Execute query with argument
-$result = $db->execute($query, 
-							 array($args['user']['email']));
+$result = $db->execute($query, array($args['user']['email']));
 
 // Check user exist
 if (is_null($result)) {
@@ -65,19 +81,19 @@ unset($result['valid'], $result['wrong_attempts']);
 // Creates a new password
 $password_new = '1234Aa';
 
-// Set query
+// Set query, and params
 $query 	= "UPDATE `user` 
-							SET `password` = :password,
-									`modified` = :modified
-						WHERE `id` = :id";
+							SET `password` = :password";
+$params = array("password"	=> password_hash($password_new, PASSWORD_DEFAULT));
+if (array_key_exists('modified', $userFields)) {
+	$query .= ", `modified` = :dateNow";
+	$params['dateNow'] = date("Y-m-d H:i:s");
+}
+$query .= " WHERE `id` = :id;";
+$params['id'] = $args['user']['id'];
 
 // Execute query with arguments
-$success	= $db->execute($query, array(
-							"password"	=> password_hash($password_new, 
-																					 PASSWORD_DEFAULT),
-							"modified"	=> date("Y-m-d H:i:s"),
-							"id"				=> $result['id']
-						));
+$result = $db->execute($query, $params);
 
 // Close connection
 $db = null;
@@ -87,6 +103,13 @@ if (!$success['affectedRows']) {
 
 	// Set error
 	Util::setError('password_change_failed');
+}
+
+// Check is send email
+if (!Email::isEmailConfigExist()) {
+
+	// Set response
+	Util::setResponse('password_changed');
 }
 
 // Unset not necessary variables

@@ -11,39 +11,32 @@ $args = Util::getArgs();
 // Connect to database
 $db = new Database();
 
+// Get user table fields
+$userFields = $db->getFieldsName('user');
+
+// Check user table fields exist
+if (is_null($userFields)) {
+
+	// Set error
+	Util::setError('table_not_exist', $db);
+}
+
 // Check image exist
-if (!is_null($args['user']['img'])) {
+if (array_key_exists('img', $userFields) && 
+		array_key_exists('img', $args['user']) &&
+									 !is_null($args['user']['img'])) {
 
 	// Decode image
 	$args['user']['img'] = Util::base64Decode($args['user']['img']);
 }
 
 // Set modified datetime
-$args['user']['modified'] = date("Y-m-d H:i:s");
+if (array_key_exists('modified', $userFields))
+	$args['user']['modified'] = date("Y-m-d H:i:s");
 
-// Set query
-$query = "UPDATE 	`user` 
-						 SET 	`prefix_name` = :prefix_name,
-									`first_name` = :first_name,
-									`middle_name` = :middle_name,
-									`last_name` = :last_name,
-									`suffix_name` = :suffix_name,
-									`nick_name` = :nick_name,
-									`born` = :born,
-									`gender` = :gender,
-									`img` = :img,
-									`img_type` = :img_type,
-									`country` = :country,
-									`country_code` = :country_code,
-									`phone` = :phone,
-									`city` = :city,
-									`postcode` = :postcode,
-									`address` = :address,
-									`modified` = :modified 
-						WHERE `id` = :id";
-
-// Set params
-$params = Util::objMerge(array(
+// Filter default fields by keys if present in table fields
+$fields = array_filter(array(
+	"name" => null, 
 	"prefix_name" => null, 
 	"first_name" => null,
 	"middle_name" => null,
@@ -60,9 +53,22 @@ $params = Util::objMerge(array(
 	"city" => null,
 	"postcode" => null,
 	"address" => null,
+	"email" => null,
+	"password" => null,
 	"modified" => null,
 	"id" => null
-), $args['user'], true);
+), function($key) use($userFields) {
+	return array_key_exists($key, $userFields);
+}, ARRAY_FILTER_USE_KEY);
+
+// Set query
+$query 	= "UPDATE `user` SET ";
+foreach(array_keys($fields) as $key) {
+	$query .= ("`".$key."`=:".$key.",");
+}
+
+// Finalize query
+$query = mb_substr($query, 0, -1, 'utf-8') . "WHERE `id`=:id";
 
 // Execute query
 $result = $db->execute($query, $params);

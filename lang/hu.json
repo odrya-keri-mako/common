@@ -126,5 +126,6 @@
   "products": "termékek",
   "missing_required_files": "hiányoznak a szükséges fájlok",
   "data_modification_successful": "az adatmódosítás sikeres volt",
-  "data_modification_failed": "az adatmódosítás nem sikerült"
+  "data_modification_failed": "az adatmódosítás nem sikerült",
+  "table_not_exist": ""
 }

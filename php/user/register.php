@@ -21,13 +21,11 @@ $db = new Database();
 // Set query (Check new email already exist)
 $query = "SELECT `id` 
 					FROM 	`user` 
-					WHERE `email` = :email
+					WHERE `email` = ?
 					LIMIT 1;";
 
-// Execute query with arguments
-$success	= $db->execute($query, array(
-							'email' => $args['user']['email']
-						));
+// Execute query with argument
+$success = $db->execute($query, array($args['user']['email']));
 
 // Check result
 if (!is_null($success)) {
@@ -36,8 +34,16 @@ if (!is_null($success)) {
 	Util::setError('user_email_already_exist', $db);
 }
 
+// Get user table fields
+$userFields = $db->getFieldsName('user');
+
+// Check is send email
+$isSendEmail = Email::isEmailConfigExist();
+
 // Check image exist
-if (!is_null($args['user']['img'])) {
+if (array_key_exists('img', $userFields) && 
+		array_key_exists('img', $args['user']) &&
+									 !is_null($args['user']['img'])) {
 
 	// Decode image
 	$args['user']['img'] = Util::base64Decode($args['user']['img']);
@@ -48,25 +54,21 @@ $password_current = $args['user']['password'];
 $args['user']['password'] = password_hash($args['user']['password'], PASSWORD_DEFAULT);
 
 // Set random email verification code
-$args['user']['email_verification_code'] = bin2hex(random_bytes(16));
+if ($isSendEmail && array_key_exists('email_verification_code', $userFields))
+	$args['user']['email_verification_code'] = bin2hex(random_bytes(16));
 
 // Set created datetime
-$args['user']['created'] = date("Y-m-d H:i:s");
+if (array_key_exists('created', $userFields))
+	$args['user']['created'] = date("Y-m-d H:i:s");
 
 // Set user type
-$args['user']['type'] = "N";
+if (array_key_exists('type', $userFields))
+	$args['user']['type'] = "N";
 
-// Set query
-$query = "INSERT INTO `user` (`type`, `prefix_name`, `first_name`, 
-															`middle_name`, `last_name`, `suffix_name`,
- 															`nick_name`, `born`, `gender`, `img`, `img_type`, 
-															`country`, `country_code`, `phone`, `city`, 
-															`postcode`, `address`, `email`, `password`,
-															`email_verification_code`, `created`) VALUES";
-
-// Set params
-$params = Util::objMerge(array(
-	"type" => null, 
+// Filter default fields by keys if present in table fields
+$fields = array_filter(array(
+	"type" => null,
+	"name" => null, 
 	"prefix_name" => null, 
 	"first_name" => null,
 	"middle_name" => null,
@@ -85,9 +87,19 @@ $params = Util::objMerge(array(
 	"address" => null,
 	"email" => null,
 	"password" => null,
-	"email_verification_code" => null,
-	"created" => null
-), $args['user'], true);
+	"created" => null,
+	"email_verification_code" => null
+), function($key) use($userFields) {
+	return array_key_exists($key, $userFields);
+}, ARRAY_FILTER_USE_KEY);
+
+// Set query
+$query = "INSERT INTO `user` 
+					(`" . implode("`,`", array_keys($fields)) . "`) 
+					VALUES";
+
+// Set parameters
+$params = Util::objMerge($fields, $args['user'], true);
 
 // Execute query
 $result = $db->execute($query, $params);
@@ -102,8 +114,22 @@ if (!$result['affectedRows']) {
 	Util::setError('registration_failed');
 }
 
+// Check is not send email 
+if (!$isSendEmail) {
+	
+	// Set result
+	$result = array("id" => $result['lastInsertId']);
+	
+	// Check has type property
+	if (array_key_exists('type', $userFields))
+		$result['type'] = $args['user']['type'];
+	
+	// Set response
+	Util::setResponse($result);
+}
+
 // Unset not a required variable(s)
-unset($query, $success, $params);
+unset($query, $success, $params, $fields);
 
 // Set language
 $lang = new Language($args['lang']);
@@ -111,11 +137,13 @@ $lang = new Language($args['lang']);
 // Translate error messages
 $errorMsg = $lang->translate(Email::$errorMessages);
 
-// Create message
+// Create language data
 $langData = $lang->translate(array(
 	"{{register}}"			=> "register",
 	"{{email_address}}"	=> "email_address"
 ));
+
+// Create message
 $message = "{$langData["{{register}}"]}!\n
 						{$langData["{{email_address}}"]}: {$args['user']['email']}";
 
@@ -204,8 +232,12 @@ try {
 // Close email
 $phpMailer = null;
 
+// Set result
+$result = array("id" => $result['lastInsertId']);
+
+// Check has type property
+if (array_key_exists('type', $userFields))
+	$result['type'] = $args['user']['type'];
+
 // Set response
-Util::setResponse(array(
-	"id"		=> $result['lastInsertId'],
-	"type"	=> $args['user']['type']
-));
+Util::setResponse($result);

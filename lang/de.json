@@ -125,5 +125,6 @@
   "products": "produkte",
   "missing_required_files": "erforderliche dateien fehlen",
   "data_modification_successful": "die datenänderung war erfolgreich",
-  "data_modification_failed": "die datenänderung ist fehlgeschlagen"
+  "data_modification_failed": "die datenänderung ist fehlgeschlagen",
+  "table_not_exist": "die tabelle existiert nicht"
 }

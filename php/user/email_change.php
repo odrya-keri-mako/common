@@ -18,20 +18,40 @@ $args = Util::getArgs();
 // Connect to database
 $db = new Database();
 
+// Get user table fields
+$userFields = $db->getFieldsName('user');
+
+// Check user table fields exist
+if (is_null($userFields)) {
+
+	// Set error
+	Util::setError('table_not_exist', $db);
+}
+
+// Check is send email
+$isSendEmail = Email::isEmailConfigExist();
+
+// Filter default fields by keys if present in table fields
+$fields = array_filter(array(
+	"type" => null,
+	"name" => null, 
+	"prefix_name" => null, 
+	"first_name" => null,
+	"middle_name" => null,
+	"last_name" => null,
+	"suffix_name" => null,
+ 	"nick_name" => null,
+	"email" => null,
+	"password" => null,
+	"valid" => null,
+	"wrong_attempts" => null
+), function($key) use($userFields) {
+	return array_key_exists($key, $userFields);
+}, ARRAY_FILTER_USE_KEY);
+
 // Set query
-$query =  "SELECT `prefix_name`,
-									`first_name`,
-									`middle_name`,
-									`last_name`,
-									`suffix_name`,
-									`type`,
-									`email`,
-									`password`,
-									`valid`,
-									`wrong_attempts`
-						 FROM `user`
-						WHERE `id` = ?
-						LIMIT 1;";
+$query = "SELECT `" . implode("`,`", array_keys($fields)) . 
+				 "` FROM `user` WHERE `id` = ? LIMIT 1;";
 
 // Execute query with argument
 $result = $db->execute($query, array($args['user']['id']));
@@ -54,14 +74,16 @@ if ($args['user']['email_current'] !== $result['email']) {
 }
 
 // Check user valid
-if (!$result['valid']) {
+if (array_key_exists('valid', $result) && 
+		!$result['valid']) {
 
 	// Set error
 	Util::setError('user_disabled', $db);
 }
 
-// Check the number of attempts
-if ($result['wrong_attempts'] > 5) {
+// Check the number of attempts exist, and bigger then allow
+if (array_key_exists('wrong_attempts', $result) && 
+		$result['wrong_attempts'] > 5) {
 
 	// Set error
 	Util::setError('user_wrong_attempts', $db);
@@ -70,18 +92,22 @@ if ($result['wrong_attempts'] > 5) {
 // Verify the current password
 if (!password_verify($args['user']['password'], $result['password'])) {
 
-	// Set query
-	$query = 	"UPDATE `user` 
-								SET `wrong_attempts` = `wrong_attempts` + 1
-							WHERE `id` = ?;";
+	// Check the number of attempts exist
+	if (array_key_exists('wrong_attempts', $result)) {
 
-	// Execute query with arguments
-	$success = $db->execute($query, array($result['id']));
+		// Set query
+		$query = 	"UPDATE `user` 
+									SET `wrong_attempts` = `wrong_attempts` + 1
+								WHERE `id` = ?;";
 
-	// Set error
-	if ($success['affectedRows'])
-				Util::setError('password_incorrect', $db);
-	else	Util::setError('failed_increase_retries', $db);
+		// Execute query with arguments
+		$success = $db->execute($query, array($result['id']));
+
+		// Set error
+		if ($success['affectedRows'])
+					Util::setError('password_incorrect', $db);
+		else	Util::setError('failed_increase_retries', $db);
+	} else	Util::setError('password_incorrect', $db);
 }
 
 // Set query (Check new email already exist)
@@ -91,7 +117,7 @@ $query = "SELECT `id`
 					LIMIT 1;";
 
 // Execute query with arguments
-$success	= $db->execute($query, array($args['user']['email']));
+$success = $db->execute($query, array($args['user']['email']));
 
 // Check result
 if (!is_null($success)) {
@@ -101,26 +127,36 @@ if (!is_null($success)) {
 }
 
 // Set random email verification code
-$args['user']['email_verification_code'] = bin2hex(random_bytes(16));
+if ($isSendEmail && array_key_exists('email_verification_code', $userFields))
+	$args['user']['email_verification_code'] = bin2hex(random_bytes(16));
 
-// Set query
-$query 	= "UPDATE `user` 
-							SET `type`			= :type,
-									`type_old` 	= :type_old,
-									`email`			= :email,
-									`email_verification_code`	= :code,
-						 			`modified`	= :modified
-						WHERE `id` = :id";
+// Set query, and params
+$query 	= "UPDATE `user` SET ";
+$params	= array();
+foreach(array('type','type_old','email','email_verification_code','modified') as $key) {
+	if (array_key_exists($key, $userFields)) {
+		$query .= ("`".$key."`=:".$key.",");
+		switch($key) {
+			case 'type':
+				$params[$key] = 'N';
+				break;
+			case 'type_old':
+				$params[$key] = $result['type'] === 'N' ? null : $result['type'];
+				break;
+			case 'modified':
+				$params[$key] = date("Y-m-d H:i:s");
+				break;
+			default:
+			 $params[$key] = $args['user'][$key];
+		}
+	}
+}
+
+// Finalize query
+$query = mb_substr($query, 0, -1, 'utf-8') . " WHERE `id`=:id";
 
 // Execute query with arguments
-$success = $db->execute($query, array(
-	"type"			=> 'N',
-	"type_old"	=> $result['type'] === 'N' ? null : $result['type'],
-	"email"			=> $args['user']['email'],
-	"code"			=> $args['user']['email_verification_code'],
-	"modified"	=> date("Y-m-d H:i:s"),
-	"id"				=> $args['user']['id']
-));
+$success = $db->execute($query, $params);
 
 // Close connection
 $db = null;
@@ -134,6 +170,13 @@ if (!$success['affectedRows']) {
 
 // Unset not a required variable(s)
 unset($query, $success);
+
+// Check is not send email 
+if (!$isSendEmail) {
+
+	// Set response
+	Util::setResponse('email_changed');
+}
 
 // Set language
 $lang = new Language($args['lang']);

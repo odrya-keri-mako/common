@@ -247,14 +247,54 @@ class Database {
 		}
 	}
 
-	// Get table fields
+  // Get table fields name
+  public function getFieldsName($tbl, $isAssoc=true, $db=null) {
+
+    // Check table parameter
+    if (!is_string($tbl) || 
+            empty(($tbl = trim($tbl)))) return null;
+
+    // Check is associative array parameter
+    if (!is_bool($isAssoc)) $isAssoc = true;
+
+    // When database not exist, then get current
+    if (!is_string($db) || 
+            empty(($db = trim($db)))) $db = $this->get_db();
+
+    // Create query
+    $query = "SELECT  `column_name` AS `name`
+                FROM  `information_schema`.`columns`
+                WHERE `table_schema` = :db AND 
+                      `table_name` = :tbl
+            ORDER BY  `ordinal_position`;";
+    
+    // Execute query
+    $result = $this->execute($query, array(
+      'db'  => $db,
+      'tbl' => $tbl
+    ));
+
+    // When result exist, then convert
+    if (!is_null($result)) {
+      if ($isAssoc)
+            $result = array_fill_keys(array_column($result, 'name'), null);
+      else  $result = array_column($result, 'name');
+    }
+
+    // Retur result
+    return $result;
+  }
+
+	// Get table fields type
   public function get_fields($tbl, $db=null) {
 
     // Check table exist
-    if (!is_string($tbl)) return null;
+    if (!is_string($tbl) || 
+            empty(($tbl = trim($tbl)))) return null;
 
     // When database not exist, then get current
-    if (!is_string($db)) $db = $this->get_db();
+    if (!is_string($db) || 
+            empty(($db = trim($db)))) $db = $this->get_db();
 
     // Create query
     $query = "SELECT  `column_name` AS `name`,
@@ -315,8 +355,8 @@ class Database {
     
     // Execute query
     $result = $this->execute($query, array(
-      'db'  => trim($db),
-      'tbl' => trim($tbl)
+      'db'  => $db,
+      'tbl' => $tbl
     ));
 
     // Retur result

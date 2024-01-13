@@ -20,31 +20,63 @@
 						name="dataForm" novalidate>
 
 				<!-- Name -->
-				<div class="row input-row mt-1 mb-0">
+				<div class="row input-row mb-2"
+						 ng-if="methods.isFieldExist('name')">
 
 					<!-- Label -->
 					<label for="name" 
+								 class="col-form-label col-form-label-sm col-md-4 text-md-end fw-semibold">
+						<i class="fa-solid fa-star fa-2xs text-danger"></i>
+						<i class="fa-solid fa-user me-1"></i>
+						<span>{{'name' | translate:lang.data | capitalize}}:</span>
+					</label>
+
+					<!-- Input name -->
+					<div class="col-11 col-md-7 position-relative">
+						<input id="name"
+									 name="name" 
+									 type="text"
+									 ng-attr-placeholder="{{('name' | translate:lang.data)}}"
+									 class="form-control form-control-sm"
+									 spellcheck="false" 
+									 autocomplete="off" 
+									 required
+									 maxlength="50"
+									 ng-model="model.name"
+									 ng-init="model.name=null"
+									 ng-blur="methods.removeWhitespaces($event)"
+									 ng-clear-icon
+									 ng-check-mark>
+					</div>
+				</div>
+
+				<!-- User name -->
+				<div class="row input-row mt-1 mb-0"
+						 ng-if="methods.getOptionsKey('isNameDetail')">
+
+					<!-- Label -->
+					<label for="user_name" 
 								 class="col-form-label col-form-label-sm col-md-4 text-md-end fw-semibold">
 						<i class="fa-solid fa-star fa-2xs text-danger"></i>
 						<i class="fa-solid fa-user fa-lg me-1"></i>
 						<span>{{'name' | translate:lang.data | capitalize}}:</span>
 					</label>
 
-					<!-- Input name -->
+					<!-- Input user name -->
 					<div class="col-11 col-md-7">
 
 						<!-- Input group -->
 						<div class="input-group">
 
-							<!-- Input name -->
-							<input id="name"
-										 name="name" 
+							<!-- Input user name -->
+							<input id="user_name"
+										 name="user_name" 
 										 type="text"
 										 class="form-control form-control-sm input-disabled"
 										 spellcheck="false" 
 									 	 autocomplete="off"
-									   ng-model="model.name"
-									   ng-init="model.name=null"
+									   ng-model="model.user_name"
+									   ng-init="model.user_name=null"
 										 disabled>
 
 							<!-- Button toggle -->
@@ -69,13 +101,15 @@
 				</div>
 
 				<!-- Name detail container -->
-				<div class="name-detail-container mb-2 ps-1 overflow-hidden show">
+				<div class="name-detail-container mb-2 ps-1 overflow-hidden show"
+						 ng-if="methods.getOptionsKey('isNameDetail')">
 
 					<!-- Dividing line -->
 					<hr class="text-muted mt-2">
 
 					<!-- Prefix name -->
-					<div class="row input-row mt-1 mb-2">
+					<div class="row input-row mt-1 mb-2"
+							 ng-if="methods.isFieldExist('prefix_name')">
 
 						<!-- Label -->
 						<label for="prefix_name" 
@@ -102,7 +136,8 @@
 					</div>
 
 					<!-- First name -->
-					<div class="row input-row mb-2">
+					<div class="row input-row mb-2"
+							 ng-if="methods.isFieldExist('first_name')">
 
 						<!-- Label -->
 						<label for="first_name" 
@@ -132,7 +167,8 @@
 					</div>
 
 					<!-- Middle name -->
-					<div class="row input-row mb-2">
+					<div class="row input-row mb-2"
+							 ng-if="methods.isFieldExist('middle_name')">
 
 						<!-- Label -->
 						<label for="middle_name" 
@@ -159,7 +195,8 @@
 					</div>
 
 					<!-- Last name -->
-					<div class="row input-row mb-2">
+					<div class="row input-row mb-2"
+							 ng-if="methods.isFieldExist('last_name')">
 
 						<!-- Label -->
 						<label for="last_name" 
@@ -189,7 +226,8 @@
 					</div>
 
 					<!-- Suffix name -->
-					<div class="row input-row mb-3">
+					<div class="row input-row mb-3"
+							 ng-if="methods.isFieldExist('suffix_name')">
 
 						<!-- Label -->
 						<label for="suffix_name" 
@@ -216,7 +254,8 @@
 					</div>
 
 					<!-- Nick name -->
-					<div class="row input-row mb-2">
+					<div class="row input-row mb-2"
+							 ng-if="methods.isFieldExist('nick_name')">
 
 						<!-- Label -->
 						<label for="nick_name" 
@@ -243,10 +282,12 @@
 				</div>
 
 				<!-- Dividing line -->
-				<hr class="text-muted mt-2">
+				<hr class="text-muted mt-2"
+						ng-if="methods.getOptionsKey('isNameDetail')">
 
 				<!-- Born -->
-				<div class="row input-row mb-0">
+				<div class="row input-row mb-0"
+						 ng-if="methods.isFieldExist('born')">
 
 					<!-- Label -->
 					<label for="born" 
@@ -279,11 +320,13 @@
 				</div>
 
 				<!-- Born rule -->
-				<ng-show-rule rule-id="born_rule"
+				<ng-show-rule ng-if="methods.getOptionsKey('isBornShowRule')"
+											rule-id="born_rule"
 											punctuation-mark="!"></ng-show-rule>
 
 				<!-- Gender -->
-				<fieldset class="row input-row mb-2">
+				<fieldset class="row input-row mb-2"
+									ng-if="methods.isFieldExist('gender')">
 
 					<!-- Label -->
 					<legend class="col-form-label col-form-label-sm col-md-4 pt-0 text-md-end fw-semibold">
@@ -330,7 +373,8 @@
 				</fieldset>
 
 				<!-- Image -->
-				<div class="row input-row mb-5">
+				<div class="row input-row mb-5"
+						 ng-if="methods.isFieldExist('img')">
 
 					<!-- Label -->
 					<div class="col-form-label col-form-label-sm col-md-4 text-md-end fw-semibold">
@@ -372,7 +416,8 @@
 				</div>
 
 				<!-- Country -->
-				<div class="row input-row mb-2">
+				<div class="row input-row mb-2"
+						 ng-if="methods.isFieldExist('country')">
 
 					<!-- Label -->
 					<label for="country" 
@@ -402,7 +447,8 @@
 				</div>
 
 				<!-- Phone (Country code / Phone) -->
-				<div class="row input-row mb-0">
+				<div class="row input-row mb-0"
+						 ng-if="methods.isFieldExist('phone')">
 
 					<!-- Label -->
 					<label for="phone" 
@@ -454,13 +500,15 @@
 				</div>
 
 				<!-- Phone rule -->
-				<ng-show-rule rule-id="phone_rule"
+				<ng-show-rule ng-if="methods.getOptionsKey('isPhoneShowRule')"
+											rule-id="phone_rule"
 											pre-width="120"
 											is-capitalize="false"
 											punctuation-mark="."></ng-show-rule>
 
 				<!-- City -->
-				<div class="row input-row mb-2">
+				<div class="row input-row mb-2"
+						 ng-if="methods.isFieldExist('city')">
 
 					<!-- Label -->
 					<label for="city" 
@@ -490,7 +538,8 @@
 				</div>
 
 				<!-- Post code -->
-				<div class="row input-row mb-0">
+				<div class="row input-row mb-0"
+						 ng-if="methods.isFieldExist('postcode')">
 
 					<!-- Label -->
 					<label for="postcode" 
@@ -523,12 +572,14 @@
 				</div>
 
 				<!-- Postcode rule -->
-				<ng-show-rule rule-id="postcode_rule"
+				<ng-show-rule ng-if="methods.getOptionsKey('isPostcodeShowRule')"
+											rule-id="postcode_rule"
 											is-capitalize="false"
 											punctuation-mark="."></ng-show-rule>
 
 				<!-- Address -->
-				<div class="row input-row mb-2">
+				<div class="row input-row mb-2"
+						 ng-if="methods.isFieldExist('address')">
 
 					<!-- Label -->
 					<label for="address" 
@@ -557,10 +608,11 @@
 				</div>
 
 				<!-- Dividing line -->
-				<hr class="text-muted">
+				<hr class="text-muted" ng-if="methods.getOptionsKey('isDividingPlusLine')">
 
 				<!-- Email -->
-				<div class="row input-row mb-0">
+				<div class="row input-row mb-0"
+						 ng-class="{'mb-2': !methods.getOptionsKey('isEmailShowRule')}">
 
 					<!-- Label -->
 					<label for="email" 
@@ -591,12 +643,14 @@
 				</div>
 
 				<!-- Email rule -->
-				<ng-show-rule rule-id="email_register_rule" 
+				<ng-show-rule ng-if="methods.getOptionsKey('isEmailShowRule')"
+											rule-id="email_register_rule" 
 											rule-class="text-danger"
 											punctuation-mark="!"></ng-show-rule>
 
 				<!-- Email confirm -->
-				<div class="row input-row mb-2">
+				<div class="row input-row mb-2"
+						 ng-if="methods.getOptionsKey('isEmailConfirm')">
 
 					<!-- Label -->
 					<label for="email_confirm" 
@@ -630,7 +684,8 @@
 				</div>
 
 				<!-- Password -->
-				<div class="row input-row mb-0">
+				<div class="row input-row mb-0"
+						 ng-class="{'mb-2': !methods.getOptionsKey('isPasswordShowRule')}">
 
 					<!-- Label -->
 					<label for="password" 
@@ -661,10 +716,11 @@
 				</div>
 
 				<!-- Password rule -->
-				<ng-show-rule></ng-show-rule>
+				<ng-show-rule ng-if="methods.getOptionsKey('isPasswordShowRule')"></ng-show-rule>
 
 				<!-- Password confirm -->
-				<div class="row input-row mb-2">
+				<div class="row input-row mb-2"
+						 ng-if="methods.getOptionsKey('isPasswordConfirm')">
 
 					<!-- Label -->
 					<label for="password_confirm" 
@@ -701,7 +757,7 @@
 				<ng-show-password></ng-show-password>
 
 				<!-- Test code -->
-				<ng-test-code></ng-test-code>
+				<ng-test-code ng-if="methods.getOptionsKey('isTestCode')"></ng-test-code>
 			</form>
 
 			<!-- Footer -->

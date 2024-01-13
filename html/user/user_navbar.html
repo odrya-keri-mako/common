@@ -5,7 +5,9 @@
 								$root.state.id !== 'password_frogot'">
 			<a class="nav-link" 
 				 ui-sref="login" 
-				 ui-sref-active="active">
+				 ui-sref-active="active"
+				 data-bs-toggle="collapse" 
+         data-bs-target=".navbar-collapse.show">
 				<i class="fa-solid fa-right-to-bracket me-1"></i>
 				<span class="text-capitalize text-small-caps">
 					{{'login' | translate:$root.lang.data}}
@@ -17,7 +19,9 @@
 								$root.state.id === 'password_frogot')">
 			<a class="nav-link" 
 				 ui-sref="register" 
-				 ui-sref-active="active">
+				 ui-sref-active="active"
+				 data-bs-toggle="collapse" 
+         data-bs-target=".navbar-collapse.show">
 				<i class="fa-solid fa-id-card me-1"></i>
 				<span class="text-capitalize text-small-caps">
 					{{'register' | translate:$root.lang.data}}
@@ -43,7 +47,7 @@
 			</a>
 			<ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end mt-2" 
 					aria-labelledby="dropdown-menu-user">
-				<li>
+				<li class="nav-item">
 					<a class="dropdown-item disabled" href="#">
 						<span class="text-capitalize text-small-caps" 
 									ng-if="$root.user.nick_name">
@@ -59,7 +63,10 @@
 				<li>
 					<a class="dropdown-item"
 						 ng-class="{'disabled': $root.state.id === 'user' && userEvent === 'profile'}"
-						 ui-sref="profile">
+						 ui-sref="profile"
+						 ui-sref-active="active"
+						 data-bs-toggle="collapse" 
+          	 data-bs-target=".navbar-collapse.show">
 						<i class="fa-solid fa-user fa-lg"></i>
 						<span class="text-capitalize text-small-caps">
 							{{'profile' | translate:$root.lang.data}}
@@ -70,7 +77,10 @@
 				<li>
 					<a class="dropdown-item" 
 						 href="javascript:void(0)" 
-						 ng-click="logout()">
+						 ng-click="logout()"
+						 ui-sref-active="active"
+						 data-bs-toggle="collapse" 
+          	 data-bs-target=".navbar-collapse.show">
 						<i class="fa-solid fa-right-from-bracket fa-lg"></i>
 						<span class="text-capitalize text-small-caps">
 							{{'logout' | translate:$root.lang.data}}

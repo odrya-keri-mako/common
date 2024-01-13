@@ -1,30 +1,527 @@
 {
-  "id": "",
-  "type": "",
-  "prefix_name": "",
-  "first_name": "",
-  "middle_name": "",
-  "last_name": "",
-  "suffix_name": "",
-  "nick_name": "",
-  "born": "",
-  "gender": "",
-  "img": "",
-  "img_type": "",
-  "country": "",
-  "country_code": "",
-  "phone": "",
-  "city": "",
-  "postcode": "",
-  "address": "",
-  "email": "",
-  "password": "",
-  "created": "",
-  "email_verification_code": "",
-  "email_confirmed": "",
-  "modified": "",
-  "last_login": "",
-  "wrong_attempts": "",
-  "valid": "",
-  "type_old": ""
+  "tbl": "user",
+	"icon": "fas fa-users",
+  "title": "users",
+  "fields": [
+    {
+      "name": "id",
+			"inputType": "number",
+			"isRequired": true,
+			"isModified": false,
+			"isDuplicated": false,
+			"isAutoIncrement": true,
+			"label": {
+				"table": {
+					"content": "id.",
+					"order": 1,
+					"labelClass" : "text-center",
+					"dataClass" : "text-end",
+					"isLabelTranslate": true
+				},
+				"page": {
+					"content": "identifier",
+					"order": 1,
+					"dataClass" : "text-end",
+					"dataStyle": "{'max-width':'60px'}",
+					"isLabelTranslate": true
+				}
+			}
+    },
+    {
+      "name": "type",
+			"inputType": "select",
+			"isRequired": true,
+			"relationship": {
+				"tbl": "type",
+				"id": "id",
+				"name": "name",
+				"filter": "`type`=\"USER\"",
+				"order": "`id`",
+				"isTranslate": true
+			},
+			"label": {
+				"table": {
+					"isVisible": false
+				},
+				"page": {
+					"content": "type",
+					"order": 2,
+					"isLabelTranslate": true,
+					"dataName": "typeName",
+					"isDataTranslate": true
+				}
+			}
+    },
+    {
+      "name": "typeName",
+			"isTemporary": true,
+			"label": {
+				"table": {
+					"content": "type",
+					"order": 2,
+					"isLabelTranslate": true,
+					"isDataTranslate": true
+				},
+				"page": {
+					"isVisible": false
+				}
+			}
+    },
+    {
+      "name": "name",
+      "isTemporary": true,
+			"label": {
+				"table": {
+					"content": "name",
+					"order": 3,
+					"isLabelTranslate": true,
+					"dataLangName": true
+				},
+				"page": {
+					"isVisible": false
+				}
+			}
+    },
+    {
+      "name": "prefix_name",
+			"label": {
+				"table": {
+					"isVisible": false
+				},
+				"page": {
+					"content": "prefix_name",
+					"order": 5,
+					"isLabelTranslate": true
+				}
+			}
+    },
+    {
+      "name": "first_name",
+			"isRequired": true,
+			"label": {
+				"table": {
+					"isVisible": false
+				},
+				"page": {
+					"content": "first_name",
+					"order": 6,
+					"isLabelTranslate": true
+				}
+			}
+    },
+    {
+      "name": "middle_name",
+			"label": {
+				"table": {
+					"isVisible": false
+				},
+				"page": {
+					"content": "middle_name",
+					"order": 7,
+					"isLabelTranslate": true
+				}
+			}
+    },
+    {
+      "name": "last_name",
+			"isRequired": true,
+			"label": {
+				"table": {
+					"isVisible": false
+				},
+				"page": {
+					"content": "last_name",
+					"order": 8,
+					"isLabelTranslate": true
+				}
+			}
+    },
+    {
+      "name": "suffix_name",
+			"label": {
+				"table": {
+					"isVisible": false
+				},
+				"page": {
+					"content": "suffix_name",
+					"order": 9,
+					"isLabelTranslate": true
+				}
+			}
+    },
+		{
+      "name": "nick_name",
+			"isRequired": false,
+			"label": {
+				"table": {
+					"isVisible": false
+				},
+				"page": {
+					"content": "nick_name",
+					"order": 10,
+					"isLabelTranslate": true
+				}
+			}
+    },
+    {
+      "name": "born",
+      "inputType": "date",
+			"isRequired": true,
+			"label": {
+				"table": {
+					"content": "born",
+					"order": 4,
+					"labelClass": "text-center",
+					"dataClass": "text-center",
+					"isLabelTranslate": true
+				},
+				"page": {
+					"content": "born",
+					"order": 10,
+					"isLabelTranslate": true
+				}
+			}
+    },
+    {
+      "name": "gender",
+			"inputType": "radio",
+			"isRequired": true,
+			"label": {
+				"table": {
+					"isVisible": false
+				},
+				"page": {
+					"content": "gender",
+					"order": 11,
+					"isLabelTranslate": true,
+					"dataName": [{"id":"male","value":"M"},{"id":"female","value":"F"}],
+        	"isDataNameTranslate": true
+				}
+			}
+		},
+		{
+      "name": "genderName",
+			"isTemporary": true,
+			"label": {
+				"table": {
+					"content": "gender",
+					"order": 5,
+					"isLabelTranslate": true,
+					"isDataTranslate": true
+				},
+				"page": {
+					"isVisible": false
+				}
+			}
+		},
+		{
+      "name": "img",
+			"inputType": "file",
+			"isRequired": false,
+			"label": {
+				"table": {
+					"content": "image",
+					"order": 8,
+					"isLabelTranslate": true
+				},
+				"page": {
+					"content": "image",
+					"order": 15,
+					"isLabelTranslate": true
+				}
+			}
+    },
+		{
+      "name": "img_type",
+			"isRequired": false,
+			"label": {
+				"table": {
+					"content": "image_type",
+					"order": 8,
+					"isLabelTranslate": true
+				},
+				"page": {
+					"content": "image_type",
+					"order": 15,
+					"isLabelTranslate": true
+				}
+			}
+    },
+		{
+      "name": "country",
+			"inputType": "select",
+			"isRequired": false,
+			"label": {
+				"table": {
+					"content": "country",
+					"order": 8,
+					"isLabelTranslate": true
+				},
+				"page": {
+					"content": "country",
+					"order": 15,
+					"isLabelTranslate": true
+				}
+			}
+    },
+		{
+      "name": "country_code",
+			"inputType": "select",
+			"isRequired": false,
+			"label": {
+				"table": {
+					"content": "country_code",
+					"order": 8,
+					"isLabelTranslate": true
+				},
+				"page": {
+					"content": "country_code",
+					"order": 15,
+					"isLabelTranslate": true
+				}
+			}
+    },
+		{
+      "name": "phone",
+			"isRequired": false,
+			"label": {
+				"table": {
+					"content": "phone",
+					"order": 8,
+					"isLabelTranslate": true
+				},
+				"page": {
+					"content": "phone",
+					"order": 15,
+					"isLabelTranslate": true
+				}
+			}
+    },
+		{
+      "name": "city",
+			"isRequired": false,
+			"label": {
+				"table": {
+					"content": "city",
+					"order": 8,
+					"isLabelTranslate": true
+				},
+				"page": {
+					"content": "city",
+					"order": 15,
+					"isLabelTranslate": true
+				}
+			}
+    },
+		{
+      "name": "postcode",
+			"isRequired": false,
+			"label": {
+				"table": {
+					"content": "postcode",
+					"order": 8,
+					"isLabelTranslate": true
+				},
+				"page": {
+					"content": "postcode",
+					"order": 15,
+					"isLabelTranslate": true
+				}
+			}
+    },
+    {
+      "name": "address",
+			"inputType": "textarea",
+			"isRequired": true,
+			"label": {
+				"table": {
+					"content": "address",
+					"order": 8,
+					"isLabelTranslate": true
+				},
+				"page": {
+					"content": "address",
+					"order": 15,
+					"isLabelTranslate": true
+				}
+			}
+    },
+    {
+      "name": "email",
+			"isRequired": true,
+			"label": {
+				"table": {
+					"content": "email",
+					"order": 10,
+					"isLabelTranslate": true
+				},
+				"page": {
+					"content": "email",
+					"order": 17,
+					"isLabelTranslate": true
+				}
+			}
+    },
+    {
+      "name": "password",
+			"isRequired": true,
+			"label": {
+				"table": {
+					"content": "password",
+					"order": 11,
+					"isLabelTranslate": true
+				},
+				"page": {
+					"content": "password",
+					"order": 18,
+					"isLabelTranslate": true
+				}
+			}
+    },
+    {
+      "name": "valid",
+			"type": "boolean",
+			"inputType": "checkbox",
+			"isRequired": true,
+			"label": {
+				"table": {
+					"isVisible": false
+				},
+				"page": {
+					"content": "valid",
+					"order": 20,
+					"isLabelTranslate": true,
+					"dataClass": "",
+					"dataStyle": "{'width':'18px','height':'18px','border-radius':0}"
+				}
+			}
+    },
+		{
+      "name": "validName",
+			"isTemporary": true,
+			"label": {
+				"table": {
+					"content": "valid",
+					"order": 14,
+					"isLabelTranslate": true,
+					"isDataTranslate": true
+				},
+				"page": {
+					"isVisible": false
+				}
+			}
+    },
+    {
+      "name": "last_login",
+			"inputType": "datetime-local",
+			"isReadOnly": true,
+			"isModified": false,
+			"label": {
+				"table": {
+					"isVisible": false
+				},
+				"page": {
+					"content": "last_login",
+					"order": 21,
+					"isLabelTranslate": true
+				}
+			}
+    },
+    {
+      "name": "wrong_attempts",
+			"inputType": "number",
+			"isReadOnly": true,
+			"isModified": false,
+			"label": {
+				"table": {
+					"isVisible": false
+				},
+				"page": {
+					"content": "wrong_attempts",
+					"order": 22,
+					"isLabelTranslate": true,
+					"dataClass" : "text-end",
+					"dataStyle": "{'max-width':'60px'}"
+				}
+			}
+    },
+    {
+      "name": "created",
+			"inputType": "datetime-local",
+			"isReadOnly": true,
+			"isModified": false,
+			"label": {
+				"table": {
+					"isVisible": false
+				},
+				"page": {
+					"content": "created",
+					"order": 21,
+					"isLabelTranslate": true
+				}
+			}
+    },
+		{
+      "name": "email_confirmed",
+			"inputType": "datetime-local",
+			"isReadOnly": true,
+			"isModified": false,
+			"label": {
+				"table": {
+					"isVisible": false
+				},
+				"page": {
+					"content": "email_confirmed",
+					"order": 21,
+					"isLabelTranslate": true
+				}
+			}
+    },
+		{
+      "name": "modified",
+			"inputType": "datetime-local",
+			"isReadOnly": true,
+			"isModified": false,
+			"label": {
+				"table": {
+					"isVisible": false
+				},
+				"page": {
+					"content": "modified",
+					"order": 21,
+					"isLabelTranslate": true
+				}
+			}
+    },
+		{
+      "name": "email_verification_code",
+			"isReadOnly": true,
+			"isModified": false,
+			"label": {
+				"table": {
+					"isVisible": false
+				},
+				"page": {
+					"content": "email_verification_code",
+					"order": 21,
+					"isLabelTranslate": true
+				}
+			}
+    },
+		{
+      "name": "type_old",
+			"isReadOnly": true,
+			"isModified": false,
+			"label": {
+				"table": {
+					"isVisible": false
+				},
+				"page": {
+					"content": "type_old",
+					"order": 21,
+					"isLabelTranslate": true
+				}
+			}
+    }
+  ]
 }

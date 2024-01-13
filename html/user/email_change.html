@@ -99,7 +99,7 @@
 				</div>
 
 				<!-- Password rule -->
-				<ng-show-rule></ng-show-rule>
+				<ng-show-rule ng-if="methods.getOptionsKey('isPasswordShowRule')"></ng-show-rule>
 				
 				<!-- Show/Hide password -->
 				<ng-show-password></ng-show-password>
@@ -142,12 +142,14 @@
 				</div>
 
 				<!-- Email rule -->
-				<ng-show-rule rule-id="email_rule" 
+				<ng-show-rule ng-if="methods.getOptionsKey('isEmailShowRule')"
+											rule-id="email_rule" 
 											rule-class="text-danger"
 											punctuation-mark="!"></ng-show-rule>
 											
 				<!-- Email new confirm -->
-				<div class="row input-row mb-2">
+				<div class="row input-row mb-2"
+						 ng-if="methods.getOptionsKey('isEmailConfirm')">
 					
 					<!-- Label -->
 					<label for="email_confirm" 
@@ -186,7 +188,7 @@
 				</div>
 				
 				<!-- Test code -->
-				<ng-test-code></ng-test-code>
+				<ng-test-code ng-if="methods.getOptionsKey('isTestCode')"></ng-test-code>
 			</form>
 
 			<!-- Footer -->
