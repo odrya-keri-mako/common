@@ -53,7 +53,11 @@
 									ng-if="$root.user.nick_name">
 							{{$root.user.nick_name}}
 						</span>
-						<ng-person-name ng-if="!$root.user.nick_name"
+						<span class="text-capitalize text-small-caps" 
+									ng-if="$root.user.name">
+							{{$root.user.name}}
+						</span>
+						<ng-person-name ng-if="!$root.user.nick_name && !$root.user.name"
 														person="$root.user" 
 														person-class="text-capitalize text-small-caps">
 						</ng-person-name>

@@ -129,17 +129,17 @@ if (array_key_exists('last_login', $userFields) ||
 
 	// Execute query with arguments
 	$success = $db->execute($query, $params);
+
+	// Check not success
+	if (!$success['affectedRows']) {
+
+		// Set error
+		Util::setError('failed_administer_login');
+	}
 }
 
 // Close connection
 $db = null;
-
-// Check not success
-if (!$success['affectedRows']) {
-
-	// Set error
-	Util::setError('failed_administer_login');
-}
 
 // Set response
 Util::setResponse($result);
