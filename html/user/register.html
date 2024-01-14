@@ -51,7 +51,7 @@
 				</div>
 
 				<!-- User name -->
-				<div class="row input-row mt-1 mb-0"
+				<div class="row input-row mt-1 mb-2"
 						 ng-if="methods.getOptionsKey('isNameDetail')">
 
 					<!-- Label -->
@@ -107,154 +107,60 @@
 					<!-- Dividing line -->
 					<hr class="text-muted mt-2">
 
-					<!-- Prefix name -->
+					<!-- Names detail -->
 					<div class="row input-row mt-1 mb-2"
-							 ng-if="methods.isFieldExist('prefix_name')">
+							 ng-if="methods.isFieldExist(key)"
+							 ng-repeat="key in $root.lang.rule[$root.lang.type]">
 
 						<!-- Label -->
-						<label for="prefix_name" 
+						<label for="{{key}}" 
 									 class="col-form-label col-form-label-sm col-md-4 text-md-end fw-semibold">
-							{{'prefix_name' | translate:lang.data | capitalize}}:
+							<i class="fa-solid fa-star fa-2xs text-danger"
+								 ng-if="['first_name','last_name'].includes(key)"></i>
+							{{key | translate:lang.data | capitalize}}:
 						</label>
 
-						<!-- Input prefix name -->
+						<!-- Input -->
 						<div class="col-11 col-md-7 position-relative">
-							<input id="prefix_name"
-										 name="prefix_name" 
+
+							<!-- Required inputs -->
+							<input ng-if="['first_name','last_name'].includes(key)"
+										 id="{{key}}"
+										 name="{{key}}" 
 										 type="text"
-										 ng-attr-placeholder="{{('prefix_name' | translate:lang.data)}}"
+										 ng-attr-placeholder="{{(key | translate:lang.data)}}"
 									 	 class="form-control form-control-sm"
 									 	 spellcheck="false" 
 									 	 autocomplete="off" 
-									 	 maxlength="20"
-									 	 ng-model="model.prefix_name"
-									 	 ng-init="model.prefix_name=null"
+										 ng-attr-maxlength="{{['prefix_name','sufix_name'].includes(key)?20:50}}"
+									 	 ng-model="model[key]"
+										 required
+									 	 ng-init="model[key]=null"
 										 ng-change="nameChanged()"
 										 ng-blur="methods.removeWhitespaces($event)"
+										 ng-check-mark
 									 	 ng-clear-icon>
-						</div>
-					</div>
 
-					<!-- First name -->
-					<div class="row input-row mb-2"
-							 ng-if="methods.isFieldExist('first_name')">
-
-						<!-- Label -->
-						<label for="first_name" 
-									 class="col-form-label col-form-label-sm col-md-4 text-md-end fw-semibold">
-							<i class="fa-solid fa-star fa-2xs text-danger"></i>
-							<span>{{'first_name' | translate:lang.data | capitalize}}:</span>
-						</label>
-
-						<!-- Input first name -->
-						<div class="col-11 col-md-7 position-relative">
-							<input id="first_name"
-										 name="first_name" 
-										 type="text"
-										 ng-attr-placeholder="{{('first_name' | translate:lang.data)}}"
-									 	 class="form-control form-control-sm"
-									 	 spellcheck="false" 
-									 	 autocomplete="off" 
-									 	 required
-									 	 maxlength="50"
-									 	 ng-model="model.first_name"
-									 	 ng-init="model.first_name=null"
-										 ng-change="nameChanged()"
-										 ng-blur="methods.removeWhitespaces($event)"
-									 	 ng-clear-icon
-									 	 ng-check-mark>
-						</div>
-					</div>
-
-					<!-- Middle name -->
-					<div class="row input-row mb-2"
-							 ng-if="methods.isFieldExist('middle_name')">
-
-						<!-- Label -->
-						<label for="middle_name" 
-									 class="col-form-label col-form-label-sm col-md-4 text-md-end fw-semibold">
-							{{'middle_name' | translate:lang.data | capitalize}}:
-						</label>
-
-						<!-- Input middle name -->
-						<div class="col-11 col-md-7 position-relative">
-							<input id="middle_name"
-										 name="middle_name" 
-										 type="text"
-										 ng-attr-placeholder="{{('middle_name' | translate:lang.data)}}"
-									 	 class="form-control form-control-sm"
-									 	 spellcheck="false" 
-									 	 autocomplete="off" 
-									 	 maxlength="50"
-									 	 ng-model="model.middle_name"
-									 	 ng-init="model.middle_name=null"
-										 ng-change="nameChanged()"
-										 ng-blur="methods.removeWhitespaces($event)"
-									 	 ng-clear-icon>
-						</div>
-					</div>
-
-					<!-- Last name -->
-					<div class="row input-row mb-2"
-							 ng-if="methods.isFieldExist('last_name')">
-
-						<!-- Label -->
-						<label for="last_name" 
-									 class="col-form-label col-form-label-sm col-md-4 text-md-end fw-semibold">
-							<i class="fa-solid fa-star fa-2xs text-danger"></i>
-							{{'last_name' | translate:lang.data | capitalize}}:
-						</label>
-
-						<!-- Input last name -->
-						<div class="col-11 col-md-7 position-relative">
-							<input id="last_name"
-										 name="last_name" 
-										 type="text"
-										 ng-attr-placeholder="{{('last_name' | translate:lang.data)}}"
-									 	 class="form-control form-control-sm"
-									 	 spellcheck="false" 
-									 	 autocomplete="off" 
-									 	 required
-									 	 maxlength="50"
-									 	 ng-model="model.last_name"
-									 	 ng-init="model.last_name=null"
-										 ng-change="nameChanged()"
-										 ng-blur="methods.removeWhitespaces($event)"
-									 	 ng-clear-icon
-									 	 ng-check-mark>
-						</div>
-					</div>
-
-					<!-- Suffix name -->
-					<div class="row input-row mb-3"
-							 ng-if="methods.isFieldExist('suffix_name')">
-
-						<!-- Label -->
-						<label for="suffix_name" 
-									 class="col-form-label col-form-label-sm col-md-4 text-md-end fw-semibold">
-							{{'suffix_name' | translate:lang.data | capitalize}}:
-						</label>
-
-						<!-- Input suffix name -->
-						<div class="col-11 col-md-7 position-relative">
-							<input id="suffix_name"
-										 name="suffix_name" 
-										 type="text"
-										 ng-attr-placeholder="{{('suffix_name' | translate:lang.data)}}"
-									 	 class="form-control form-control-sm"
-									 	 spellcheck="false" 
-									 	 autocomplete="off" 
-									 	 maxlength="20"
-									 	 ng-model="model.suffix_name"
-										 ng-init="model.suffix_name=null"
-										 ng-change="nameChanged()"
-										 ng-blur="methods.removeWhitespaces($event)"
-									 	 ng-clear-icon>
+							<!-- Optional inputs -->
+							<input ng-if="!['first_name','last_name'].includes(key)"
+											id="{{key}}"
+											name="{{key}}" 
+											type="text"
+											ng-attr-placeholder="{{(key | translate:lang.data)}}"
+											class="form-control form-control-sm"
+											spellcheck="false" 
+											autocomplete="off" 
+											ng-attr-maxlength="{{['prefix_name','sufix_name'].includes(key)?20:50}}"
+											ng-model="model[key]"
+											ng-init="model[key]=null"
+											ng-change="nameChanged()"
+											ng-blur="methods.removeWhitespaces($event)"
+											ng-clear-icon>
 						</div>
 					</div>
 
 					<!-- Nick name -->
-					<div class="row input-row mb-2"
+					<div class="row input-row mt-1 mb-2"
 							 ng-if="methods.isFieldExist('nick_name')">
 
 						<!-- Label -->
@@ -279,14 +185,14 @@
 									 	 ng-clear-icon>
 						</div>
 					</div>
-				</div>
 
-				<!-- Dividing line -->
-				<hr class="text-muted mt-2"
-						ng-if="methods.getOptionsKey('isNameDetail')">
+					<!-- Dividing line -->
+					<hr class="text-muted my-3">
+				</div>
 
 				<!-- Born -->
 				<div class="row input-row mb-0"
+						 ng-class="{'mb-2': !methods.getOptionsKey('isBornShowRule')}"
 						 ng-if="methods.isFieldExist('born')">
 
 					<!-- Label -->
@@ -329,7 +235,8 @@
 									ng-if="methods.isFieldExist('gender')">
 
 					<!-- Label -->
-					<legend class="col-form-label col-form-label-sm col-md-4 pt-0 text-md-end fw-semibold">
+					<legend class="col-form-label col-form-label-sm 
+												 col-md-4 pt-0 text-md-end fw-semibold">
 						<i class="fa-solid fa-star fa-2xs text-danger"></i>
 						<i class="fa-solid fa-venus-mars me-1"></i>
 						<span class="text-capitalize">
@@ -448,6 +355,7 @@
 
 				<!-- Phone (Country code / Phone) -->
 				<div class="row input-row mb-0"
+						 ng-class="{'mb-2': !methods.getOptionsKey('isPhoneShowRule')}"
 						 ng-if="methods.isFieldExist('phone')">
 
 					<!-- Label -->
@@ -539,6 +447,7 @@
 
 				<!-- Post code -->
 				<div class="row input-row mb-0"
+						 ng-class="{'mb-2': !methods.getOptionsKey('isPostcodeShowRule')}"
 						 ng-if="methods.isFieldExist('postcode')">
 
 					<!-- Label -->

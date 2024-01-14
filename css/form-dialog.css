@@ -31,7 +31,7 @@
           transition: height .3s ease-in-out;
 }
 .name-detail-container.show {
-  height: 453px;
+  height: 460px;
 }
 @media (min-width: 768px) {
   .form-dialog .form-dialog-body .fa-hand-point-right {
@@ -39,7 +39,7 @@
             transform: rotate(0deg);
   }
   .name-detail-container.show {
-    height: 267px;
+    height: 273px;
   }
 }
 input.input-disabled,

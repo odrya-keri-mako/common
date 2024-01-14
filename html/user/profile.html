@@ -47,7 +47,8 @@
 				</div>
 
 				<!-- User type -->
-				<div class="row input-row mb-2">
+				<div class="row input-row mb-2"
+						 ng-if="methods.isFieldExist('type')">
 
 					<!-- Label -->
 					<label for="type" 
@@ -110,8 +111,42 @@
 				<!-- Dividing line -->
 				<hr class="text-muted" ng-show="helper.isInEditMode">
 
+				<!-- Name -->
+				<div class="row input-row mb-2"
+						 ng-if="methods.isFieldExist('name')">
+
+					<!-- Label -->
+					<label for="name" 
+								 class="col-form-label col-form-label-sm col-md-4 text-md-end fw-semibold">
+						<i class="fa-solid fa-star fa-2xs text-danger"></i>
+						<i class="fa-solid fa-user me-1"></i>
+						<span>{{'name' | translate:lang.data | capitalize}}:</span>
+					</label>
+
+					<!-- Input name -->
+					<div class="col-11 col-md-7 position-relative">
+						<input id="name"
+									 name="name" 
+									 type="text"
+									 ng-attr-placeholder="{{helper.isInEditMode ? 
+										('name' | translate:lang.data) : ''}}"
+									 class="form-control form-control-sm"
+									 ng-class="{'input-disabled': !helper.isInEditMode}"
+									 spellcheck="false" 
+									 autocomplete="off" 
+									 required
+									 maxlength="50"
+									 ng-model="model.name"
+									 ng-disabled="!helper.isInEditMode"
+									 ng-blur="methods.removeWhitespaces($event)"
+									 ng-clear-icon
+									 ng-check-mark>
+					</div>
+				</div>
+
 				<!-- User name -->
-				<div class="row input-row mb-2">
+				<div class="row input-row mb-2"
+						 ng-if="methods.getOptionsKey('isNameDetail')">
 
 					<!-- Label -->
 					<label for="user_name" 
@@ -162,159 +197,70 @@
 
 				<!-- Name detail container -->
 				<div class="name-detail-container mb-2 ps-1 overflow-hidden"
-						 ng-show="helper.isInEditMode">
+						 ng-show="helper.isInEditMode && methods.getOptionsKey('isNameDetail')">
 
 					<!-- Dividing line -->
 					<hr class="text-muted mt-2">
 
-					<!-- Prefix name -->
-					<div class="row input-row mt-1 mb-2">
+					<!-- Names detail -->
+					<div class="row input-row mt-1 mb-2"
+							 ng-if="methods.isFieldExist(key)"
+							 ng-repeat="key in $root.lang.rule[$root.lang.type]">
 
 						<!-- Label -->
-						<label for="prefix_name" 
+						<label for="{{key}}" 
 									 class="col-form-label col-form-label-sm col-md-4 text-md-end fw-semibold">
-							{{'prefix_name' | translate:lang.data | capitalize}}:
+							<i class="fa-solid fa-star fa-2xs text-danger"
+								 ng-if="['first_name','last_name'].includes(key)"></i>
+							{{key | translate:lang.data | capitalize}}:
 						</label>
 
-						<!-- Input prefix name -->
+						<!-- Input -->
 						<div class="col-11 col-md-7 position-relative">
-							<input id="prefix_name"
-										 name="prefix_name" 
+
+							<!-- Required inputs -->
+							<input ng-if="['first_name','last_name'].includes(key)"
+										 id="{{key}}"
+										 name="{{key}}" 
 										 type="text"
-										 ng-attr-placeholder="{{helper.isInEditMode ? ('prefix_name' | translate:lang.data) : ''}}"
+										 ng-attr-placeholder="{{helper.isInEditMode ? 
+												('key' | translate:lang.data) : ''}}"
 									 	 class="form-control form-control-sm"
-									 	 ng-class="{'input-disabled': !helper.isInEditMode}"
+										 ng-class="{'input-disabled': !helper.isInEditMode}"
 									 	 spellcheck="false" 
 									 	 autocomplete="off" 
-									 	 maxlength="20"
-									 	 ng-model="model.prefix_name"
+										 ng-attr-maxlength="{{['prefix_name','sufix_name'].includes(key)?20:50}}"
+									 	 ng-model="model[key]"
+										 required
 										 ng-change="nameChanged()"
-									 	 ng-disabled="!helper.isInEditMode"
-									 	 ng-blur="methods.removeWhitespaces($event)"
+										 ng-disabled="!helper.isInEditMode"
+										 ng-blur="methods.removeWhitespaces($event)"
+										 ng-check-mark
 									 	 ng-clear-icon>
-						</div>
-					</div>
 
-					<!-- First name -->
-					<div class="row input-row mb-2">
-
-						<!-- Label -->
-						<label for="first_name" 
-									 class="col-form-label col-form-label-sm col-md-4 text-md-end fw-semibold">
-							<i class="fa-solid fa-star fa-2xs text-danger"></i>
-							<span>{{'first_name' | translate:lang.data | capitalize}}:</span>
-						</label>
-
-						<!-- Input first name -->
-						<div class="col-11 col-md-7 position-relative">
-							<input id="first_name"
-										 name="first_name" 
-										 type="text"
-										 ng-attr-placeholder="{{helper.isInEditMode ? ('first_name' | translate:lang.data) : ''}}"
-									 	 class="form-control form-control-sm"
-									 	 ng-class="{'input-disabled': !helper.isInEditMode}"
-									 	 spellcheck="false" 
-									 	 autocomplete="off" 
-									 	 required
-									 	 maxlength="50"
-									 	 ng-model="model.first_name"
-										 ng-change="nameChanged()"
-									 	 ng-disabled="!helper.isInEditMode"
-									 	 ng-blur="methods.removeWhitespaces($event)"
-									 	 ng-clear-icon
-									 	 ng-check-mark>
-						</div>
-					</div>
-
-					<!-- Middle name -->
-					<div class="row input-row mb-2">
-
-						<!-- Label -->
-						<label for="middle_name" 
-									 class="col-form-label col-form-label-sm col-md-4 text-md-end fw-semibold">
-							{{'middle_name' | translate:lang.data | capitalize}}:
-						</label>
-
-						<!-- Input middle name -->
-						<div class="col-11 col-md-7 position-relative">
-							<input id="middle_name"
-										 name="middle_name" 
-										 type="text"
-										 ng-attr-placeholder="{{helper.isInEditMode ? ('middle_name' | translate:lang.data) : ''}}"
-									 	 class="form-control form-control-sm"
-									 	 ng-class="{'input-disabled': !helper.isInEditMode}"
-									 	 spellcheck="false" 
-									 	 autocomplete="off" 
-									 	 maxlength="50"
-									 	 ng-model="model.middle_name"
-										 ng-change="nameChanged()"
-									 	 ng-disabled="!helper.isInEditMode"
-									 	 ng-blur="methods.removeWhitespaces($event)"
-									 	 ng-clear-icon>
-						</div>
-					</div>
-
-					<!-- Last name -->
-					<div class="row input-row mb-2">
-
-						<!-- Label -->
-						<label for="last_name" 
-									 class="col-form-label col-form-label-sm col-md-4 text-md-end fw-semibold">
-							<i class="fa-solid fa-star fa-2xs text-danger"></i>
-							{{'last_name' | translate:lang.data | capitalize}}:
-						</label>
-
-						<!-- Input last name -->
-						<div class="col-11 col-md-7 position-relative">
-							<input id="last_name"
-										 name="last_name" 
-										 type="text"
-										 ng-attr-placeholder="{{helper.isInEditMode ? ('last_name' | translate:lang.data) : ''}}"
-									 	 class="form-control form-control-sm"
-									 	 ng-class="{'input-disabled': !helper.isInEditMode}"
-									 	 spellcheck="false" 
-									 	 autocomplete="off" 
-									 	 required
-									 	 maxlength="50"
-									 	 ng-model="model.last_name"
-										 ng-change="nameChanged()"
-									 	 ng-disabled="!helper.isInEditMode"
-									 	 ng-blur="methods.removeWhitespaces($event)"
-									 	 ng-clear-icon
-									 	 ng-check-mark>
-						</div>
-					</div>
-
-					<!-- Suffix name -->
-					<div class="row input-row mb-3">
-
-						<!-- Label -->
-						<label for="suffix_name" 
-									 class="col-form-label col-form-label-sm col-md-4 text-md-end fw-semibold">
-							{{'suffix_name' | translate:lang.data | capitalize}}:
-						</label>
-
-						<!-- Input suffix name -->
-						<div class="col-11 col-md-7 position-relative">
-							<input id="suffix_name"
-										 name="suffix_name" 
-										 type="text"
-										 ng-attr-placeholder="{{helper.isInEditMode ? ('suffix_name' | translate:lang.data) : ''}}"
-									 	 class="form-control form-control-sm"
-									 	 ng-class="{'input-disabled': !helper.isInEditMode}"
-									 	 spellcheck="false" 
-									 	 autocomplete="off" 
-									 	 maxlength="20"
-									 	 ng-model="model.suffix_name"
-										 ng-change="nameChanged()"
-									 	 ng-disabled="!helper.isInEditMode"
-									 	 ng-blur="methods.removeWhitespaces($event)"
-									 	 ng-clear-icon>
+							<!-- Optional inputs -->
+							<input ng-if="!['first_name','last_name'].includes(key)"
+											id="{{key}}"
+											name="{{key}}" 
+											type="text"
+											ng-attr-placeholder="{{helper.isInEditMode ? 
+												('key' | translate:lang.data) : ''}}"
+											class="form-control form-control-sm"
+											ng-class="{'input-disabled': !helper.isInEditMode}"
+											spellcheck="false" 
+											autocomplete="off" 
+											ng-attr-maxlength="{{['prefix_name','sufix_name'].includes(key)?20:50}}"
+											ng-model="model[key]"
+											ng-change="nameChanged()"
+											ng-disabled="!helper.isInEditMode"
+											ng-blur="methods.removeWhitespaces($event)"
+											ng-clear-icon>
 						</div>
 					</div>
 
 					<!-- Nick name -->
-					<div class="row input-row mb-2">
+					<div class="row input-row mb-2"
+							 ng-if="methods.isFieldExist('nick_name')">
 
 						<!-- Label -->
 						<label for="nick_name" 
@@ -327,7 +273,8 @@
 							<input id="nick_name"
 										 name="nick_name" 
 										 type="text"
-										 ng-attr-placeholder="{{helper.isInEditMode ? ('nick_name' | translate:lang.data) : ''}}"
+										 ng-attr-placeholder="{{helper.isInEditMode ? 
+											('nick_name' | translate:lang.data) : ''}}"
 									 	 class="form-control form-control-sm"
 									 	 ng-class="{'input-disabled': !helper.isInEditMode}"
 									 	 spellcheck="false" 
@@ -339,14 +286,16 @@
 									 	 ng-clear-icon>
 						</div>
 					</div>
-				</div>
 
-				<!-- Dividing line -->
-				<hr class="text-muted" ng-show="helper.isInEditMode">
+					<!-- Dividing line -->
+					<hr class="text-muted my-3">
+				</div>
 
 				<!-- Born -->
 				<div class="row input-row mb-0"
-						 ng-class="{'mb-2': !helper.isInEditMode}">
+						 ng-class="{'mb-2': !helper.isInEditMode &&
+						 										!methods.getOptionsKey('isBornShowRule')}"
+						 ng-if="methods.isFieldExist('born')">
 
 					<!-- Label -->
 					<label for="born" 
@@ -379,11 +328,19 @@
 					</div>
 				</div>
 
+				<!-- Born rule -->
+				<ng-show-rule ng-if="helper.isInEditMode && 
+														 methods.getOptionsKey('isBornShowRule')"
+											rule-id="born_rule"
+											punctuation-mark="!"></ng-show-rule>
+
 				<!-- Gender -->
-				<fieldset class="row input-row mt-1 mb-3">
+				<fieldset class="row input-row mt-1 mb-3"
+									ng-if="methods.isFieldExist('gender')">
 
 					<!-- Label -->
-					<legend class="col-form-label col-form-label-sm col-md-4 text-md-end fw-semibold">
+					<legend class="col-form-label col-form-label-sm 
+												 col-md-4 text-md-end fw-semibold">
 						<i class="fa-solid fa-star fa-2xs text-danger"></i>
 						<i class="fa-solid fa-venus-mars me-1"></i>
 						<span class="text-capitalize">
@@ -430,7 +387,8 @@
 				</fieldset>
 
 				<!-- Image -->
-				<div class="row input-row mb-5">
+				<div class="row input-row mb-5"
+						 ng-if="methods.isFieldExist('img')">
 
 					<!-- Label -->
 					<div class="col-form-label col-form-label-sm col-md-4 text-md-end fw-semibold">
@@ -473,7 +431,8 @@
 				</div>
 
 				<!-- Country -->
-				<div class="row input-row mb-2">
+				<div class="row input-row mb-2"
+						 ng-if="methods.isFieldExist('country')">
 
 					<!-- Label -->
 					<label for="country" 
@@ -504,7 +463,9 @@
 				</div>
 
 				<!-- Phone (Country code / Phone) -->
-				<div class="row input-row mb-2">
+				<div class="row input-row mb-0"
+						 ng-class="{'mb-2': !methods.getOptionsKey('isPhoneShowRule')}"
+						 ng-if="methods.isFieldExist('phone')">
 
 					<!-- Label -->
 					<label for="phone" 
@@ -561,10 +522,13 @@
 											pre-width="120"
 											is-capitalize="false"
 											punctuation-mark="."
-											ng-show="helper.isInEditMode"></ng-show-rule>
+											ng-show="helper.isInEditMode && 
+															 methods.getOptionsKey('isPhoneShowRule')">
+				</ng-show-rule>
 
 				<!-- City -->
-				<div class="row input-row mb-2">
+				<div class="row input-row mb-2"
+						 ng-if="methods.isFieldExist('city')">
 
 					<!-- Label -->
 					<label for="city" 
@@ -595,7 +559,9 @@
 				</div>
 
 				<!-- Post code -->
-				<div class="row input-row mb-2">
+				<div class="row input-row mb-0"
+						 ng-class="{'mb-2': !methods.getOptionsKey('isPostcodeShowRule')}"
+						 ng-if="methods.isFieldExist('postcode')">
 
 					<!-- Label -->
 					<label for="postcode" 
@@ -632,10 +598,13 @@
 				<ng-show-rule rule-id="postcode_rule"
 											is-capitalize="false"
 											punctuation-mark="."
-											ng-show="helper.isInEditMode"></ng-show-rule>
+											ng-show="helper.isInEditMode && 
+															 methods.getOptionsKey('isPostcodeShowRule')">
+				</ng-show-rule>
 
 				<!-- Address -->
-				<div class="row input-row mb-2">
+				<div class="row input-row mb-2"
+						 ng-if="methods.isFieldExist('address')">
 
 					<!-- Label -->
 					<label for="address" 
@@ -668,7 +637,7 @@
 				<div class="m-0 p-0" ng-show="helper.isInEditMode">
 
 					<!-- Dividing line -->
-					<hr class="text-muted">
+					<hr class="text-muted" ng-if="methods.getOptionsKey('isDividingPlusLine')">
 
 					<!-- Password -->
 					<div class="row input-row mb-0">
@@ -702,13 +671,13 @@
 					</div>
 
 					<!-- Password rule -->
-					<ng-show-rule></ng-show-rule>
+					<ng-show-rule ng-if="methods.getOptionsKey('isPasswordShowRule')"></ng-show-rule>
 				
 					<!-- Show/Hide password -->
 					<ng-show-password></ng-show-password>
 
 					<!-- Test code -->
-					<ng-test-code></ng-test-code>
+					<ng-test-code ng-if="methods.getOptionsKey('isTestCode')"></ng-test-code>
 				</div>
 			</form>
 

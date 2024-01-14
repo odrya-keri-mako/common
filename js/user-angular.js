@@ -28,7 +28,8 @@
         isPasswordConfirm   : true,
         isPasswordShowRule  : true,
         isNameDetail        : true,
-        isSendEmail         : true
+        isSendEmail         : true,
+        isDividingPlusLine  : true
       };
 
       // Set user default properties
@@ -123,16 +124,6 @@
             options.isSendEmail = false;
           if (!options.isSendEmail)
             options.isEmailShowRule = false;
-          if (!util.isObjectHasKey(user.fields, 'born') &&
-              !util.isObjectHasKey(user.fields, 'gender') &&
-              !util.isObjectHasKey(user.fields, 'img') &&
-              !util.isObjectHasKey(user.fields, 'country') &&
-              !util.isObjectHasKey(user.fields, 'phone') &&
-              !util.isObjectHasKey(user.fields, 'city') &&
-              !util.isObjectHasKey(user.fields, 'postcode') &&
-              !util.isObjectHasKey(user.fields, 'address'))
-                options.isDividingPlusLine = false;
-          else  options.isDividingPlusLine = true;
         },
 
         // Get optons
@@ -685,8 +676,11 @@
             case 'email_change':
             case 'register':
 
+              // Set is send email property
+              args.isSendEmail = user.getOptions('isSendEmail');
+
               // Set please wait message to true when send email
-              isShowWait = user.getOptions('isSendEmail');
+              isShowWait = args.isSendEmail;
 
               // Get language properties
               args.lang = util.objFilterByKeys($rootScope.lang, ['id','type'], true);
@@ -701,7 +695,7 @@
                   event : acceptBtnId
                 };
                 if (acceptBtnId === 'email_change')
-                  args.user.id  = $rootScope.user.id;
+                  args.user.id = $rootScope.user.id;
               }
               break;
             default:   
@@ -735,10 +729,13 @@
                 $timeout(() => {alert(lang.translate(response, true)+'!');}, 50);
                 break;
               case 'register':
-                user_property.id   = response.id;
-                user_property.type = response.type;
+                user_property.id = response.id;
+                if (user.isFieldExist('type'))
+                  user_property.type = response.type;
                 user.set(user_property);
-                $timeout(() => {alert(lang.translate('registration_successful', true)+'!');}, 50);
+                $timeout(() => {
+                  alert(lang.translate('registration_successful', true)+'!');
+                }, 50);
                 break;
               case 'profile':
                 $scope.methods.hideNameDetail();
@@ -746,7 +743,9 @@
                 $scope.model.password = null;
                 if (util.isObjectHasKey($scope.model, 'testcode'))
                   $rootScope.$broadcast('refreshTestcodeEvent');
-                $timeout(() => {alert(lang.translate(response, true)+'!');}, 500);
+                $timeout(() => {
+                  alert(lang.translate(response, true)+'!');
+                }, 500);
                 break;
               default:   
             }
@@ -782,7 +781,7 @@
               // When is state is not login or register, then go to prevent enabled state.
               } else if(acceptBtnId !== 'login' && 
                         acceptBtnId !== 'register') {
-                      $state.go($rootScope.state.prevEnabled);
+                $state.go($rootScope.state.prevEnabled);
                       
               } else {
 
