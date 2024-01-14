@@ -197,7 +197,8 @@
 
 				<!-- Name detail container -->
 				<div class="name-detail-container mb-2 ps-1 overflow-hidden"
-						 ng-show="helper.isInEditMode && methods.getOptionsKey('isNameDetail')">
+						 ng-show="helper.isInEditMode && 
+						 					methods.getOptionsKey('isNameDetail')">
 
 					<!-- Dividing line -->
 					<hr class="text-muted mt-2">
@@ -224,7 +225,7 @@
 										 name="{{key}}" 
 										 type="text"
 										 ng-attr-placeholder="{{helper.isInEditMode ? 
-												('key' | translate:lang.data) : ''}}"
+												(key | translate:lang.data) : ''}}"
 									 	 class="form-control form-control-sm"
 										 ng-class="{'input-disabled': !helper.isInEditMode}"
 									 	 spellcheck="false" 
@@ -244,7 +245,7 @@
 											name="{{key}}" 
 											type="text"
 											ng-attr-placeholder="{{helper.isInEditMode ? 
-												('key' | translate:lang.data) : ''}}"
+												(key | translate:lang.data) : ''}}"
 											class="form-control form-control-sm"
 											ng-class="{'input-disabled': !helper.isInEditMode}"
 											spellcheck="false" 
@@ -637,10 +638,12 @@
 				<div class="m-0 p-0" ng-show="helper.isInEditMode">
 
 					<!-- Dividing line -->
-					<hr class="text-muted" ng-if="methods.getOptionsKey('isDividingPlusLine')">
+					<hr class="text-muted" 
+							ng-if="methods.getOptionsKey('isDividingPlusLine')">
 
 					<!-- Password -->
-					<div class="row input-row mb-0">
+					<div class="row input-row mb-0"
+							 ng-class="{'mb-2': !methods.getOptionsKey('isPasswordShowRule')}">
 					
 						<!-- Label -->
 						<label for="password" 
