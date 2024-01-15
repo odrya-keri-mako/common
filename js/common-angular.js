@@ -49,15 +49,41 @@
   .filter('capitalize', [
     'util', 
     (util) => {
-      return (str, isAllowed=true) => {
+      return (str, isAllowed=null) => {
+
+        // Check parameters
+        if (!util.isString(str) ||
+            !(str = str.trim()).length) return str;
+        if (util.isString(isAllowed))
+          isAllowed = util.strToBoolean(isAllowed, true);
+        if (!util.isBoolean(isAllowed)) isAllowed = true;
+        if (!isAllowed) return str;
+        return util.capitalize(str);
+      }
+    }
+  ])
+
+  // Assigns assignments
+  .filter('assigns', [
+    'util', 
+    (util) => {
+      return (str, assignments=null) => {
 
         // Check parameters
         if (!util.isString(str)) return str;
-        str = str.trim();
-        if (util.isString(isAllowed)) isAllowed = !(isAllowed.toLowerCase().trim() === 'false');
-        if (!util.isBoolean(isAllowed)) isAllowed = true;
-        if (!isAllowed || !str.length) return str;
-        return util.capitalize(str);
+        if (util.isString(assignments)) 
+          assignments = util.strToArray(assignments);
+        if (util.isArray(assignments))
+          assignments = assignments.reduce((o, k) => (o[k] = '', o), {});
+        if (!util.isObject(assignments)) return str;
+        let keys = util.substrBetween(str);
+        if (keys.length) {
+          keys.forEach(key => {
+            if (util.isObjectHasKey(assignments, key))
+              str = str.replaceAll(`{{${key}}}`, assignments[key]);
+          });
+                return str;
+        } else  return str;
       }
     }
   ])
@@ -236,10 +262,29 @@
                         /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,5}$/.test(checkedVar),
         upToLowHyphen: (str) => str.replace(/([a-zA-Z])(?=[A-Z])/g, '$1-').toLowerCase(),
         lowToUpHyphen: (str) => str.replace(/(-.)/g, (x) => {return x[1].toUpperCase();}),
+        strToBoolean: (str, def=false) => {
+          if (util.isString(str)) 
+                return str.toLowerCase().trim() === 'true';
+          else  return def;
+        },
+        strToArray: (str) => {
+          if (util.isString(str)) { 
+                  str = str.trim().replaceAll(",", ";");
+                  return str.split(";").map(e => e.trim()).filter(Boolean);
+          } else  return [];
+        },
+        substrBetween: (str, beg=null, end=null) => {
+          if (!util.isString(str)) return [];
+          if (!util.isString(beg) ||
+              !(beg = beg.trim()).length) beg = '{{';
+          if (!util.isString(end) ||
+              !(end = end.trim()).length) end = '}}';
+          let regex = new RegExp(`(?<=${beg})(.*?)(?=${end})`, 'g');
+          return str.match(regex) || [];
+        },
         capitalize: (str, isLowerEnd=true) => {
-          if (!util.isString(str)) return str;
-          str = str.trim();
-          if (str.length === 0) return str;
+          if (!util.isString(str) ||
+              !(str = str.trim()).length) return str;
           if (str.length === 1) return str.toUpperCase();
           if (!util.isBoolean(isLowerEnd)) isLowerEnd = true;
           return  str.charAt(0).toUpperCase() + (isLowerEnd ?

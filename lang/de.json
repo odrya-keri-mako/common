@@ -59,7 +59,7 @@
   "under_construction": "bauarbeiten im gange",
   "back": "zurück",
   "menu": "speisekarte",
-  "born_rule": "es können sich nur personen über 18 jahren anmelden",
+  "born_rule": "es können sich nur personen über {{minAgeLimit}} jahren anmelden",
   "send": "schicken",
   "shopping_cart": "einkaufswagen",
   "form": "bilden",

@@ -63,7 +63,8 @@ if (is_null($result)) {
 $result = $result[0];
 
 // Check user valid
-if (array_key_exists('valid', $result) && !$result['valid']) {
+if (array_key_exists('valid', $result) && 
+		!$result['valid']) {
 
 	// Set error
 	Util::setError('user_disabled', $db);
@@ -106,6 +107,7 @@ unset(
 	$result['wrong_attempts']
 );
 
+// Check for login administration
 if (array_key_exists('last_login', $userFields) ||
 		array_key_exists('wrong_attempts', $userFields)) {
 		

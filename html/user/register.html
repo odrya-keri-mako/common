@@ -107,84 +107,8 @@
 					<!-- Dividing line -->
 					<hr class="text-muted mt-2">
 
-					<!-- Names detail -->
-					<div class="row input-row mt-1 mb-2"
-							 ng-if="methods.isFieldExist(key)"
-							 ng-repeat="key in $root.lang.rule[$root.lang.type]">
-
-						<!-- Label -->
-						<label for="{{key}}" 
-									 class="col-form-label col-form-label-sm col-md-4 text-md-end fw-semibold">
-							<i class="fa-solid fa-star fa-2xs text-danger"
-								 ng-if="['first_name','last_name'].includes(key)"></i>
-							{{key | translate:lang.data | capitalize}}:
-						</label>
-
-						<!-- Input -->
-						<div class="col-11 col-md-7 position-relative">
-
-							<!-- Required inputs -->
-							<input ng-if="['first_name','last_name'].includes(key)"
-										 id="{{key}}"
-										 name="{{key}}" 
-										 type="text"
-										 ng-attr-placeholder="{{(key | translate:lang.data)}}"
-									 	 class="form-control form-control-sm"
-									 	 spellcheck="false" 
-									 	 autocomplete="off" 
-										 ng-attr-maxlength="{{['prefix_name','sufix_name'].includes(key)?20:50}}"
-									 	 ng-model="model[key]"
-										 required
-									 	 ng-init="model[key]=null"
-										 ng-change="nameChanged()"
-										 ng-blur="methods.removeWhitespaces($event)"
-										 ng-check-mark
-									 	 ng-clear-icon>
-
-							<!-- Optional inputs -->
-							<input ng-if="!['first_name','last_name'].includes(key)"
-											id="{{key}}"
-											name="{{key}}" 
-											type="text"
-											ng-attr-placeholder="{{(key | translate:lang.data)}}"
-											class="form-control form-control-sm"
-											spellcheck="false" 
-											autocomplete="off" 
-											ng-attr-maxlength="{{['prefix_name','sufix_name'].includes(key)?20:50}}"
-											ng-model="model[key]"
-											ng-init="model[key]=null"
-											ng-change="nameChanged()"
-											ng-blur="methods.removeWhitespaces($event)"
-											ng-clear-icon>
-						</div>
-					</div>
-
-					<!-- Nick name -->
-					<div class="row input-row mt-1 mb-2"
-							 ng-if="methods.isFieldExist('nick_name')">
-
-						<!-- Label -->
-						<label for="nick_name" 
-									 class="col-form-label col-form-label-sm col-md-4 text-md-end fw-semibold">
-							{{'nick_name' | translate:lang.data | capitalize}}:
-						</label>
-
-						<!-- Input nick name -->
-						<div class="col-11 col-md-7 position-relative">
-							<input id="nick_name"
-										 name="nick_name" 
-										 type="text"
-										 ng-attr-placeholder="{{('nick_name' | translate:lang.data)}}"
-									 	 class="form-control form-control-sm"
-									 	 spellcheck="false" 
-									 	 autocomplete="off" 
-									 	 maxlength="50"
-									 	 ng-model="model.nick_name"
-									 	 ng-init="model.nick_name=null"
-										 ng-blur="methods.removeWhitespaces($event)"
-									 	 ng-clear-icon>
-						</div>
-					</div>
+					<!-- Username details -->
+					<ng-username-details></ng-username-details>
 
 					<!-- Dividing line -->
 					<hr class="text-muted my-3">
@@ -228,7 +152,9 @@
 				<!-- Born rule -->
 				<ng-show-rule ng-if="methods.getOptionsKey('isBornShowRule')"
 											rule-id="born_rule"
-											punctuation-mark="!"></ng-show-rule>
+											punctuation-mark="!"
+											assignments="{'minAgeLimit':methods.getOptionsKey('minAgeLimit')}">
+				</ng-show-rule>
 
 				<!-- Gender -->
 				<fieldset class="row input-row mb-2"

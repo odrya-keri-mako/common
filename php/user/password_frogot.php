@@ -62,14 +62,16 @@ if (is_null($result)) {
 $result = $result[0];
 
 // Check user valid
-if (!$result['valid']) {
+if (array_key_exists('valid', $result) && 
+		!$result['valid']) {
 
 	// Set error
 	Util::setError('user_disabled', $db);
 }
 
 // Check the number of attempts
-if ($result['wrong_attempts'] > 5) {
+if (array_key_exists('wrong_attempts', $result) &&
+		$result['wrong_attempts'] > 5) {
 
 	// Set error
 	Util::setError('user_wrong_attempts', $db);
@@ -90,10 +92,10 @@ if (array_key_exists('modified', $userFields)) {
 	$params['dateNow'] = date("Y-m-d H:i:s");
 }
 $query .= " WHERE `id` = :id;";
-$params['id'] = $args['user']['id'];
+$params['id'] = $result['id'];
 
 // Execute query with arguments
-$result = $db->execute($query, $params);
+$success = $db->execute($query, $params);
 
 // Close connection
 $db = null;
@@ -105,29 +107,34 @@ if (!$success['affectedRows']) {
 	Util::setError('password_change_failed');
 }
 
-// Check is send email
-if (!Email::isEmailConfigExist()) {
-
-	// Set response
-	Util::setResponse('password_changed');
-}
-
 // Unset not necessary variables
 unset($query, $success);
 
 // Set language
 $lang = new Language($args['lang']);
 
-// Translate error messages
-$errorMsg = $lang->translate(Email::$errorMessages);
-
 // Create message
 $langData = $lang->translate(array(
 	"{{password_changed}}"	=> "password_changed",
 	"{{password_new}}"			=> "password_new"
 ));
-$message = "{$langData["{{password_changed}}"]}!\n
-						{$langData["{{password_new}}"]}: {$password_new}";
+$message = "{$langData["{{password_changed}}"]}!\n{$langData["{{password_new}}"]}: {$password_new}";
+
+// Check is send email
+if (!$args['isSendEmail']) {
+
+	// Close language
+	$lang = null;
+
+	// Set response
+	Util::setResponse($message);
+}
+
+// Unset not necessary variables
+unset($query, $success);
+
+// Translate error messages
+$errorMsg = $lang->translate(Email::$errorMessages);
 
 // Set constants data
 $constants = array(
@@ -147,9 +154,13 @@ $phpMailer = new Email($lang);
 // Check is error
 if ($phpMailer->isError()) {
 
+	// Get error
+	$error = $phpMailer->getErrorMsg();
+	if (array_key_exists($error, $errorMsg))
+		$error =$errorMsg[$error];
+
 	// Set error
-	Util::setError("{$phpMailer->getErrorMsg()}!
-									\n{$message}", $phpMailer, $lang);
+	Util::setError("{$error}!\n{$message}", $phpMailer, $lang);
 }
 
 // Set document
@@ -161,9 +172,13 @@ $phpMailer->setDocument(array(
 // Check is error
 if ($phpMailer->isError()) {
 
+	// Get error
+	$error = $phpMailer->getErrorMsg();
+	if (array_key_exists($error, $errorMsg))
+		$error =$errorMsg[$error];
+
 	// Set error
-	Util::setError("{$phpMailer->getErrorMsg()}!
-									\n{$message}", $phpMailer, $lang);
+	Util::setError("{$error}!\n{$message}", $phpMailer, $lang);
 }
 
 // Close language
@@ -183,9 +198,13 @@ try {
 // Exception
 } catch (Exception $e) {
 
+	// Get error
+	$error = 'email_send_failed';
+	if (array_key_exists($error, $errorMsg))
+		$error =$errorMsg[$error];
+
   // Set error
-	Util::setError("{$errorMsg['email_send_failed']}!
-									\n{$message}", $phpMailer);
+	Util::setError("{$error}!\n{$message}", $phpMailer);
 }
 
 // Close email

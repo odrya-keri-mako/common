@@ -32,8 +32,8 @@ $fields = array_filter(array(
 }, ARRAY_FILTER_USE_KEY);
 
 // Set query
-$query = "SELECT " . implode("`,`", array_keys($fields)) . 
-				 " FROM `user` WHERE `id` = ? LIMIT 1;";
+$query = "SELECT `" . implode("`,`", array_keys($fields)) . 
+				 "` FROM `user` WHERE `id` = ? LIMIT 1;";
 
 // Execute query with argument
 $result = $db->execute($query, array($args['user']['id']));

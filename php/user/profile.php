@@ -53,22 +53,23 @@ $fields = array_filter(array(
 	"city" => null,
 	"postcode" => null,
 	"address" => null,
-	"email" => null,
-	"password" => null,
-	"modified" => null,
-	"id" => null
+	"modified" => null
 ), function($key) use($userFields) {
 	return array_key_exists($key, $userFields);
 }, ARRAY_FILTER_USE_KEY);
 
-// Set query
+// Set parameters, and query
+$params = array('id' => $args['user']['id']);
 $query 	= "UPDATE `user` SET ";
 foreach(array_keys($fields) as $key) {
-	$query .= ("`".$key."`=:".$key.",");
+	if (array_key_exists($key, $args['user'])) {
+		$query .= ("`".$key."` = :".$key.",");
+		$params[$key] = $args['user'][$key];
+	}
 }
 
 // Finalize query
-$query = mb_substr($query, 0, -1, 'utf-8') . "WHERE `id`=:id";
+$query = mb_substr($query, 0, -1, 'utf-8') . " WHERE `id` = :id";
 
 // Execute query
 $result = $db->execute($query, $params);

@@ -28,8 +28,10 @@ if (is_null($userFields)) {
 	Util::setError('table_not_exist', $db);
 }
 
-// Check is send email
-$isSendEmail = Email::isEmailConfigExist();
+// Check has fields for email confirmation
+$isEmailConfirm = 
+		array_key_exists('email_verification_code', $userFields) &&
+		array_key_exists('type', $userFields);
 
 // Filter default fields by keys if present in table fields
 $fields = array_filter(array(
@@ -127,18 +129,22 @@ if (!is_null($success)) {
 }
 
 // Set random email verification code
-if ($isSendEmail && array_key_exists('email_verification_code', $userFields))
+if ($args['isSendEmail'] && $isEmailConfirm)
 	$args['user']['email_verification_code'] = bin2hex(random_bytes(16));
 
 // Set query, and params
 $query 	= "UPDATE `user` SET ";
-$params	= array();
-foreach(array('type','type_old','email','email_verification_code','modified') as $key) {
+$params	= array('id' =>  $args['user']['id']);
+foreach(array('type','type_old','email',
+							'email_verification_code','modified') as $key) {
 	if (array_key_exists($key, $userFields)) {
 		$query .= ("`".$key."`=:".$key.",");
 		switch($key) {
 			case 'type':
-				$params[$key] = 'N';
+				if ($isEmailConfirm &&
+						array_key_exists('type_old', $userFields))
+							$params[$key] = 'N';
+				else 	$params[$key] = $result['type'];
 				break;
 			case 'type_old':
 				$params[$key] = $result['type'] === 'N' ? null : $result['type'];
@@ -169,28 +175,30 @@ if (!$success['affectedRows']) {
 }
 
 // Unset not a required variable(s)
-unset($query, $success);
-
-// Check is not send email 
-if (!$isSendEmail) {
-
-	// Set response
-	Util::setResponse('email_changed');
-}
+unset($query, $success, $key, $fields, $params);
 
 // Set language
 $lang = new Language($args['lang']);
-
-// Translate error messages
-$errorMsg = $lang->translate(Email::$errorMessages);
 
 // Create message
 $langData = $lang->translate(array(
 	"{{email_changed}}"	=> "email_changed",
 	"{{email_new}}"			=> "email_new"
 ));
-$message = "{$langData["{{email_changed}}"]}!\n
-						{$langData["{{email_new}}"]}: {$args['user']["email"]}";
+$message = "{$langData["{{email_changed}}"]}!\n{$langData["{{email_new}}"]}: {$args['user']["email"]}";
+
+// Check is not send email 
+if (!$args['isSendEmail']) {
+
+	// Close language
+	$lang = null;
+
+	// Set response
+	Util::setResponse($message, $lang);
+}
+
+// Translate error messages
+$errorMsg = $lang->translate(Email::$errorMessages);
 
 // Set constants data
 $constants = array(
@@ -211,9 +219,13 @@ $phpMailer = new Email($lang);
 // Check is error
 if ($phpMailer->isError()) {
 
+	// Get error
+	$error = $phpMailer->getErrorMsg();
+	if (array_key_exists($error, $errorMsg))
+		$error =$errorMsg[$error];
+
 	// Set error
-	Util::setError("{$phpMailer->getErrorMsg()}!
-									\n{$message}", $phpMailer, $lang);
+	Util::setError("{$error}!\n{$message}", $phpMailer, $lang);
 }
 
 // Set document
@@ -225,9 +237,13 @@ $phpMailer->setDocument(array(
 // Check is error
 if ($phpMailer->isError()) {
 
+	// Get error
+	$error = $phpMailer->getErrorMsg();
+	if (array_key_exists($error, $errorMsg))
+		$error =$errorMsg[$error];
+
 	// Set error
-	Util::setError("{$phpMailer->getErrorMsg()}!
-									\n{$message}", $phpMailer, $lang);
+	Util::setError("{$error}!\n{$message}", $phpMailer, $lang);
 }
 
 try {
@@ -244,48 +260,62 @@ try {
 // Exception
 } catch (Exception $e) {
 
+	// Get error
+	$error = 'email_send_failed';
+	if (array_key_exists($error, $errorMsg))
+		$error =$errorMsg[$error];
+
   // Set error
-	Util::setError("{$errorMsg['email_send_failed']}!
-									\n{$message}", $phpMailer);
+	Util::setError("{$error}!\n{$message}", $phpMailer);
 }
 
 // Clear all addresses to
 $phpMailer->clearToAddresses();
 
-// Set url
-$u = getUrl('email_confirm.php', $args['app']);
-if (is_null($u)) {
+// Check email confirmation is required
+if ($isEmailConfirm) {
 
-	// Set error
-	Util::setError("{$langData['file_not_found']}: email_confirm.php!");
-}
+				// Set url
+				$u = getUrl('email_confirm.php', $args['app']);
+				if (is_null($u)) {
 
-// Set url query
-$l = Util::base64Encode($args['lang']['id']);
-$t = Util::base64Encode($args['lang']['type']);
-$e = Util::base64Encode($args['app']['event']);
-$v = Util::base64Encode($args['app']['domain']);
-$x = Util::base64Encode(strval($args['user']['id']));
-$y = Util::base64Encode($args['user']['email']);
-$z = password_hash($args['user']['email_verification_code'], PASSWORD_DEFAULT);
-$w = Util::base64Encode(getWorkingDirectory());
-$c = Util::base64Encode($args['app']['common']);
-$a = Util::base64Encode($args['app']['id']);
-$langData["{{email_confirm_url}}"] = 
+					// Set error
+					Util::setError("{$langData['file_not_found']}: email_confirm.php!");
+				}
+
+				// Set url query
+				$l = Util::base64Encode($args['lang']['id']);
+				$t = Util::base64Encode($args['lang']['type']);
+				$e = Util::base64Encode($args['app']['event']);
+				$v = Util::base64Encode($args['app']['domain']);
+				$x = Util::base64Encode(strval($args['user']['id']));
+				$y = Util::base64Encode($args['user']['email']);
+				$z = password_hash($args['user']['email_verification_code'],
+							PASSWORD_DEFAULT);
+				$w = Util::base64Encode(getWorkingDirectory());
+				$c = Util::base64Encode($args['app']['common']);
+				$a = Util::base64Encode($args['app']['id']);
+				$langData["{{email_confirm_url}}"] = 
 	"{$u}?l={$l}&t={$t}&e={$e}&v={$v}&x={$x}&y={$y}&z={$z}&w={$w}&c={$c}&a={$a}";
-
+}
+		
 // Set document
+$slice = $isEmailConfirm ? 'confirm' : 'inform';
 $phpMailer->setDocument(array(
-	'fileName'		=> "{$file}_confirm.html",
+	'fileName'		=> "{$file}_{$slice}.html",
 	'subFolder' 	=> 'email/user'
 ), $constants, $langData);
 
 // Check is error
 if ($phpMailer->isError()) {
 
+	// Get error
+	$error = $phpMailer->getErrorMsg();
+	if (array_key_exists($error, $errorMsg))
+		$error =$errorMsg[$error];
+
 	// Set error
-	Util::setError("{$phpMailer->getErrorMsg()}!
-									\n{$message}", $phpMailer, $lang);
+	Util::setError("{$error}!\n{$message}", $phpMailer, $lang);
 }
 
 // Close language
@@ -304,9 +334,13 @@ try {
 // Exception
 } catch (Exception $e) {
 
+	// Get error
+	$error = 'email_send_failed';
+	if (array_key_exists($error, $errorMsg))
+		$error =$errorMsg[$error];
+
   // Set error
-	Util::setError("{$errorMsg['email_send_failed']}!
-									\n{$message}", $phpMailer);
+	Util::setError("{$error}!\n{$message}", $phpMailer);
 }
 
 // Close email

@@ -59,7 +59,7 @@
   "under_construction": "fejlesztés alatt",
   "back": "vissza",
   "menu": "menü",
-  "born_rule": "csak 18 éven felüliek regisztrálhatnak",
+  "born_rule": "csak {{minAgeLimit}} éven felüliek regisztrálhatnak",
   "send": "elküld",
   "shopping_cart": "bevásárlókocsi",
   "form": "űrlap",

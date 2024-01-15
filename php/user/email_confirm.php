@@ -6,6 +6,10 @@ use Util\Util as Util;
 use Database\Database as Database;
 use Language\Language as Language;
 
+// $_SERVER['QUERY_STRING'] =
+// 'l=aHU=&t=ZWFzdA==&e=cmVnaXN0ZXI=&v=aHR0cDovL2xvY2FsaG9zdA==&x=MQ==&y=b2RyeS5hdHRpbGFAZ21haWwuY29t&z=$2y$10$DmbnUX6XMDL4cwUVbMgk.OR49t/H4gbuqAAgUGlOqQLHU/5rRX9XK&w=YzoveGFtcHAvaHRkb2NzL3Byb2plY3RzLzIwMjNfMjAyNC92aXpzZ2FyZW1lay91c2VyLWxhbmd1YWdl&c=Li4vY29tbW9uLw==&a=cHJvamVjdHMvMjAyM18yMDI0L3ZpenNnYXJlbWVrL3VzZXItbGFuZ3VhZ2U=';
+// $result['email_verification_code'] = '3e20b69950863e6c2098b4e7666f6f23';
+
 // Get url query
 parse_str($_SERVER['QUERY_STRING'], $args);
 
@@ -67,6 +71,9 @@ $lang = new Language(array(
 	'id'		=> $args['langId'], 
 	'type'	=> $args['langType']
 ));
+
+
+// Translate data
 $langData = $lang->translate(array(
   "user_not_exist" => "user_not_exist",
 	"email_verification_code_invalid" => "email_verification_code_invalid",
@@ -81,19 +88,33 @@ $lang = null;
 // Connect to database
 $db = new Database();
 
+// Get user table fields
+$userFields = $db->getFieldsName('user');
+
+// Check user table fields exist
+if (is_null($userFields)) {
+
+	// Set error
+	Util::setError('table_not_exist', $db);
+}
+
+// Filter default fields by keys if present in table fields
+$fields = array_filter(array(
+	"name" => null, 
+	"prefix_name" => null, 
+	"first_name" => null,
+	"middle_name" => null,
+	"last_name" => null,
+	"suffix_name" => null,
+	"type_old" => null,
+	"email_verification_code" => null
+), function($key) use($userFields) {
+	return array_key_exists($key, $userFields);
+}, ARRAY_FILTER_USE_KEY);
+
 // Set query
-$query =  "SELECT `id`,
-									`prefix_name`,
-									`first_name`,
-									`middle_name`,
-									`last_name`,
-									`suffix_name`,
-									`type_old`,
-									`email_verification_code`
-						 FROM `user` 
-						WHERE `id` = :id AND
-									`email` = :email
-						LIMIT 1;";
+$query = "SELECT `" . implode("`,`", array_keys($fields)) . 
+				 "` FROM `user` WHERE `id` = :id AND `email` = :email LIMIT 1;";
 
 // Execute query with argument
 $result = $db->execute($query, array(
@@ -118,7 +139,7 @@ if (is_null($result)) {
 $result = $result[0];
 
 // Verify verification code
-if (is_null($result['email_verification_code'])) {
+if (!$result['email_verification_code']) {
 
 	// Set error
 	setError(array(
@@ -129,50 +150,69 @@ if (is_null($result['email_verification_code'])) {
 		"url"					=> $url
 	));
 
-} elseif (!password_verify($result['email_verification_code'], $args['code'])) {
-
-	// Set query
-	$query = 	"UPDATE `user` 
-								SET `wrong_attempts` = `wrong_attempts` + 1
-							WHERE `id` = ?;";
-
-	// Execute query with arguments
-	$success = $db->execute($query, array($result['id']));
-
-	// Set error
-	if ($success['affectedRows'])
-				setError(array(
-					"langId"			=> $args['langId'], 
-					"title"				=> $langData['email_verification'], 
-					"message"			=> $langData['email_verification_code_invalid'],
-					"btnContent"	=> $langData['moves_on'],
-					"url"					=> $url
-				), $db);
-	else	setError(array(
-					"langId"			=> $args['langId'], 
-					"title"				=> $langData['email_verification'], 
-					"message"			=> $langData['failed_increase_retries'],
-					"btnContent"	=> $langData['moves_on'],
-					"url"					=> $url
-				), $db);
 }
 
-// Set query
-$query = 	"UPDATE `user` 
-							SET `type` = :type,
-									`email_confirmed` = :dateNow,
-									`type_old` = :type_old,
-									`email_verification_code` = :code
-						WHERE `id` = :id;";
+// Check verification code
+if (!password_verify($result['email_verification_code'], $args['code'])) {
 
+	// Check the number of attempts exist
+	if (array_key_exists('wrong_attempts', $userFields)) {
+
+		// Set query
+		$query = 	"UPDATE `user` 
+									SET `wrong_attempts` = `wrong_attempts` + 1
+								WHERE `id` = ?;";
+
+		// Execute query with arguments
+		$success = $db->execute($query, array($args['id']));
+
+		// Set error
+		if ($success['affectedRows'])
+					setError(array(
+						"langId"			=> $args['langId'], 
+						"title"				=> $langData['email_verification'], 
+						"message"			=> $langData['email_verification_code_invalid'],
+						"btnContent"	=> $langData['moves_on'],
+						"url"					=> $url
+					), $db);
+		else	setError(array(
+						"langId"			=> $args['langId'], 
+						"title"				=> $langData['email_verification'], 
+						"message"			=> $langData['failed_increase_retries'],
+						"btnContent"	=> $langData['moves_on'],
+						"url"					=> $url
+					), $db);
+	} else	setError(array(
+						"langId"			=> $args['langId'], 
+						"title"				=> $langData['email_verification'], 
+						"message"			=> $langData['email_verification_code_invalid'],
+						"btnContent"	=> $langData['moves_on'],
+						"url"					=> $url
+					), $db);
+}
+
+// Set query, and parameters
+$params = array(
+	'type' => array_key_exists('type_old', $userFields) &&
+						$result['type_old'] ? $result['type_old'] : 'U',
+	'code' => 	NULL,
+	'id' 	=> 	$args['id']
+);
+$query 	= 	"UPDATE `user` 
+								SET `type` = :type,
+										`email_verification_code` = :code";
+if (array_key_exists('email_confirmed', $userFields)) {
+	$query .= ", `email_confirmed` = :dateNow";
+	$params['dateNow'] = date("Y-m-d H:i:s");
+}
+if (array_key_exists('type_old', $userFields)) {
+	$query .= ", `type_old` = :type_old";
+	$params['type_old'] = null;
+}
+$query .= " WHERE `id` = :id;";									
+										
 // Execute query with arguments
-$success = $db->execute($query, array(
-	'type' 			=> $result['type_old'] ? $result['type_old'] : 'U',
-	"dateNow"		=> date("Y-m-d H:i:s"),
-	'type_old'	=> NULL,
-	'code' 			=> NULL,
-	'id' 				=> $result['id']
-));
+$success = $db->execute($query, $params);
 
 // Close connection
 $db = null;
@@ -195,7 +235,7 @@ if (!Util::setSession(array(
 	'id'    => $args['appId'],
   'key'   => "email_confirm_{$args['event']}_{$args['id']}",
   'data'	=> 	array_filter($result, function($key) {
-								return strpos($key, '_name') !== false;
+								return $key === 'name' || strpos($key, '_name') !== false;
 							}, ARRAY_FILTER_USE_KEY)
 ))) {
 

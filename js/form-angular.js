@@ -176,35 +176,44 @@
         scope   : false,
         link: (scope, iElement, iAttrs, ngModel) => {
 
-          // Check/Set parent element skeleton, and find it
-          let skeleton 			= iAttrs.ngCheckMark ? iAttrs.ngCheckMark : '.input-row',
-              parentElement = iElement[0].closest(skeleton);
+          // Check is required
+          let isRequired  = iAttrs.ngCheckMark ? 
+                            iAttrs.ngCheckMark.trim().toLowerCase() : 'true';
 
-          // Check exist
-          if (parentElement) {
+          // Check is required
+          if (isRequired === 'true') {
 
-            // Create check mark element
-            let checkMark = angular.element(
-                `<div class="col-1 pt-1">
-                    <span class="check-mark ms-1 fw-bold text-success"
-                          ng-show="helper.isInEditMode && 
-                                    ${ngModel.$$parentForm.$name}.${ngModel.$name}.$valid && 
-                                    ${ngModel.$$parentForm.$name}.${ngModel.$name}.$viewValue">
-                      &check;
-                    </span>
-                  </div>`);
+            // Get/Check input parent element
+            let skeleton      = iAttrs.ngCheckMarkParentSkeleton ?
+                                iAttrs.ngCheckMarkParentSkeleton : '.input-row',
+                parentElement = iElement[0].closest(skeleton);
 
-            // Append to parent element, and compile check mark to scope
-            parentElement.append(checkMark[0]);
-            $compile(checkMark)(scope);
+            // Check exist
+            if (parentElement) {
 
-            // Watch input element disabled changed
-            scope.$watch(() => iElement.attr('disabled'), 
-                  (newValue, oldValue) => {
-                    if(!angular.equals(newValue, oldValue))
-                      checkMark[0].classList[newValue === 'disabled' ? 
-                                          'add' : 'remove']('d-none');
-                  });
+              // Create check mark element
+              let checkMark = angular.element(
+                  `<div class="col-1 pt-1">
+                      <span class="check-mark ms-1 fw-bold text-success"
+                            ng-show="helper.isInEditMode && 
+                              ${ngModel.$$parentForm.$name}.${ngModel.$name}.$valid && 
+                              ${ngModel.$$parentForm.$name}.${ngModel.$name}.$viewValue">
+                        &check;
+                      </span>
+                    </div>`);
+
+              // Append to parent element, and compile check mark to scope
+              parentElement.append(checkMark[0]);
+              $compile(checkMark)(scope);
+
+              // Watch input element disabled changed
+              scope.$watch(() => iElement.attr('disabled'), 
+                (newValue, oldValue) => {
+                  if(!angular.equals(newValue, oldValue))
+                    checkMark[0].classList[newValue === 'disabled' ? 
+                                        'add' : 'remove']('d-none');
+              });
+            }
           }
         }
       };

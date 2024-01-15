@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="{{lang_id}}">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>{{email_confirm_short}}</title>
+</head>
+<body>
+	<div style="width:600px;margin:0 auto">
+		<header style="background-color:#24a9ca;color:#fff;height:60px;
+									 text-align:center;display:table;width:100%;">
+			<div style="display:table-cell;vertical-align:middle;">
+				<img height="40" alt="logo" src="cid:logoimg" style="display:inline;vertical-align:middle;">
+				<h2 style="margin-left:15px;display:inline;vertical-align:middle;">KERI {{informatics}}</h2>
+			</div>
+		</header>
+		<main>
+			<hr>
+			<div style="font-size:18px;"> 
+				<p style="font-size:20px;">
+					<span>{{dear}}</span>
+					<span style="font-weight:bold;">{{user_name}}</span>
+					<span>!</span>
+				</p>
+				<h4 style="color:red;">{{register_email_address_changed}}!</h4>
+				<p style="font-size:16px;">
+					<span style="font-weight:bold;">{{email_previous}}:</span> 
+					<span>{{email_old}}</span>
+				</p>
+				<p style="font-size:16px;margin-bottom:0;">
+					<span style="font-weight:bold;">{{email_new}}:</span>
+					<span>{{email_current}}</span>
+				</p>
+				<p style="font-size:12px;text-align:right;margin:0 10px;">{{current_date}}</p>
+			</div>
+			<hr>
+		</main>
+		<footer style="padding:2px;text-align:center;background-color:#385765;color:#f2f2f2;">
+			<p style="font-size:18px;margin:12px 0 0 0;">
+				{{email_do_not_reply}}!
+			</p>
+			<p style="font-size:12px;border-top:1px solid gray;padding:5px;margin-bottom:0;">
+				&copy; Copyright 2021-{{current_year}} KERI {{informatics}}.
+			</p>
+		</footer>
+	</div>
+</body>
+</html>

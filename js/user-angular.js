@@ -119,10 +119,10 @@
             options.isPostcodeShowRule = false;
           if (!util.isObjectHasKey(user.fields, 'postcode'))
             options.isPostcodeShowRule = false;
-          if (!util.isObjectHasKey(user.fields, 'email_verification_code') ||
-              !util.isObjectHasKey(user.fields, 'email_confirmed'))
-            options.isSendEmail = false;
-          if (!options.isSendEmail)
+          if (!options.minAgeLimit)
+            options.isBornShowRule  = false;
+          if (!options.isSendEmail ||
+              !util.isObjectHasKey(user.fields, 'email_verification_code'))
             options.isEmailShowRule = false;
         },
 
@@ -272,8 +272,12 @@
             // Check is in edit mode
             if ($scope.helper.isInEditMode) {
 
-              // Set focus
-              $scope.methods.setFocus();
+              // Reset asynchronous
+              $timeout(() => {
+
+                // Set focus
+                $scope.methods.setFocus();
+              });
             }
           });
         },
@@ -648,6 +652,7 @@
 
           // Get user neccesary property filtered
           let user_property = util.objFilterByKeys($scope.model, [
+            'identifier',
             'user_name',
             'testcode',
             'testCodeContent',
@@ -726,6 +731,13 @@
               case 'email_change':
               case 'password_change':
               case 'password_frogot':
+                if (acceptBtnId === 'email_change') {
+                  let prop = {email: $scope.model.email};
+                  if (user.isFieldExist('type') &&
+                      user.isFieldExist('email_verification_code'))
+                    prop.type = 'N';
+                  user.set(prop);
+                }
                 $timeout(() => {alert(lang.translate(response, true)+'!');}, 50);
                 break;
               case 'register':
@@ -784,6 +796,9 @@
                 $state.go($rootScope.state.prevEnabled);
                       
               } else {
+
+                // Reset password
+                $scope.model.password = null;
 
                 // Refresh testcode
                 if (util.isObjectHasKey($scope.model, 'testcode'))
@@ -941,7 +956,6 @@
 				session.promise.resolve(response);
 			})
 			.catch(e => {
-				console.log(e);
 				$state.go("home");
 				return;
 			});
@@ -954,6 +968,7 @@
 
 				// Set person, and apply change
 				$scope.person = response[0];
+        console.log(response);
 				$scope.$applyAsync();
 
 				// Reset asynchronous, and show card container
@@ -962,6 +977,29 @@
 			});
 		}
 	])
+
+  // Username details
+  .directive('ngUsernameDetails', [
+    '$compile',
+    'file',
+    ($compile, file) => {
+      return {
+        replace: true,
+        restrict: 'EA',
+        scope: false,
+        link: (scope, iElement) => {
+          file.get('username_details.html', {
+            subFolder: 'html',
+            isContent: true,
+            isMinimize: true
+          }).then(template => {
+            let e = $compile(template)(scope);
+            iElement.replaceWith(e);
+          });
+        }
+      };
+    }
+  ])
 
   // Navbar user
   .directive('ngNavbarUser', [
@@ -1078,13 +1116,18 @@
           ruleClass: "@",
           preWidth: "@",
           punctuationMark: '@',
-          isCapitalize: "@"
+          isCapitalize: "@",
+          assignments: "<"
         },
         template:`<div class="row mt-1 mb-2">
                     <div class="col-0 col-sm-4"></div>
                     <div class="col-12 col-md-8 fs-sm" ng-class="ruleClass">
                       <div class="d-inline-block" style="min-width:{{preWidth}}px;"></div>
-                      {{ruleId|translate:$root.lang.data| capitalize: isCapitalize}}{{punctuationMark}}
+                      {{ruleId |
+                        translate: $root.lang.data |
+                        assigns: assignments | 
+                        capitalize: isCapitalize}}
+                      {{punctuationMark}}
                     </div>
                   </div>`,
         link: (scope) => {

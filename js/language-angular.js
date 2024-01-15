@@ -12,8 +12,10 @@
       return (key, data=null, isAllowed=true) => {
         if (!util.isString(key)) return key;
         key = key.trim();
-        if (util.isString(isAllowed))   isAllowed = !(isAllowed.toLowerCase().trim() === 'false');
-        if (!util.isBoolean(isAllowed)) isAllowed = true;
+        if (util.isString(isAllowed)) 
+          isAllowed = !(isAllowed.toLowerCase().trim() === 'false');
+        if (!util.isBoolean(isAllowed)) 
+          isAllowed = true;
         if (!isAllowed || 
             !util.isObjectHasKey(data, key) ||
             !data[key]) 
@@ -230,9 +232,13 @@
           personClass: "@",
         },
         template:`<span ng-class="personClass">
-                    <span ng-repeat="k in $root.lang.rule[$root.lang.type] track by $index"
+                    <span ng-repeat="k in $root.lang.rule[$root.lang.type] 
+                          track by $index"
                           ng-if="person[k]">
                       {{person[k]}}
+                    </span>
+                    <span ng-if="person.name">
+                      {{person.name}}
                     </span>
                   </span>`
       };

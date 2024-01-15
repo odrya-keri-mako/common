@@ -71,6 +71,13 @@ if (!empty($fields)) {
 if (mb_substr($query, 0, 1, 'utf-8') === ',')
 	$query = trim(mb_substr($query, 1, null, 'utf-8'));
 
+// Check is no field to select
+if (empty($query)) {
+
+	// Set response
+	Util::setResponse(array());
+}
+
 // Set query
 $query = "SELECT " . $query . " FROM `user`";
 

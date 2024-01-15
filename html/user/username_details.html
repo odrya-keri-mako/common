@@ -1,0 +1,65 @@
+<!-- Names detail -->
+<div class="row input-row mt-1 mb-2"
+		 ng-if="methods.isFieldExist(key)"
+		 ng-repeat="key in $root.lang.rule[$root.lang.type]">
+
+	<!-- Label -->
+	<label for="{{key}}" 
+			 	 class="col-form-label col-form-label-sm col-md-4 text-md-end fw-semibold">
+		<i class="fa-solid fa-star fa-2xs text-danger"
+		 	 ng-if="['first_name','last_name'].includes(key)"></i>
+		{{key | translate:lang.data | capitalize}}:
+	</label>
+
+	<!-- Input -->
+	<div class="col-11 col-md-7 position-relative">
+
+		<!-- Input(s) -->
+		<input id="{{key}}"
+					 name="{{key}}" 
+					 type="text"
+					 ng-attr-placeholder="{{helper.isInEditMode ? 
+						(key | translate:lang.data) : ''}}"
+					 class="form-control form-control-sm"
+					 ng-class="{'input-disabled': !helper.isInEditMode}"
+					 spellcheck="false" 
+					 autocomplete="off" 
+					 ng-attr-maxlength="{{['prefix_name','sufix_name'].includes(key)?20:50}}"
+					 ng-model="model[key]"
+					 ng-init="isRequired=['first_name','last_name'].includes(key);
+					 					$root.state.id === 'register' ? model[key]=null : null"
+					 ng-change="nameChanged()"
+					 ng-required="isRequired"
+					 ng-disabled="!helper.isInEditMode"
+					 ng-blur="methods.removeWhitespaces($event)"
+					 ng-check-mark="{{isRequired}}"
+					 ng-clear-icon>
+	</div>
+</div>
+
+<!-- Nick name -->
+<div class="row input-row mt-1 mb-2"
+		 ng-if="methods.isFieldExist('nick_name')">
+
+	<!-- Label -->
+	<label for="nick_name" 
+				 class="col-form-label col-form-label-sm col-md-4 text-md-end fw-semibold">
+		{{'nick_name' | translate:lang.data | capitalize}}:
+	</label>
+
+	<!-- Input nick name -->
+	<div class="col-11 col-md-7 position-relative">
+		<input id="nick_name"
+					 name="nick_name" 
+					 type="text"
+					 ng-attr-placeholder="{{('nick_name' | translate:lang.data)}}"
+					 class="form-control form-control-sm"
+					 spellcheck="false" 
+					 autocomplete="off" 
+					 maxlength="50"
+					 ng-model="model.nick_name"
+					 ng-init="$root.state.id === 'register' ? model.nick_name=null : null"
+					 ng-blur="methods.removeWhitespaces($event)"
+					 ng-clear-icon>
+	</div>
+</div>

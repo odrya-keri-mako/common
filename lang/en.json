@@ -59,7 +59,7 @@
   "under_construction": "under construction",
   "back": "back",
   "menu": "menu",
-  "born_rule": "only people over 18 can register",
+  "born_rule": "only people over {{minAgeLimit}} can register",
   "send": "send",
   "shopping_cart": "shopping cart",
   "form": "form",
