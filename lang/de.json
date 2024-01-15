@@ -78,6 +78,7 @@
   "password_change_it_soon": "bitte ändern sie ihr passwort so schnell wie möglich",
   "email_do_not_reply": "dies ist eine automatische email, bitte antworten sie nicht",
   "email_send_failed": "das senden der email ist fehlgeschlagen",
+  "email_sent_successfully": "die email wurde erfolgreich gesendet",
   "email_crete_failed": "email erstellung fehlgeschlagen",
   "user_id_email_not_match": "die benutzerkennung stimmt nicht mit der email adresse überein",
   "user_email_already_exist": "es gibt bereits einen benutzer mit dieser email adresse",
