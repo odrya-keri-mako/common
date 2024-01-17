@@ -246,9 +246,10 @@
 
   // Navbar language
   .directive('ngNavbarLanguage', [
+    '$timeout',
     '$compile',
     'file',
-    ($compile, file) => {
+    ($timeout, $compile, file) => {
       return {
         restrict: 'EA',
         scope: false,
@@ -268,7 +269,15 @@
                 let e = $compile(template)(scope);
                 iElement.replaceWith(e);
               });
-						}
+						},
+
+            // Post-link
+						post: (scope, iElement, iAttrs) => {
+              $timeout(() => {
+                if (iAttrs.dropdownMenuClass)
+                  scope.langDropdownMenuClass = iAttrs.dropdownMenuClass;
+              });
+            }
           };
         }
       };

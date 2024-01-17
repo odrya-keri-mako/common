@@ -12,7 +12,8 @@
       {{$root.lang.available[$root.lang.index].local}}
     </span>
   </a>
-  <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end mt-2" 
+  <ul class="dropdown-menu dropdown-menu-end mt-2"
+      ng-class="langDropdownMenuClass" 
       aria-labelledby="dropdown-menu-language">
     <li data-lang-id="{{x.id}}"
         class="dropdown-item cursor-pointer"
