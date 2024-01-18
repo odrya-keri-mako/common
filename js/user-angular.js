@@ -1090,6 +1090,7 @@
           isInEditMode: "=",
           callbackAccept: '&',
           callbackCancel: '&',
+          footerClass: "@",
           linkId: "@",
           linkIcon: "@",
           linkState: "@",
