@@ -178,12 +178,13 @@
         isStringBlank: checkedVar => !checkedVar || /^\s*$/.test(checkedVar),
 				isObjectEmpty: checkedVar => {
 					if (util.isObject(checkedVar)) {
-							for(var prop in checkedVar) {
-									if(checkedVar.hasOwnProperty(prop))
-													return false;
-									else    return true;
-							}
-					} else  return true;
+						for(var prop in checkedVar) {
+							if(checkedVar.hasOwnProperty(prop))
+										return false;
+							else  return true;
+						}
+            return true;
+					} else return true;
 				},
         hasKey: (checkedVar, key) => util.isString(key) && key in checkedVar,
 				isObjectHasKey: (checkedVar, key) =>  util.isObject(checkedVar) && util.hasKey(checkedVar, key),
