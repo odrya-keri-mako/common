@@ -25,6 +25,47 @@
     }
   ])
 
+  // Traslate new
+  .filter('translateNew', [
+    '$rootScope',
+    'util',
+    ($rootScope, util) => {
+      return (key, data, isAllowed, separator) => {
+
+				// Check parameters
+				if (util.isObjectEmpty(data))
+          data = $rootScope.lang.data;
+        if (util.isObjectEmpty(data)) return key;
+				if (util.isString(isAllowed))
+          isAllowed = !(isAllowed.toLowerCase().trim() === 'false');
+        if (!util.isBoolean(isAllowed)) isAllowed = true;
+				if (!util.isString(separator)) separator = ' ';
+				
+				// Check key type
+				if (util.isArray(key)) {
+					if (!key.length) return '';
+					let result = [];
+					[...key].forEach(k => {
+            k = k.trim();
+            if (!isAllowed || 
+                !util.isObjectHasKey(data, k) ||
+                !data[k]) 
+                  result.push(k);
+            else  result.push(data[k]);
+					});
+					return result.join(separator);
+				} else if (util.isString(key)) {
+					key = key.trim();
+					if (!isAllowed || 
+            !util.isObjectHasKey(data, key) ||
+            !data[key]) 
+              	return key;
+        	else  return data[key];
+				} else 	return key;
+      }
+    }
+  ])
+
 	// Language factory
   .factory('lang', [
     '$rootScope',
