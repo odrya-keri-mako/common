@@ -7,25 +7,28 @@
 
   // Add class(es)
   HTMLElement.prototype.addClass = (function(classList) {
+    let element = this; 
     if (Object.prototype.toString.call(classList) === '[object String]') {
       classList = [...new Set(classList.split(' ').map(s => s.trim()).filter(s => s.length))];
-      classList.forEach(c => this.classList.add(c));
+      classList.forEach(c => element.classList.add(c));
     }
   });
 
   // Remove class(es)
-  HTMLElement.prototype.removeClass = (function(classList) { 
+  HTMLElement.prototype.removeClass = (function(classList) {
+    let element = this;  
     if (Object.prototype.toString.call(classList) === '[object String]') {
       classList = [...new Set(classList.split(' ').map(s => s.trim()).filter(s => s.length))];
-      classList.forEach(c => this.classList.remove(c));
+      classList.forEach(c => element.classList.remove(c));
     }
   });
 
   // Toogle class(es)
-  HTMLElement.prototype.toggleClass = (function(classList) { 
+  HTMLElement.prototype.toggleClass = (function(classList) {
+    let element = this; 
     if (Object.prototype.toString.call(classList) === '[object String]') {
       classList = [...new Set(classList.split(' ').map(s => s.trim()).filter(s => s.length))];
-      classList.forEach(c => this.classList.toogle(c));
+      classList.forEach(c => element.classList.toggle(c));
     }
   });
 
@@ -579,7 +582,48 @@
           let defer = $q.defer();
           return {promise: defer, completed: defer.promise};
         },
-        sleep: async (delay) => new Promise((resolve) => setTimeout(resolve, delay))
+        sleep: async (delay) => new Promise((resolve) => setTimeout(resolve, delay)),
+				intersectionObserverInit: (options, fnCallBack) => {
+
+          // Check/Set options
+          if (util.isString(options)) options = {skeleton: options};
+          options = util.objMerge({
+            skeleton  : undefined,       // Skeleton element(s)
+            root      : undefined,				// Bounding parent element
+						rootMargin: undefined,	      // Offset (margin)
+						threshold : undefined		    // Numbers between 0.0:1.0 (1-hall element visible)
+          }, options, true);
+          if (!util.isString(options.skeleton) ||
+              !(options.skeleton = options.skeleton.trim()).length)
+            return;
+
+          // Check call back function exist
+          if (!util.isFunction(fnCallBack)) fnCallBack = null;
+
+					// Create new intersection observer
+    		  let observer = new IntersectionObserver(entries => {
+
+						// Each entries
+    		    entries.forEach(entry => {
+
+							// Check is in viewport
+    		      if (entry.isIntersecting)
+    		        		entry.target.classList.add('show');
+    		      else 	entry.target.classList.remove('show');
+
+              // When call back function exist, then execute
+              if (fnCallBack) fnCallBack(entry.target, entry.isIntersecting);
+    		    });
+    		  }, options);
+
+					// Get elements
+          let elements = document.querySelectorAll(options.skeleton);
+          if (elements.length) {
+            elements.forEach(element => {
+              observer.observe(element);
+            });
+          }
+    		}
 			};
 
 			// Return utilities
