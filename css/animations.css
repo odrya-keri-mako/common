@@ -97,11 +97,12 @@
 
 
 /* fade */
+/*
 .fade {
 	-webkit-animation: fade .7s ease both;
 					animation: fade .7s ease both;
 }
-
+*/
 
 /* move from / to and fade */
 .moveToLeftFade {
@@ -232,6 +233,7 @@
 }
 
 /* fade */
+/*
 @-webkit-keyframes fade {
 	from 	{ }
 	to 		{ opacity: 0.3; }
@@ -240,6 +242,7 @@
 	from 	{ }
 	to 		{ opacity: 0.3; }
 }
+*/
 
 /* move from / to and fade */
 @-webkit-keyframes moveToLeftFade {
