@@ -5,28 +5,8 @@
   // Application language module
   angular.module('app.language', ['app.common'])
 
-	// Traslate
+  // Traslate
   .filter('translate', [
-    'util', 
-    (util) => {
-      return (key, data=null, isAllowed=true) => {
-        if (!util.isString(key)) return key;
-        key = key.trim();
-        if (util.isString(isAllowed)) 
-          isAllowed = !(isAllowed.toLowerCase().trim() === 'false');
-        if (!util.isBoolean(isAllowed)) 
-          isAllowed = true;
-        if (!isAllowed || 
-            !util.isObjectHasKey(data, key) ||
-            !data[key]) 
-              return key;
-        else  return data[key];
-      }
-    }
-  ])
-
-  // Traslate new
-  .filter('translateNew', [
     '$rootScope',
     'util',
     ($rootScope, util) => {
@@ -35,7 +15,8 @@
 				// Check parameters
 				if (util.isObjectEmpty(data))
           data = $rootScope.lang.data;
-        if (util.isObjectEmpty(data)) return key;
+        if (util.isObjectEmpty(data)) 
+          return util.isString(key) ? key : '';
 				if (util.isString(isAllowed))
           isAllowed = !(isAllowed.toLowerCase().trim() === 'false');
         if (!util.isBoolean(isAllowed)) isAllowed = true;
@@ -46,14 +27,18 @@
 					if (!key.length) return '';
 					let result = [];
 					[...key].forEach(k => {
-            k = k.trim();
-            if (!isAllowed || 
-                !util.isObjectHasKey(data, k) ||
-                !data[k]) 
-                  result.push(k);
-            else  result.push(data[k]);
+            if (util.isString(k)) {
+              k = k.trim();
+              if (!isAllowed || 
+                  !util.isObjectHasKey(data, k) ||
+                  !data[k]) 
+                    result.push(k);
+              else  result.push(data[k]);
+            }
 					});
-					return result.join(separator);
+          if (result.length)
+					      return result.join(separator);
+          else  return '';
 				} else if (util.isString(key)) {
 					key = key.trim();
 					if (!isAllowed || 
