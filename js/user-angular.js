@@ -619,15 +619,18 @@
           }
         },
 
-        // Removing whitespaces from the beginning and end
+        // Removing whitespaces
         removeWhitespaces: (event) => {
           let element = event.currentTarget;
-          if (element.value)
-            element.value = element.value.replace(/\s+/g, ' ').trim();
-          if (util.isObjectHasKey($scope.model, element.name) && 
-              $scope.model[element.name])
-            $scope.model[element.name] = 
-            $scope.model[element.name].replace(/\s+/g, ' ').trim();
+          if (element) {
+            if (element.value)
+              element.value = element.value.replace(/\s+/g, ' ').trim();
+            if (util.isObjectHasKey($scope.model, element.name) && 
+                $scope.model[element.name]) {
+              $scope.model[element.name] = 
+              $scope.model[element.name].replace(/\s+/g, ' ').trim();
+            }
+          }
         },
 
         // Accept button clicked

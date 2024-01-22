@@ -356,9 +356,11 @@
 				replace: true,
 				scope: false,
         template:`<div class="testcode-container">
-                    <hr class="text-muted">
+                    <hr class="text-muted" ng-if="testCodeOptions.isTopLine">
                     <div class="row mb-2">
-                      <div class="col-form-label col-form-label-sm col-md-4 text-md-end fw-semibold">
+                      <div class="col-form-label fw-semibold"
+                           ng-class="testCodeOptions.classLabel"
+                           ng-if="testCodeOptions.isLabel">
                         <i class="fa-solid fa-star fa-2xs text-danger"></i>
                         <i class="fa-regular fa-hand-point-right fa-xl mx-1"></i>
                         <span class="text-capitalize">
@@ -366,6 +368,8 @@
                         </span>
                       </div>
                       <div class="col-11 col-md-7 position-relative">
+                        <i class="fa-solid fa-star fa-2xs text-danger"
+                           ng-if="!testCodeOptions.isLabel"></i>
                         <span id="testcode_content"
                               class="text-start letter-spacing-2 fw-semibold fs-4">
                           {{model.testCodeContent}}
@@ -376,10 +380,13 @@
                     <div class="row mb-2 input-row">
                       <label for="testcode" 
                              class="col-form-label col-form-label-sm col-md-4 
-                                    text-md-end fw-semibold invisible">
+                                    text-md-end fw-semibold invisible"
+                             ng-if="testCodeOptions.isFalseLabel">
                       </label>
-                      <div class="col-11 col-md-7 position-relative">
-                        <div class="input-group input-group-sm">
+                      <div class="col-11 position-relative"
+                           ng-class="{'col-md-7': testCodeOptions.isFalseLabel}">
+                        <div class="input-group"
+                             ng-class="testCodeOptions.classInputGroup">
                           <div class="input-group-prepend">
                             <span class="input-group-text rounded-0 h-100">
                               <i class="fas fa-robot"></i>
@@ -388,7 +395,7 @@
                           <input id="testcode"
                                  name="testcode"
                                  type="text" 
-                                 class="form-control form-control-sm"
+                                 class="form-control {{}}"
                                  ng-class="{'input-disabled': !helper.isInEditMode}"
                                  spellcheck="false" 
                                  autocomplete="off"
@@ -407,8 +414,9 @@
                                  ng-check-mark>
                           <div class="input-group-append">
                             <button type="button"
-                                    class="btn btn-sm btn-light text-capitalize 
+                                    class="btn btn-light text-capitalize 
                                            text-small-caps btnClickEffect"
+                                    ng-class="testCodeOptions.classBtn"
                                     ng-click="refresh($event)"
                                     ng-disabled="!helper.isInEditMode">
                               <i class="fas fa-sync-alt"></i>
@@ -421,7 +429,20 @@
                       </div>
                     </div>
                   </div>`,
-        link: function(scope, iElement, iAttrs, ngModel) {
+        link: function(scope) {
+
+          // Check/Set testcode options
+          if (!util.hasKey(scope, 'testCodeOptions'))
+            scope.testCodeOptions = {};
+          scope.testCodeOptions = util.objMerge({
+            isTopLine: true,
+            isLabel: true,
+            classLabel: "col-form-label-sm col-md-4 text-md-end",
+            isFalseLabel: true,
+            classInputGroup: "input-group-sm",
+            classInput: "form-control-sm",
+            classBtn: "btn-sm",
+          }, scope.testCodeOptions, true);
 
           // Refresh testcode
           scope.refresh = (event) => {
