@@ -86,7 +86,8 @@ if (!is_null($typeFields)) {
 
 	// Set query
 	$query .= " LEFT JOIN `type`
-										 ON `type`.`id` = `user`.`type`";
+										 ON `type`.`id` = `user`.`type` AND 
+										 		`type`.`type` = 'USER'";
 }
 
 // Set query
