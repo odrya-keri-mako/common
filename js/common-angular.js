@@ -432,12 +432,12 @@
           }
           return data;
         },
-        getBase64UrlType: (url) => {
-          let type = '';
-          if (util.isString(url))
-            type = url.match(/[^:]\w+\/[\w-+\d.]+(?=;|,)/)[0];
-          return type;
-        },
+        // getBase64UrlType: (url) => {
+        //   let type = '';
+        //   if (util.isString(url))
+        //     type = url.match(/[^:]\w+\/[\w-+\d.]+(?=;|,)/)[0];
+        //   return type;
+        // },
         fileReader: (file, options) => {
 
           // Create promise
@@ -963,10 +963,35 @@
     'util',
     ($transitions, $state, $rootScope, $timeout, util) => {
 
+      // Go to previous state
+			$rootScope.goToPreviousState = (isReload=false, isEnabled=true) => {
+      
+        // Check/Set parameters
+        if (!util.isBoolean(isReload )) isReload 	= false;
+        if (!util.isBoolean(isEnabled)) isEnabled = false;
+
+        // Check/Set state key
+        let key = isEnabled ? 'prevEnabled' : 'prev';
+
+        // Check state exist, andgot to state
+        if ($rootScope.state[key])
+              $state.go(
+                $rootScope.state[key], 
+                $rootScope.state.params[key], 
+                {reload: isReload}
+              );
+        else	$state.go(
+                $rootScope.state.default, 
+                {}, 
+                {reload: isReload}
+              );
+			};
+
       return {
         /**
          * Events
-         * @param {*} options disable state(s) by name, parent, and group property when refresh page
+         * @param {*} options disable state(s) by name, parent, and group 
+         *                    property when refresh page
          * @param {boolean} scrollTop   scroll to top when refresh page
          */
         events: (options=null, scrollTop=true) => {
@@ -989,7 +1014,8 @@
           Object.keys(options).forEach(key => {
             if (util.isString(options[key])) {
               options[key] = options[key].replaceAll(';', ',').split(',');
-              options[key] = options[key].map(name => name.trim()).filter(name => name !== '');
+              options[key] = options[key].map(name => name.trim())
+                                         .filter(name => name !== '');
             }
             if (!util.isArray(options[key])) options[key] = [];
           });
@@ -997,11 +1023,15 @@
           // Define state properties
           $rootScope.state = {
             id          : null,
+            default     : null,
             prev        : null,    
             prevEnabled : null,
+            params      : {
+              prev        : null,
+              prevEnabled : null
+            },
             parent      : null,
-            group       : null,
-            default     : null
+            group       : null
           };
           
           // Get available states
@@ -1038,44 +1068,76 @@
           
           // Set page container visibility, and class
           let setPageContainer = (stateId, method) => {
-            let element = document.querySelector('.page-container');
-            if (element) {
-              element.classList[method]('show');
-              let index = util.indexByKeyValue($rootScope.state.available, 'name', stateId);
-              if (index !== -1) 
-                element.classList[method]($rootScope.state.available[index].class);
+            if (stateId) {
+              let element = document.querySelector('.page-container');
+              if (element) {
+                element.classList[method]('show');
+                let index = util.indexByKeyValue($rootScope.state.available, 'name', stateId);
+                if (index !== -1) 
+                  element.classList[method]($rootScope.state.available[index].class);
+              }
             }
           }
 
           // Check parameter scroll to top
           if (!util.isBoolean(scrollTop)) scrollTop = true;
-          
-          // On before transaction
+
+          // On before start transaction
           $transitions.onBefore({}, (transition) => {
             
+            // Get transaction properties
+            let properties = {
+              from: {
+                name  : transition.from().name,
+                params: util.objFilterByKeys(transition.params('from'), '#', false)
+              },
+              to: {
+                name  : transition.to().name,
+                params: util.objFilterByKeys(transition.params('to'), '#', false)
+              }
+            };
+
             // Check is first time
             if (util.isNull($rootScope.state.id)) {
-              if ($rootScope.state.disabled.includes(transition.to().name))
+              if ($rootScope.state.disabled.includes(properties.to.name))
                 return transition.router.stateService.target($rootScope.state.default);
             }
 
-            // Check state is change
-            if(!angular.equals(transition.to().name, transition.from().name)) {
-            
-              // Set page container visibility, and class
-              setPageContainer(transition.from().name, 'remove');
-              
-              // Set state properties
-              if (!$rootScope.state.disabled.includes($rootScope.state.id))
-                $rootScope.state.prevEnabled = $rootScope.state.id;
-              $rootScope.state.prev = $rootScope.state.id;
-              $rootScope.state.id   = transition.to().name;
+            // Check is changed
+            let changed = {
+              state : !angular.equals(properties.from.name, properties.to.name),
+              params: !angular.equals(properties.from.params, properties.to.params)
+            }
 
-              // Get/Check transaction state to index
-              let index = util.indexByKeyValue($rootScope.state.available, 'name', transition.to().name);
-              if (index !== -1) {
-                $rootScope.state.parent = $rootScope.state.available[index].parent;
-                $rootScope.state.group = $rootScope.state.available[index].group;
+            // When is any one changed
+            if (changed.state || changed.params) {
+
+              // Check state parameters is changed
+              if (changed.params) {
+
+                // Set state properties
+                if (!$rootScope.state.disabled.includes($rootScope.state.id))
+                  $rootScope.state.params.prevEnabled = properties.from.params;
+                $rootScope.state.params.prev = properties.from.params;
+              }
+
+              // Check state changed
+              if (changed.state || 
+                  !angular.equals($rootScope.state.prev, $rootScope.state.id)) {
+
+                // Set state properties
+                if (!$rootScope.state.disabled.includes($rootScope.state.id))
+                  $rootScope.state.prevEnabled = $rootScope.state.id;
+                $rootScope.state.prev = $rootScope.state.id;
+                $rootScope.state.id   = properties.to.name;
+
+                // Get/Check transaction state to index
+                let index = util.indexByKeyValue(
+                  $rootScope.state.available, 'name', properties.to.name);
+                if (index !== -1) {
+                  $rootScope.state.parent = $rootScope.state.available[index].parent;
+                  $rootScope.state.group  = $rootScope.state.available[index].group;
+                }
               }
 
               // Apply change
@@ -1089,8 +1151,15 @@
             
             return $timeout(() => {
 
-              // Set page container visibility, and class
-              setPageContainer($rootScope.state.id, 'add');
+              // Check state is changed
+              if (!angular.equals($rootScope.state.prev, $rootScope.state.id)) {
+
+                // Set previous page container visibility, and class
+                setPageContainer($rootScope.state.prev, 'remove');
+
+                // Set current page container visibility, and class
+                setPageContainer($rootScope.state.id, 'add');
+              }
 
               // Scroll to top if necessary
               if (scrollTop) {
@@ -1383,6 +1452,69 @@
 		}
 	])
 
+  /**
+	 * Navbar collapse
+	 * @attribute: skeleton of navigation items
+	 * @description: Collapse navbar on click
+	 */
+  .directive('ngBsNavbarCollapse', [
+    '$timeout',
+    ($timeout) => {
+      return {
+
+				// Link
+        link: (scope, iElement, iAttrs) => {
+
+					// Get/navbar collapse element, and check exist
+          let navbarCollapse	= iElement[0].querySelector('.collapse.navbar-collapse');
+					if (navbarCollapse) {
+
+						// Get atribute, when not exist set to default
+						let skeleton = iAttrs.ngNavbarCollapse || 
+                           '.navbar-brand, .nav-item:not(.dropdown)';
+
+						// Reset asynchronous
+						$timeout(() => {
+
+							// Get navigation items
+							let navItems = iElement[0].querySelectorAll(skeleton);
+
+							// Check navigation items exist
+							if (navItems.length) {
+
+								// Create bootstrap collapse instance
+								let bsCollapse = new bootstrap.Collapse(navbarCollapse, {toggle:false});
+
+								// Each items
+								navItems.forEach(item => {
+
+									// Add event listener on click event
+									item.addEventListener('click', () => {
+
+										// Check navbar collapse element visibility
+										if (navbarCollapse.classList.contains('show')) {
+
+											// When is not active, then collapse navbar
+											let isActiveItem =  item.classList.contains('active') ||
+																					item.querySelector('.active');
+											if (!isActiveItem) bsCollapse.toggle();
+										}
+
+										// Hide all parent dropdowns
+										let dropdownMenu = item.closest('ul.dropdown-menu.show');
+										while(dropdownMenu) {
+											dropdownMenu.classList.remove('show');
+											dropdownMenu = dropdownMenu.closest('ul.dropdown-menu.show');
+										}
+									});
+								});
+							}
+						}, 300);
+					}
+        }
+      };
+  }])
+  
   // Please wait
   .directive('ngWhait', [
     '$parse',
