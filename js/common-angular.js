@@ -220,10 +220,12 @@
                 return arr.sort((a, b) => a[key] < b[key] ? -1 : (a[key] > b[key] ?  1 : 0));
           else  return arr.sort((a, b) => a[key] < b[key] ?  1 : (a[key] > b[key] ? -1 : 0));
         },
-        arrayObjUniqueByKeys: (obj, keys, isKeepFirst = true) => {
-			  	if (util.isString(keys)) keys = [keys];
+        arrayObjUniqueByKeys: (arr, keys, isKeepFirst=true) => {
+			  	if (util.isString(keys)) 
+            keys = keys.replaceAll(';', ',').split(',');
+          if (!util.isBoolean(isKeepFirst)) isKeepFirst = true;
 			  	return Array.from(
-			  			obj.reduce((map, e) => {
+			  			arr.reduce((map, e) => {
 			  					let key = keys.map(k => [e[k], typeof e[k]])
 			  												.flat().join('-');
 			  					if (isKeepFirst && map.has(key)) return map;
