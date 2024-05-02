@@ -95,17 +95,8 @@
   .filter('numSep', [
     'util',
     (util) => {
-      return (number, separator) => {
-      
-		  	// Check parameters
-		  	if (!util.isVarNumber(number)) number = 0;
-		  	if (!util.isString(separator)) separator = ' ';
-      
-		  	// Return number thousand separated
-        return number.toString()
-		  							 .replace(/(\d)(?=(\d{3})+(?!\d))/g,
-		  											'$1' + separator.charAt(0)); 
-      };
+      return (number, separator) => 
+        util.mumberToStringThousandSeparator(number, separator)
     }
   ])
 
@@ -636,7 +627,14 @@
               observer.observe(element);
             });
           }
-    		}
+    		},
+        mumberToStringThousandSeparator: (number, separator) => {
+		  	  if (!util.isVarNumber(number)) number = 0;
+		  	  if (!util.isString(separator)) separator = ' ';
+          return number.toString()
+		  	  						 .replace(/(\d)(?=(\d{3})+(?!\d))/g,
+		  	  										'$1' + separator.charAt(0)); 
+        }
 			};
 
 			// Return utilities
