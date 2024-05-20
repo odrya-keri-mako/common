@@ -18,9 +18,12 @@ class File {
 				if (!is_bool($skipEmpty)) $skipEmpty = true;
 				$result = array();
 				while(!feof($handle)) {
-					$line = trim(fgets($handle));
-					if (!empty($line) || !$skipEmpty)
-						$result[] = $line;
+					$line = fgets($handle);
+					if (is_string($line)) {
+						$line = trim($line);
+						if (!empty($line) || !$skipEmpty)
+							$result[] = $line;
+					}
 				}
 				fclose($handle);
 				return $result;
