@@ -115,7 +115,9 @@ class Database {
 
 	// Get query type
 	private function get_type($query) {
-		return strtoupper(strtok($query, " "));
+    $query  = trim(preg_replace('!\s+!', ' ', $query));
+    $type   = strtok($query, " ");
+		return strtoupper($type);
 	}
 
 	// Close connection
@@ -189,6 +191,11 @@ class Database {
 
       // Get query type
 			$type = $this->get_type($query);
+
+      // Check parameters
+      if (!is_null($params) && 
+          !is_array($params))
+        $params = array($params);
 
       // Check query type is INSERT
       if ($type === "INSERT") {
