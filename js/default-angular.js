@@ -19,7 +19,7 @@
 	// Custom factory
   .factory('customFactoryName', [
     '$timeout',
-    ($timeout) => {
+    function($timeout) {
       return {
         get: () => {
         },
@@ -33,7 +33,7 @@
   .config([
     '$stateProvider', 
     '$urlRouterProvider', 
-    ($stateProvider, $urlRouterProvider) => {
+    function($stateProvider, $urlRouterProvider) {
 
       $stateProvider
 			.state('home', {
@@ -62,7 +62,7 @@
   // Application run
   .run([
     '$rootScope',
-    ($rootScope) => {
+    function($rootScope) {
 			console.log('Run...');
     }
   ])
@@ -70,7 +70,7 @@
   // Home controller
   .controller('homeController', [
     '$scope',
-    ($scope) => {
+    function($scope) {
       console.log('Home controller...');
     }
   ])
@@ -78,7 +78,7 @@
 	// Page1 controller
   .controller('page1Controller', [
     '$scope',
-    ($scope) => {
+    function($scope) {
       console.log('Page1 controller...');
     }
   ])
@@ -88,7 +88,7 @@
     '$state',
     '$scope',
 		'$stateParams',
-    ($state, $scope, $stateParams) => {
+    function($state, $scope, $stateParams) {
 
 			// Get/Check parameters
       $scope.data = $stateParams.data;
@@ -112,6 +112,11 @@
   }])
 
 	// Custom directive 2
+  // Scope bindings:
+  // < one-way binding      <? optional     
+  // = two-way binding      =? optional
+  // & function binding     &? optional
+  // @ pass only strings    @? optional
 	.directive('customDirectiveName2', [
     '$timeout', 
     ($timeout) => {
