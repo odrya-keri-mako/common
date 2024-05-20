@@ -449,4 +449,52 @@ namespace Util;
       $html
     ));
 	}
+
+  // Short array
+  public static function usort_local(&$arr, $order=null) {
+    if (!is_array($arr) || empty($arr)) return;
+    $currentOrder = setlocale(LC_COLLATE, 0);
+    if (!is_string($order) || empty(($order = trim($order))))
+      $order = "Hungarian_Hungary.utf8";
+    setlocale(LC_COLLATE, $order);
+    usort($arr, function($a, $b) {
+      return strcoll(mb_strtolower($a), mb_strtolower($b));
+    });
+    setlocale(LC_COLLATE, $currentOrder);
+    return;
+  }
+
+  // Insert arry to array before/after every chunk items
+  public static function insertArryToArray($target, $insert, $options=null) {
+
+    // Set result, and check arrays
+    $result = array();
+    if (!is_array($target)) $target = array($target);
+    if (!is_array($insert)) $insert = array($insert);
+    if (self::isAssocArray($target)) $target = array_values($target);
+    if (self::isAssocArray($insert)) $insert = array_values($insert);
+    if (empty($target)) return $insert;
+    if (empty($insert)) return $target;
+    
+    // Check/Merge options
+    if (is_int($options) && $options > 0) $options = array("chunkLength" => $options);
+    if (is_bool($options)) $options = array("insertToBeg" => $options);
+    $options = self::objMerge(array(
+      "chunkLength" => 1,
+      "insertToBeg" => true
+    ), $options, true);
+  
+    // Create chunked array from traget
+    $target = array_chunk($target, $options["chunkLength"]);
+  
+    // Combine two array
+    foreach($target as $chunk) {
+      if ($options["insertToBeg"])
+            $result = array_merge($result, $insert, $chunk);
+      else	$result = array_merge($result, $chunk, $insert); 
+    }
+  
+    // Return result
+    return $result;
+  }
 }
