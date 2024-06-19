@@ -32,6 +32,11 @@
     }
   });
 
+  // Sort array randomly
+  Array.prototype.random = function() {
+    return this.sort((a, b) => Math.random() - 0.5);
+  };
+  
   // Unique array
   Array.prototype.unique = function(key=null) {
     let arr = this;
@@ -127,8 +132,9 @@
 
 	// Utilities factory
   .factory('util', [
+    '$interval',
     '$q',
-    ($q) => {
+    ($interval, $q) => {
 
       // Set utilities
       let util = {
@@ -587,6 +593,29 @@
           return {promise: defer, completed: defer.promise};
         },
         sleep: async (delay) => new Promise((resolve) => setTimeout(resolve, delay)),
+        sleepUntil: (callBack, delay) => {
+          return new Promise((resolve, reject) => {
+            if (!util.isFunction(callBack)) {
+              reject('Missing function!');
+              return;
+            }
+            if (callBack()) {
+              if (!util.isInt(delay) || delay < 0) delay = 1;
+              let startTime   = new Date(),
+                  intervalID  = $interval(() => {
+                if (!callBack()) {
+                  $interval.cancel(intervalID);
+                  resolve();
+                  return;
+                } else if ((new Date()) - startTime > 5000) {
+                  $interval.cancel(intervalID);
+                  reject('Time overflow!');
+                  return;
+                }
+              }, delay);
+            } else resolve();
+          });
+        },
 				intersectionObserverInit: (options, fnCallBack) => {
 
           // Check/Set options
