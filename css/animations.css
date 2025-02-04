@@ -96,14 +96,6 @@
 }
 
 
-/* fade */
-/*
-.fade {
-	-webkit-animation: fade .7s ease both;
-					animation: fade .7s ease both;
-}
-*/
-
 /* move from / to and fade */
 .moveToLeftFade {
 	-webkit-animation: moveToLeftFade .7s ease both;
@@ -232,17 +224,6 @@
 	from 	{ -webkit-transform: translateY(100%); transform: translateY(100%); }
 }
 
-/* fade */
-/*
-@-webkit-keyframes fade {
-	from 	{ }
-	to 		{ opacity: 0.3; }
-}
-@keyframes fade {
-	from 	{ }
-	to 		{ opacity: 0.3; }
-}
-*/
 
 /* move from / to and fade */
 @-webkit-keyframes moveToLeftFade {
@@ -1422,22 +1403,59 @@
   100% 	{transform:none;}
 }
 
-/* Fade In */
+/* Fade In-Out */
+.fadeIn {
+	-webkit-animation: fadeIn .7s ease both;
+					animation: fadeIn .7s ease both;
+}
+.fadeOut {
+	-webkit-animation: fadeOut 1s ease both;
+					animation: fadeOut 1s ease both;
+}
+
 @-webkit-keyframes fadeIn {
+  	0% {opacity:0;}
+	100% {opacity:1;}
+}
+@keyframes fadeIn {
+  	0% {opacity:0;}
+	100% {opacity:1;}
+}
+
+@-webkit-keyframes fadeOut {
+  	0% {opacity:1;}
+	100% {opacity:0;}
+}
+@keyframes fadeOut {
+  	0% {opacity:1;}
+	100% {opacity:0;}
+}
+
+/* Fade-Scale In-Out */
+.fadeScaleIn {
+	-webkit-animation: fadeScaleIn .7s ease both;
+					animation: fadeScaleIn .7s ease both;
+}
+.fadeScaleOut {
+	-webkit-animation: fadeScaleOut .7s ease both;
+					animation: fadeScaleOut .7s ease both;
+}
+
+@-webkit-keyframes fadeScaleIn {
 		0% {-webkit-transform:scale(0); opacity:1;}
 	100% {-webkit-transform:scale(1); opacity:1;}
 }
-@keyframes fadeIn {
+@keyframes fadeScaleIn {
 		0% {transform:scale(0); opacity:0;}
 	100% {transform:scale(1); opacity:1;}
 }
 
-/* Fade Out */
-@-webkit-keyframes fadeOut {
+/* Fade Scale Out */
+@-webkit-keyframes fadeScaleOut {
 		0% {-webkit-transform:scale(1); opacity:1;}
 	100% {-webkit-transform:scale(0); opacity:0;}
 }
-@keyframes fadeOut {
+@keyframes fadeScaleOut {
 		0% {transform:scale(1); opacity:1;}
 	100% {transform:scale(0); opacity:0;}
 }
