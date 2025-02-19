@@ -167,8 +167,10 @@ class Database {
 			// Return result
 			return $result;
 
+		} catch (PDOException $e) {
+			Util::setError($e->getMessage());
 		} catch (Exception $e) {
-			Util::setError("Unable to execute query!");
+			Util::setError($e->getMessage());
 		}
 	}
 }

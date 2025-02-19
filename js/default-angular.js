@@ -19,18 +19,23 @@
 
 	// Custom factory
   .factory('customFactoryName', [
-    '$timeout',
-    function($timeout) {
-      let a = 1;
+    function() {
+      let a = [];
       return {
         get: () => {
           return a;
         },
         set: (v) => {
-          a = v;
+          if (Array.isArray(v))
+            a = [...v];
+        },
+        remove: (index) => {
+          if (Number.isInteger(index) && 
+              index >= 0 && index < a.length)
+            a.splice(index, 1);
         },
         add: (v) => {
-          a += v;
+          a.push(v);
         }
       }
     }
@@ -111,7 +116,8 @@
     '$state',
     '$scope',
 		'$stateParams',
-    function($state, $scope, $stateParams) {
+    'customFactoryName',
+    function($state, $scope, $stateParams, customFactoryName) {
 
 			// Get/Check parameters
       $scope.data = $stateParams.data;
@@ -120,6 +126,13 @@
         return;
       }
 
+      // Use factory
+      customFactoryName.set([55,44,99]);
+      let a = customFactoryName.get();
+      customFactoryName.add(100);
+      customFactoryName.remove(2);
+      let b = customFactoryName.get();
+      console.log(a, b);
       console.log('Page2 controller...');
     }
   ])
