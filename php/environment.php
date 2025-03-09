@@ -58,7 +58,7 @@ class Env {
 	private function setError() {
 		error_reporting(0);
 		set_error_handler(array($this, 'customErrorHandler'), E_ALL);
-		register_shutdown_function(array($this, 'customFatalErrorHandler'));
+		register_shutdown_function(array($this, 'customFatalErrorHandler'), E_ALL);
 	}
 
 	// Custom error handler
@@ -124,7 +124,7 @@ class Env {
 		$error = error_get_last();
 
 		// Check is error
-		if (!is_null($error)) {
+			if (!is_null($error)) {
 		
 			// Check error type
 			switch ($error['type']) {

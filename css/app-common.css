@@ -131,8 +131,15 @@
 .text-justify {
   text-align: justify !important
 }
+.text-indent-4 {
+  text-indent: 40px !important
+}
 .text-nowrap {
   white-space:nowrap !important;
+}
+.text-underline-active.active {
+	text-decoration: underline !important;
+	cursor: default !important;
 }
 .fs-xs {
   font-size: var(--xs-font-size) !important;
