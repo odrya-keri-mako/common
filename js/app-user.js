@@ -14,7 +14,8 @@
     '$state',
     'util',
     'msg',
-    ($rootScope, $state, util, msg) => {
+    'trans',
+    ($rootScope, $state, util, msg, trans) => {
 
       // Set user properties, and root scope user key
       let properties,
@@ -102,13 +103,8 @@
           callback  : (response) => {
             if (response === 'ok') {
               user.reset();
-              if (util.isObjectHasKey($rootScope, 'state')) {
-                if ($rootScope.state.disabled.includes($rootScope.state.id)) {
-                  if ($rootScope.state.disabled.includes($rootScope.state.prev))
-                        $state.go($rootScope.state.default);
-                  else  $state.go($rootScope.state.prev); 
-                }
-              }
+              if (util.isObjectHasKey($rootScope, 'state'))
+                trans.preventState();
             }
           }
         });

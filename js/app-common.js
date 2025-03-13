@@ -328,7 +328,50 @@
               }
             }, delay);
           });
-        }
+        },
+        intersectionObserverInit: (options, fnCallBack) => {
+
+          // Check options
+          if (util.isString(options)) options = {skeleton: options};
+
+          // Set options
+          options = util.objMerge({
+            skeleton  : undefined,      // Skeleton element(s)
+            root      : undefined,			// Bounding parent element
+						rootMargin: undefined,	    // Offset (margin)
+						threshold : undefined		    // Numbers between 0.0:1.0 (1-hall element visible)
+          }, options, true);
+          if (!util.isString(options.skeleton) ||
+              !(options.skeleton = options.skeleton.trim()).length)
+            return;
+
+          // Check call back function exist
+          if (!util.isFunction(fnCallBack)) fnCallBack = null;
+
+					// Create new intersection observer
+    		  let observer = new IntersectionObserver(entries => {
+
+						// Each entries
+    		    entries.forEach(entry => {
+
+							// Check is in viewport
+    		      if (entry.isIntersecting)
+    		        		entry.target.classList.add('show');
+    		      else 	entry.target.classList.remove('show');
+
+              // When call back function exist, then execute
+              if (fnCallBack) fnCallBack(entry.target, entry.isIntersecting);
+    		    });
+    		  }, options);
+
+					// Get elements
+          let elements = document.querySelectorAll(options.skeleton);
+          if (elements.length) {
+            elements.forEach(element => {
+              observer.observe(element);
+            });
+          }
+    		}
 			};
 
 			// Return utilities

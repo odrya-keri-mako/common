@@ -10,8 +10,9 @@
 	// Message factory
   .factory('msg', [
     '$rootScope',
+		'$timeout',
     'util',
-    ($rootScope, util) => {
+    ($rootScope, $timeout, util) => {
 
 			// Define message dielog element
 			let msgDialog;
@@ -25,6 +26,7 @@
 					// Merge options with message defaults
 					return 	util.objMerge({
 										icon 			: null,
+										title     : null,		
 										content 	: '',
 										isAudio 	: true,
 										isConfirm	: false,
@@ -64,7 +66,8 @@
 				// Reset
 				reset: (customEvent) => {
 
-					// Remove event on modal close
+					// Remove aria hidden, and event on modal close
+					msgDialog.removeAttribute("aria-hidden");
 					msgDialog.removeEventListener('msgDialogClose', methods.reset);
 
 					// Check callback function exist
@@ -156,15 +159,17 @@
 									     class="modal fade" 
 									     data-bs-backdrop="static" 
 									     data-bs-keyboard="false" 
-									     tabindex="-1" 
-									     aria-hidden="true">
+									     tabindex="-1">
 										<div class="modal-dialog border border-3 rounded-3
 																border-secondary shadow-bottom-end">
 										  <div class="modal-content text-dark">
 										    <div class="modal-header">
 													<i class="fa-3x" ng-class="$root.message.icon"></i>
+													<h1 class="ms-3 text-capitalize text-small-caps">
+														{{$root.message.title}}
+													</h1>
 												</div>
-										    <div class="modal-body">
+										    <div class="modal-body py-4 px-2">
 													<h5 class="text-center">
 														<span>{{$root.message.content}}</span>
 													</h5>
