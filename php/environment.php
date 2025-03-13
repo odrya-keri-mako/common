@@ -120,6 +120,7 @@ class Env {
 
   // Get application paths
   private function getApplicationPath(): void {
+
     $appPaths = [self::checkPath(realpath('./'), 'php')];
 
     foreach (array_reverse(debug_backtrace()) as $item) {
@@ -127,18 +128,49 @@ class Env {
     }
 
     $appPaths[] = self::checkPath(dirname(__FILE__), 'php');
-    self::$appPaths = array_values(array_unique($appPaths));
+    $appPaths   = array_values(array_unique($appPaths));
 
-    if (!chdir(self::$appPaths[0])) {
-      Util::setError('Unable to change directory');
-    }
+    // Change working directory to first path
+		if (empty($appPaths) || !chdir($appPaths[0])) {
+			throw new Exception('Unable to change directory');
+		}
+
+    // Set application path(s)
+		$currPath = $this->checkPath(realpath('./'), 'php');
+		self::$appPaths = array_map(fn($path) => 
+                      self::getRelativePath($currPath, $path), $appPaths);
   }
 
+  // Get relative path from working directory
+	private function getRelativePath(string $currPath, string $pathTo): string {
+
+		$currParts  = array_values(array_filter(explode('/', $currPath)));
+    $toParts    = array_values(array_filter(explode('/', $pathTo)));
+    $root       = '';
+
+    while (!empty($currParts) && 
+           !empty($toParts) && 
+           $currParts[0] === $toParts[0]) {
+      $root .= array_shift($currParts) . "/";
+      array_shift($toParts);
+    }
+
+    return  empty($currParts) ? 
+            "./" . implode('/', $toParts) : 
+            str_repeat("../", count($currParts)) . 
+            implode('/', $toParts) . '/';
+	}
+
+  // Get application paths
+  public static function getAppPaths(): array {
+    return self::$appPaths;
+  }
+  
   // Normalize paths
   private static function checkPath(string $path, 
                                     ?string $exceptFolder = null): string {
     $path = rtrim(str_replace(DIRECTORY_SEPARATOR, '/', 
-                              strtolower(trim($path))), '/') . '/';
+                  strtolower(trim($path))), '/') . '/';
     return ($exceptFolder !== null && str_ends_with($path, "/$exceptFolder/")) ? 
             substr($path, 0, -strlen($exceptFolder) - 1) : $path;
   }
@@ -176,6 +208,7 @@ class Env {
 
   // Set include path
   private function setIncludePath(): void {
+
     $includePaths = explode(PATH_SEPARATOR, get_include_path() ?: '');
     $includePaths = array_unique(array_merge($includePaths, self::$appPaths));
 
