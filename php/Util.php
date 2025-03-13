@@ -89,4 +89,12 @@ class Util {
     return  array_merge(...array_map(fn($item) => $fixValue === null ? 
             array_values($item) : [$fixValue, ...array_values($item)], $arr));
   }
+
+  // Convert array of arrays to simple array
+  function arrayOfArrayToArray(array $arr, 
+                               mixed $fixValue = null): array {
+    return  is_null($fixValue) ? 
+            array_merge(...$arr) : 
+            array_merge(...array_map(fn($item) => [$fixValue, ...$item], $arr));
+  }
 }
