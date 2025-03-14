@@ -92,10 +92,16 @@ class Util {
   }
 
   // Convert array of arrays to simple array
-  function arrayOfArrayToArray(array $arr, 
+  public static function arrayOfArrayToArray(array $arr, 
                                mixed $fixValue = null): array {
     return  is_null($fixValue) ? 
             array_merge(...$arr) : 
             array_merge(...array_map(fn($item) => [$fixValue, ...$item], $arr));
+  }
+
+  // Inserts a fixed value before all elements of an array
+  public static function prependToArray(array $arr, mixed $fixValue): array {
+    return  array_reduce($arr, fn($a, $item) => 
+            [...$a, $fixValue, $item], []);
   }
 }
