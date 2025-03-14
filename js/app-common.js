@@ -554,11 +554,13 @@
                   // Check has property
                   if (!util.isUndefined(options.data)) {
 
+                    if (!util.isString(options.data))
+                      options.data = JSON.stringify(options.data);
+
                     // Check method
-                    if (method !== 'ajax') {
-                            options.method = 'POST';
-                            options.data = JSON.stringify(options.data);
-                    } else  options.data = {data: JSON.stringify(options.data)};
+                    if (method !== 'ajax')
+                          options.method = 'POST';
+                    else  options.data = {data: options.data};
                   }
                 } else options.data = undefined;
 

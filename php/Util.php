@@ -53,10 +53,11 @@ class Util {
   }
 
   // Get arguments
-  public static function getArgs(): ?array {
+  public static function getArgs(bool $isDecode = true): mixed {
     $args = $_GET['data'] ?? $_POST['data'] ?? file_get_contents('php://input');
-    $args = is_string($args) && trim($args) !== '' ? trim($args) : null;
-    return $args !== null ? self::jsonDecode($args) : null;
+    $args = is_string($args) && trim($args) !== '' ? 
+            trim($args) : null;
+    return $isDecode && $args !== null ? self::jsonDecode($args) : $args;
   }
 
   // Merge two object/arrays
