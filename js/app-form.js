@@ -32,6 +32,12 @@
 						else if (firstEmptyInput)   firstEmptyInput.focus();
 					}, delay);
 				},
+
+        // Tooltips
+        tooltips: () => {
+					let tooltips = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+					if (tooltips.length) [...tooltips].map(e => new bootstrap.Tooltip(e));
+        }
       };
 
       // Return form
