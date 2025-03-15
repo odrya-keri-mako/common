@@ -61,15 +61,17 @@
 
 					// Set event on message dialog close
 					msgDialog.addEventListener('msgDialogClose', methods.reset);
+
+					// Set event on dialog hide
+					msgDialog.addEventListener('hide.bs.modal', methods.blour);
 				},
 
 				// Reset
 				reset: (customEvent) => {
 
-					// Remove aria hidden, and event on modal close
-					msgDialog.removeAttribute("aria-hidden");
+					// Remove event on modal close
 					msgDialog.removeEventListener('msgDialogClose', methods.reset);
-
+					
 					// Check callback function exist
 					if (util.isFunction($rootScope.message.callback)) {
 
@@ -79,6 +81,13 @@
 
 					// Reset rootscope message property
 					$rootScope.message = undefined;
+				},
+
+				// Blour
+				blour: () => {
+					msgDialog.removeEventListener('hide.bs.modal', methods.blour);
+					if (document.activeElement instanceof HTMLElement)
+						document.activeElement.blur();
 				}
       };
 
