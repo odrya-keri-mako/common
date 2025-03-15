@@ -10,19 +10,27 @@
   // Form factory
   .factory('form', [
     '$timeout',
-    ($timeout) => {
+    'util',
+    ($timeout, util) => {
 
       // Set form
       let form = {
 
         // Focus
-				focus: () => {
+				focus: (skeleton=null, delay=200) => {
+
+          // Check parameters
+          if (!util.isString(skeleton))
+                skeleton = 'form';
+          else  skeleton = skeleton.trim();
+          if (!util.isInt(delay) || delay < 0) delay = 200;
+
 					$timeout(() => {
-						let firstInvalidInput = document.querySelector(`form input.ng-invalid`),
-								firstEmptyInput   = document.querySelector(`form input.ng-empty`);
+						let firstInvalidInput = document.querySelector(`${skeleton} input.ng-invalid`),
+								firstEmptyInput   = document.querySelector(`${skeleton} input.ng-empty`);
 						if 		  (firstInvalidInput) firstInvalidInput.focus();
 						else if (firstEmptyInput)   firstEmptyInput.focus();
-					}, 200);
+					}, delay);
 				},
       };
 
