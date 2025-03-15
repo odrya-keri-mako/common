@@ -158,7 +158,8 @@
 				template:`<div id="msg-dialog" 
 									     class="modal fade" 
 									     data-bs-backdrop="static" 
-									     data-bs-keyboard="false" 
+									     data-bs-keyboard="false"
+											 aria-modal="true" 
 									     tabindex="-1">
 										<div class="modal-dialog border border-3 rounded-3
 																border-secondary shadow-bottom-end">

@@ -491,10 +491,12 @@
         // Check prevent state exist, and not disabled
         // Go to checked state
         preventState: () => {
-          if (!$rootScope.state.prev ||
-                $rootScope.state.disabled.includes($rootScope.state.prev))
-                $state.go($rootScope.state.default);
-          else  $state.go($rootScope.state.prev);
+          if ($rootScope.state.disabled.includes($rootScope.state.id)) {
+            if (!$rootScope.state.prev ||
+                  $rootScope.state.disabled.includes($rootScope.state.prev))
+                  $state.go($rootScope.state.default);
+            else  $state.go($rootScope.state.prev);
+          }
         }
       };
 
