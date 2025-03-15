@@ -11,11 +11,10 @@
 	// User factory
   .factory('user', [
     '$rootScope',
-    '$state',
     'util',
     'msg',
     'trans',
-    ($rootScope, $state, util, msg, trans) => {
+    ($rootScope, util, msg, trans) => {
 
       // Set user properties, and root scope user key
       let properties,
@@ -77,7 +76,7 @@
         },
 
         // Get
-        get: () => properties,
+        get: () => util.objMerge({}, $rootScope[userKey]),
 
         // Reset
         reset: (filter=null) => {
