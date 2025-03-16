@@ -26,8 +26,10 @@
           if (!util.isInt(delay) || delay < 0) delay = 200;
 
 					$timeout(() => {
-						let firstInvalidInput = document.querySelector(`${skeleton} input.ng-invalid`),
-								firstEmptyInput   = document.querySelector(`${skeleton} input.ng-empty`);
+						let firstInvalidInput = document.querySelector(
+                  `${skeleton} input.ng-invalid, ${skeleton} textarea.ng-invalid`),
+								firstEmptyInput   = document.querySelector(
+                  `${skeleton} input.ng-empty, ${skeleton} textarea.ng-empty`);
 						if 		  (firstInvalidInput) firstInvalidInput.focus();
 						else if (firstEmptyInput)   firstEmptyInput.focus();
 					}, delay);

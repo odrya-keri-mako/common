@@ -80,8 +80,8 @@ class Util {
   }
 
   // Check if array is associative
-  public static function isAssocArray(array $arr): bool {
-    return !empty($arr) && array_keys($arr) !== range(0, count($arr) - 1);
+  public static function isAssocArray(mixed $arr): bool {
+    return is_array($arr) && !empty($arr) && array_keys($arr) !== range(0, count($arr) - 1);
   }
 
   // Convert array of associative arrays to simple array
