@@ -640,7 +640,8 @@
                   resolve(null);
                   return;
                 }
-                if (response.includes('error') &&
+                if (util.isString(response) &&
+                    response.includes('error') &&
                     response.includes('</span>') &&
                     response.includes('</th>')) {
                   let regex = /<\/span>(.*?)<\/th>/,
