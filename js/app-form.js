@@ -57,8 +57,25 @@
         scope   : false,
         link: function(scope, iElement, iAttrs, ngModel) {
           scope.$watch(() => 	
-            $parse(iAttrs.ngCompareModel)(scope) === ngModel.$modelValue, 
-                  (isEqual) => ngModel.$setValidity('equal', isEqual));
+                $parse(iAttrs.ngCompareModel)(scope) == ngModel.$modelValue, 
+                      (isEqual) => ngModel.$setValidity('equal', isEqual));
+        }
+      };
+    }
+  ])
+
+  // Compare model different with another model
+  .directive('ngCompareModelDifferent', [
+    '$parse',
+    ($parse) => {
+      return {
+        restrict: 'EA',
+        require : "ngModel",
+        scope   : false,
+        link: function(scope, iElement, iAttrs, ngModel) {
+          scope.$watch(() => 
+                $parse(iAttrs.ngCompareModelDifferent)(scope) != ngModel.$modelValue, 
+                (isEqual) => ngModel.$setValidity('equal', isEqual));
         }
       };
     }
