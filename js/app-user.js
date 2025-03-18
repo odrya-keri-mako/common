@@ -41,7 +41,7 @@
       let user = {
 
         // Initialize
-        init: (prop=null, key=null) => {
+        init: (prop=null, key=null, callback=null) => {
 
           // Check user properties
           if (util.isString(prop)) {
@@ -64,6 +64,13 @@
 
           // Set user default properties
           $rootScope[userKey] = util.objMerge({}, properties);
+
+          // Check callback function exist
+          if (util.isFunction(callback)) {
+
+            // Execute callback function
+            callback();
+          }
         },
 
         // Set
