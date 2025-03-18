@@ -16,9 +16,8 @@
     'trans',
     ($rootScope, util, msg, trans) => {
 
-      // Set user properties, and root scope user key
-      let properties,
-          userKey;
+      // Set user properties
+      let properties;
 
       // Set local methods
       let methods = {
@@ -41,7 +40,7 @@
       let user = {
 
         // Initialize
-        init: (prop=null, key=null, callback=null) => {
+        init: (prop=null, callback=null) => {
 
           // Check user properties
           if (util.isString(prop)) {
@@ -55,15 +54,8 @@
                 properties = prop.reduce((o, k) => (o[k] = null, o), {});
           else  properties = util.objMerge({}, methods.default());
 
-          // Check root scope user key
-          if (util.isString(key))
-            key = key.replaceAll(" ", "");
-          if (util.isString(key) && key.length)
-                userKey = key;
-          else  userKey = 'user';
-
           // Set user default properties
-          $rootScope[userKey] = util.objMerge({}, properties);
+          $rootScope.user = util.objMerge({}, properties);
 
           // Check callback function exist
           if (util.isFunction(callback)) {
@@ -77,13 +69,13 @@
         set: (data) => {
           Object.keys(properties).forEach(key => {
             if (util.hasKey(data, key)) 
-              $rootScope[userKey][key] = data[key];
+              $rootScope.user[key] = data[key];
           });
           $rootScope.$applyAsync();
         },
 
         // Get
-        get: () => util.objMerge({}, $rootScope[userKey]),
+        get: () => util.objMerge({}, $rootScope.user),
 
         // Reset
         reset: (filter=null) => {
@@ -94,7 +86,7 @@
           }
           if (!util.isArray(filter)) filter = [];
           Object.keys(properties).forEach(key => {
-            if (!filter.includes(key)) $rootScope[userKey][key] = null;
+            if (!filter.includes(key)) $rootScope.user[key] = null;
           });
           $rootScope.$applyAsync();
         }
