@@ -101,6 +101,7 @@
           callback  : (response) => {
             if (response === 'ok') {
               user.reset();
+              util.localStorage('remove', 'user');
               if (util.isObjectHasKey($rootScope, 'state'))
                 trans.preventState();
             }
