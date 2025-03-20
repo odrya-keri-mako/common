@@ -56,6 +56,7 @@
 
           // Set user default properties
           $rootScope.user = util.objMerge({}, properties);
+          $rootScope.$applyAsync();
 
           // Check callback function exist
           if (util.isFunction(callback)) {
@@ -71,7 +72,7 @@
             if (util.hasKey(data, key)) 
               $rootScope.user[key] = data[key];
           });
-          $rootScope.$applyAsync();
+          $rootScope.$applyAsync();        
         },
 
         // Get
