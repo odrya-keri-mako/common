@@ -54,6 +54,14 @@
     }
   ])
 
+  // Trusted external resource url
+  .filter('trustAsResourceUrl', [
+		'$sce', 
+		($sce) => {
+    	return (val) => $sce.trustAsResourceUrl(val)
+		}
+	])
+
 	// Utilities factory
   .factory('util', [
     '$q',
