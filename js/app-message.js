@@ -10,9 +10,8 @@
 	// Message factory
   .factory('msg', [
     '$rootScope',
-		'$timeout',
     'util',
-    ($rootScope, $timeout, util) => {
+    ($rootScope, util) => {
 
 			// Define message dielog element
 			let msgDialog;
@@ -61,9 +60,6 @@
 
 					// Set event on message dialog close
 					msgDialog.addEventListener('msgDialogClose', methods.reset);
-
-					// Set event on dialog hide
-					msgDialog.addEventListener('hide.bs.modal', methods.blour);
 				},
 
 				// Reset
@@ -81,13 +77,6 @@
 
 					// Reset rootscope message property
 					$rootScope.message = undefined;
-				},
-
-				// Blour
-				blour: () => {
-					msgDialog.removeEventListener('hide.bs.modal', methods.blour);
-					if (document.activeElement instanceof HTMLElement)
-						document.activeElement.blur();
 				}
       };
 
@@ -164,46 +153,49 @@
 					audioUrl: "<"
 				},
 				controller: msgController,
-				template:`<div id="msg-dialog" 
-									     class="modal fade" 
-									     data-bs-backdrop="static" 
-									     data-bs-keyboard="false"
-											 aria-modal="true" 
-									     tabindex="-1">
-										<div class="modal-dialog border border-3 rounded-3
-																border-secondary shadow-bottom-end">
-										  <div class="modal-content text-dark">
-										    <div class="modal-header">
-													<i class="fa-3x" ng-class="$root.message.icon"></i>
-													<h1 class="ms-3 text-capitalize text-small-caps">
-														{{$root.message.title}}
-													</h1>
+				template:`<div class="msg-container">
+										<div id="msg-dialog" 
+												class="modal fade" 
+												data-bs-backdrop="static" 
+												data-bs-keyboard="false"
+												aria-modal="true" 
+												tabindex="-1"
+												ng-bs-hide-modal>
+											<div class="modal-dialog border border-3 rounded-3
+																	border-secondary shadow-bottom-end">
+												<div class="modal-content text-dark">
+													<div class="modal-header">
+														<i class="fa-3x" ng-class="$root.message.icon"></i>
+														<h1 class="ms-3 text-capitalize text-small-caps">
+															{{$root.message.title}}
+														</h1>
+													</div>
+													<div class="modal-body py-4 px-2">
+														<h5 class="text-center">
+															<span>{{$root.message.content}}</span>
+														</h5>
+													</div>
+													<div class="modal-footer">
+														<button type="button"
+																		class="btn btn-primary px-4"  
+																		data-bs-dismiss="modal"
+																		ng-click="methods.clicked('ok')">
+															Ok
+														</button>
+														<button type="button"
+																		class="btn btn-secondary px-4"  
+																		data-bs-dismiss="modal"
+																		ng-if="$root.message.isConfirm"
+																		ng-click="methods.clicked('cancel')">
+															Mégsem
+														</button>
+													</div>
 												</div>
-										    <div class="modal-body py-4 px-2">
-													<h5 class="text-center">
-														<span>{{$root.message.content}}</span>
-													</h5>
-												</div>
-										    <div class="modal-footer">
-													<button type="button"
-									                class="btn btn-primary px-4"  
-																	data-bs-dismiss="modal"
-																	ng-click="methods.clicked('ok')">
-									          Ok
-									        </button>
-													<button type="button"
-									                class="btn btn-secondary px-4"  
-																	data-bs-dismiss="modal"
-																	ng-if="$root.message.isConfirm"
-																	ng-click="methods.clicked('cancel')">
-									          Mégsem
-									        </button>
-												</div>
-										  </div>
-											<audio controls="false" class="d-none m-0 p-0"
-														 ng-if="audioUrl">
-												<source ng-src="{{audioUrl}}" type="audio/mpeg">
-											</audio>
+												<audio controls="false" class="d-none m-0 p-0"
+															 ng-if="audioUrl">
+													<source ng-src="{{audioUrl}}" type="audio/mpeg">
+												</audio>
+											</div>
 										</div>
 									</div>`
 			};

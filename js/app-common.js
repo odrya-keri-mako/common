@@ -678,6 +678,45 @@
         }
       };
     }
-  ]);
+  ])
+
+  // Bootstrap modal hide directive
+  .directive('ngBsHideModal', [
+    () => {
+			return {
+				restrict: 'EA',
+				scope: {},
+				controller: [
+          '$element',
+          ($element) => {
+            $element[0].addEventListener('hide.bs.modal', () => {
+              if (document.activeElement instanceof HTMLElement)
+                  document.activeElement.blur();
+            });
+				  }
+        ]
+      };
+		}
+	])
+
+  // Bootstrap carousel force start directive
+  .directive('ngBsCarouselForceStart', [
+    () => {
+			return {
+				restrict: 'EA',
+				scope: {},
+				controller: [
+          '$element',
+          '$timeout',
+          ($element, $timeout) => {
+            $timeout(() => {
+              if (bootstrap)
+                new bootstrap.Carousel($element[0]);
+            }, 300);
+				  }
+        ]
+      };
+		}
+	]);
 
 })(window, angular);
