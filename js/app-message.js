@@ -139,8 +139,9 @@
 								detail: btnId
 							});
 
-							// Trigger event
-							$element[0].dispatchEvent(customEvent);
+							// Get/Check message dialog, and trigger event
+							let msgDialog = $element[0].querySelector('#msg-dialog');
+							if (msgDialog) msgDialog.dispatchEvent(customEvent);
 						}
 					}
 				}
