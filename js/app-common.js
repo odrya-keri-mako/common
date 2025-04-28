@@ -34,7 +34,7 @@
     'util',
     (util) => {
       return (number) => {
-        if (!util.isVarNumber(number)) number = 0;
+        if (!util.isVarNumber(number)) return;
         return number + 'px';
       };
     }
@@ -47,7 +47,7 @@
       return (number, len) => {
       
 		  	// Check parameters
-		  	if (!util.isNumber(number)) number = 0;
+		  	if (!util.isNumber(number)) return;
         if (!util.isNumber(len) || len < 2) len = 2;
         return ('0'.repeat(len) + number.toString()).slice (-1 * len);
       };
