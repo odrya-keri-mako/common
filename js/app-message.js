@@ -167,9 +167,9 @@
 												<div class="modal-content text-dark">
 													<div class="modal-header">
 														<i class="fa-3x" ng-class="$root.message.icon"></i>
-														<h1 class="ms-3 text-capitalize text-small-caps">
+														<h3 class="ms-3 text-capitalize text-small-caps">
 															{{$root.message.title}}
-														</h1>
+														</h3>
 													</div>
 													<div class="modal-body py-4 px-2">
 														<h5 class="text-center">
