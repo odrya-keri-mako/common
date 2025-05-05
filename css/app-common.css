@@ -1,8 +1,10 @@
 :root {
-  --xs-font-size: 0.6rem;
-  --sm-font-size: 0.7rem;
-  --md-font-size: 0.8rem;
-  --lg-font-size: 0.9rem;
+  --xxs-font-size: 0.625em;
+  --xs-font-size:	0.75em;
+  --sm-font-size:	0.875em;
+  --lg-font-size:	1.25em;
+  --xl-font-size:	1.5em;
+  --xxl-font-size: 2em;
 }
 *:not(input):not(textarea) {
 		user-select:none !important;
@@ -139,17 +141,23 @@
 	text-decoration: underline !important;
 	cursor: default !important;
 }
+.fs-xxs {
+    font-size: var(--xxs-font-size) !important;
+  }
 .fs-xs {
   font-size: var(--xs-font-size) !important;
 }
 .fs-sm {
   font-size: var(--sm-font-size) !important;
 }
-.fs-md {
-  font-size: var(--md-font-size) !important;
-}
 .fs-lg {
   font-size: var(--lg-font-size) !important;
+}
+.fs-xl {
+  font-size: var(--xl-font-size) !important;
+}
+.fs-xxl {
+  font-size: var(--xxl-font-size) !important;
 }
 .fix-header {
   z-index: 1000 !important;
