@@ -20,6 +20,17 @@
   // Application common module
   angular.module('app.common', [])
 
+  // Current year (+-)
+  .filter('currentYear', [
+    function () {
+      return (n) => {
+        let offset = parseInt(n, 10);
+        if (isNaN(offset)) offset = 0;
+        return new Date().getFullYear() + offset;
+      };
+    }
+  ])
+
 	// Convert day to string format (YYYY-mm-dd)
 	.filter('dateToStr', [
     () => {
@@ -28,6 +39,7 @@
       };
     }
   ])
+
 
   // Add to number pixel property
   .filter('pixel', [
