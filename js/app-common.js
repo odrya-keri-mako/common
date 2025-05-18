@@ -2,6 +2,33 @@
 
 	'use strict';
 
+  // Add class(es)
+  HTMLElement.prototype.addClass = (function(classList) {
+    let element = this; 
+    if (Object.prototype.toString.call(classList) === '[object String]') {
+      classList = [...new Set(classList.split(' ').map(s => s.trim()).filter(s => s.length))];
+      classList.forEach(c => element.classList.add(c));
+    }
+  });
+
+  // Remove class(es)
+  HTMLElement.prototype.removeClass = (function(classList) {
+    let element = this;  
+    if (Object.prototype.toString.call(classList) === '[object String]') {
+      classList = [...new Set(classList.split(' ').map(s => s.trim()).filter(s => s.length))];
+      classList.forEach(c => element.classList.remove(c));
+    }
+  });
+
+  // Toogle class(es)
+  HTMLElement.prototype.toggleClass = (function(classList) {
+    let element = this; 
+    if (Object.prototype.toString.call(classList) === '[object String]') {
+      classList = [...new Set(classList.split(' ').map(s => s.trim()).filter(s => s.length))];
+      classList.forEach(c => element.classList.toggle(c));
+    }
+  });
+  
 	// Sort array randomly
   Array.prototype.random = () => this.sort((a, b) => Math.random() - 0.5);
   
