@@ -28,7 +28,7 @@
       classList.forEach(c => element.classList.toggle(c));
     }
   });
-  
+
 	// Sort array randomly
   Array.prototype.random = () => this.sort((a, b) => Math.random() - 0.5);
   
@@ -90,6 +90,15 @@
         if (!util.isNumber(len) || len < 2) len = 2;
         return ('0'.repeat(len) + number.toString()).slice (-1 * len);
       };
+    }
+  ])
+
+  // Number thousand separator
+  .filter('numSep', [
+    'util',
+    (util) => {
+      return (number, separator) => 
+        util.mumberToStringThousandSeparator(number, separator)
     }
   ])
 
@@ -418,7 +427,14 @@
               observer.observe(element);
             });
           }
-    		}
+    		},
+        mumberToStringThousandSeparator: (number, separator) => {
+		  	  if (!util.isVarNumber(number)) number = 0;
+		  	  if (!util.isString(separator)) separator = ' ';
+          return number.toString()
+		  	  						 .replace(/(\d)(?=(\d{3})+(?!\d))/g,
+		  	  										'$1' + separator.charAt(0)); 
+        }
 			};
 
 			// Return utilities
