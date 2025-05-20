@@ -67,7 +67,6 @@
     }
   ])
 
-
   // Add to number pixel property
   .filter('pixel', [
     'util',
@@ -75,6 +74,26 @@
       return (number) => {
         if (!util.isVarNumber(number)) return;
         return number + 'px';
+      };
+    }
+  ])
+
+  // Calculate summ total
+  .filter('sumTotal', [
+    'util',
+    function(util) {
+      return function(data, key) {
+				if (!util.isString(key) ||
+						!((key = key.trim()).length)) 
+					key = 'total';
+        let total = 0;
+        if (util.isArray(data) && data.length) {
+          data.forEach((item) => {
+						if (util.isObjectHasKey(item, key))
+							total += Number(item[key])
+					});
+        } 
+        return total;
       };
     }
   ])
@@ -457,6 +476,11 @@
         // Initialize
         init: (options) => {
 
+          // Set application properties
+          $rootScope.app = {
+            id: util.getPageId()
+          };
+          
           // Check options
           if (util.isString(options)) 
             options = {default: options};
