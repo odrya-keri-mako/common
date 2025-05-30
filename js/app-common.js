@@ -643,8 +643,8 @@
                   // Check has property
                   if (!util.isUndefined(options.data)) {
 
-                    if (!util.isString(options.data))
-                      options.data = JSON.stringify(options.data);
+                    // Convert to json string
+                    options.data = JSON.stringify(options.data);
 
                     // Check method
                     if (method !== 'ajax')
