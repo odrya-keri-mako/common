@@ -56,7 +56,7 @@ class Util {
   public static function getArgs(): mixed {
     $args = $_GET['data'] ?? $_POST['data'] ?? file_get_contents('php://input');
     $args = is_string($args) && ($args = trim($args)) !== '' ? $args : null;
-    if (is_null($args)) self::setError('Hiányoznak a paraméterek!');
+    if (is_null($args)) return null;
     return self::jsonDecode($args);
   }
 
