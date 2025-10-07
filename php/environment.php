@@ -139,6 +139,11 @@ class Env {
 		$currPath = $this->checkPath(realpath('./'), 'php');
 		self::$appPaths = array_map(fn($path) => 
                       self::getRelativePath($currPath, $path), $appPaths);
+
+    foreach(self::$appPaths as $i => $path) {
+      if (substr($path, -1) !== '/')
+        self::$appPaths[$i] .= '/';
+    }
   }
 
   // Get relative path from working directory
