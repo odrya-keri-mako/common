@@ -780,20 +780,26 @@
 
   // Bootstrap carousel force start directive
   .directive('ngBsCarouselForceStart', [
-    () => {
+    '$timeout',
+    ($timeout) => {
 			return {
-				restrict: 'EA',
-				scope: {},
-				controller: [
-          '$element',
-          '$timeout',
-          ($element, $timeout) => {
-            $timeout(() => {
-              if (bootstrap)
-                new bootstrap.Carousel($element[0]);
-            }, 300);
-				  }
-        ]
+        restrict: 'A',
+        scope: {
+          interval: '@'
+        },
+        link: function(scope, element, attrs) {
+          $timeout(function() {
+            const carouselEl = element[0];
+            const carousel = new bootstrap.Carousel(carouselEl, {
+              interval: parseInt(scope.interval) || 5000,
+              ride: 'carousel'
+            });
+            carousel.cycle();
+            scope.$on('$destroy', function() {
+              carousel.dispose();
+            });
+          });
+        }
       };
 		}
 	]);
