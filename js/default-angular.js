@@ -41,7 +41,7 @@
     }
   ])
 
-  /* Application config */
+  // Application config
   .config([
     '$stateProvider', 
     '$urlRouterProvider', 
