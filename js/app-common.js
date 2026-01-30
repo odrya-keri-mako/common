@@ -453,6 +453,18 @@
           return number.toString()
 		  	  						 .replace(/(\d)(?=(\d{3})+(?!\d))/g,
 		  	  										'$1' + separator.charAt(0)); 
+        },
+        isEmail: (str) => {
+          const RE = /^[^\s@]+@(?:[^\s@]+\.)+[A-Za-z]{2,63}$/;
+          return RE.test(str);
+        },
+        isPassword: (str) => {
+          const RE = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,20}$/;
+          return RE.test(str);
+        },
+        isPhone: (str) => {
+          const RE = /^[+()\-\s0-9]+$/;
+          return RE.test(str);
         }
 			};
 
