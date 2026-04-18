@@ -34,12 +34,17 @@ class Database {
     $this->conn = Util::objMerge([
       "host" => "localhost",
       "dbname" => "",
+      "dbname_force" => "",
       "user" => "root",
       "pass" => ""
     ], $conn, true);
 
     // Set database name if exist
-    if ($db) $this->conn["dbname"] = $db;
+    if (is_string($this->conn["dbname_force"]) &&
+        !empty(($this->conn["dbname_force"] = 
+           trim($this->conn["dbname_force"])))) 
+      $this->conn["dbname"] = $this->conn["dbname_force"];
+    elseif ($db) $this->conn["dbname"] = $db;
   }
 
   // Connect to MySQL server
