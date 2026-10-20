@@ -145,8 +145,8 @@ class Database {
             // Get result
             $result = $stmt->fetchAll();
 
-            // Check/Return result
-            return empty($result) ? null : $result;
+            // Return result
+            return $result;
 
           case "INSERT":
           case "UPDATE":
