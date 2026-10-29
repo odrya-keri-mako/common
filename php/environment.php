@@ -34,6 +34,10 @@ class Env {
 
     ini_set('memory_limit', '-1');
     set_time_limit(0);
+
+    // Check session status
+    if (session_status() === PHP_SESSION_NONE)
+      session_start();
   }
 
   // Set custom error reporting
