@@ -15,7 +15,8 @@ class Util {
   }
 
   // Set error
-  public static function setError(?string $msg = null): void {
+  public static function setError(?string $msg = null, mixed &$toBeNull=null): void {
+    if (!is_null($toBeNull))  $toBeNull = null;
     self::$result["error"] =  $msg && trim($msg) !== '' ? 
                               trim($msg) : "Unknown error!";
     self::setResponse();
