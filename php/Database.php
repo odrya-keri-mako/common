@@ -50,13 +50,13 @@ class Database {
   // Connect to MySQL server
   private function connect(): void {
     try {
-      $dsn = "mysql:host={$this->conn['host']};dbname={$this->conn['dbname']};charset=utf8";
+      $dsn = "mysql:host={$this->conn['host']};dbname={$this->conn['dbname']};charset=utf8mb4";
       $this->dbHandle = new PDO(
         $dsn, 
         $this->conn['user'], 
         $this->conn['pass'], 
         [
-          PDO::MYSQL_ATTR_INIT_COMMAND       => "SET NAMES utf8",
+          PDO::MYSQL_ATTR_INIT_COMMAND       => "SET NAMES utf8mb4",
           PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => false,
           PDO::ATTR_ERRMODE                  => PDO::ERRMODE_EXCEPTION,
           PDO::ATTR_DEFAULT_FETCH_MODE       => PDO::FETCH_ASSOC,
