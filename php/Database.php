@@ -56,8 +56,8 @@ class Database {
         $this->conn['user'], 
         $this->conn['pass'], 
         [
-          PDO::MYSQL_ATTR_INIT_COMMAND       => "SET NAMES utf8mb4",
-          PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => false,
+          Pdo\Mysql::ATTR_INIT_COMMAND       => "SET NAMES utf8mb4",
+          Pdo\Mysql::ATTR_USE_BUFFERED_QUERY => false,
           PDO::ATTR_ERRMODE                  => PDO::ERRMODE_EXCEPTION,
           PDO::ATTR_DEFAULT_FETCH_MODE       => PDO::FETCH_ASSOC,
           PDO::ATTR_ORACLE_NULLS             => PDO::NULL_EMPTY_STRING,
@@ -118,7 +118,8 @@ class Database {
   }
 
   // Execute
-  public function execute(string $query, array|string|null $params = null, 
+  public function execute(string $query, 
+                          mixed $params = null, 
                           ?string $type = null): ?array {
 
       // Set result
