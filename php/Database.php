@@ -49,22 +49,55 @@ class Database {
 
   // Connect to MySQL server
   private function connect(): void {
+
+    if (version_compare(PHP_VERSION, '8.4.0', '>')) {
+      $options = [
+        Pdo\Mysql::ATTR_INIT_COMMAND       => "SET NAMES utf8mb4",
+        Pdo\Mysql::ATTR_USE_BUFFERED_QUERY => false,
+      ];
+    } else {
+      $options = [
+        PDO::MYSQL_ATTR_INIT_COMMAND       => "SET NAMES utf8mb4",
+        PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => false,
+      ];
+    }
+    $options = array_merge($options, [
+      PDO::ATTR_ERRMODE                  => PDO::ERRMODE_EXCEPTION,
+      PDO::ATTR_DEFAULT_FETCH_MODE       => PDO::FETCH_ASSOC,
+      PDO::ATTR_ORACLE_NULLS             => PDO::NULL_EMPTY_STRING,
+      PDO::ATTR_EMULATE_PREPARES         => false,
+      PDO::ATTR_STRINGIFY_FETCHES        => false
+    ]);
+
     try {
       $dsn = "mysql:host={$this->conn['host']};dbname={$this->conn['dbname']};charset=utf8mb4";
       $this->dbHandle = new PDO(
         $dsn, 
         $this->conn['user'], 
-        $this->conn['pass'], 
-        [
-          Pdo\Mysql::ATTR_INIT_COMMAND       => "SET NAMES utf8mb4",
-          Pdo\Mysql::ATTR_USE_BUFFERED_QUERY => false,
-          PDO::ATTR_ERRMODE                  => PDO::ERRMODE_EXCEPTION,
-          PDO::ATTR_DEFAULT_FETCH_MODE       => PDO::FETCH_ASSOC,
-          PDO::ATTR_ORACLE_NULLS             => PDO::NULL_EMPTY_STRING,
-          PDO::ATTR_EMULATE_PREPARES         => false,
-          PDO::ATTR_STRINGIFY_FETCHES        => false
-        ]
+        $this->conn['pass'],
+        $options 
+        // [
+        //   // if (version_compare(PHP_VERSION, '8.2.0', '>')) {
+        //   // Pdo\Mysql::ATTR_INIT_COMMAND       => "SET NAMES utf8mb4",
+        //   // Pdo\Mysql::ATTR_USE_BUFFERED_QUERY => false,
+        //   // } else {
+
+        //   // PDO::MYSQL_ATTR_INIT_COMMAND       => "SET NAMES utf8mb4",
+        //   // PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => false,
+        //   // }
+
+        //   PDO::ATTR_ERRMODE                  => PDO::ERRMODE_EXCEPTION,
+        //   PDO::ATTR_DEFAULT_FETCH_MODE       => PDO::FETCH_ASSOC,
+        //   PDO::ATTR_ORACLE_NULLS             => PDO::NULL_EMPTY_STRING,
+        //   PDO::ATTR_EMULATE_PREPARES         => false,
+        //   PDO::ATTR_STRINGIFY_FETCHES        => false
+        // ]
       );
+      if (version_compare(PHP_VERSION, '8.4.0', '>')) {
+        $this->dbHandle->setAttribute(Pdo\Mysql::ATTR_INIT_COMMAND, "SET NAMES utf8mb4");
+      } else {
+
+      }
     } catch (Exception $e) {
         Util::setError("Unable to connect to MySQL server: " . $e->getMessage());
     }
